@@ -42,7 +42,7 @@ try:
     from OpenGL.GLUT import *
 
 except ImportError as e:
-    print "Could not import PyOpenGL."
+    print('"Could not import PyOpenGL."')
     raise e
 
 class MouseActions:
@@ -130,7 +130,7 @@ class VisGraphicsPick(object):
         min_dist = 0
         min_point = None
         for i,point in enumerate(self.intersect_points): 
-            v = [point[j] - self.point1[j] for j in xrange(03)]
+            v = [point[j] - self.point1[j] for j in range(0,3)]
             dist = v[0]*v[0] + v[1]*v[1] + v[2]*v[2]
             if (i == 0) or (dist < min_dist):
                 min_dist = dist 
@@ -222,7 +222,7 @@ class VisGraphics(object):
     def start_interactive(self):
         """ Start interactive graphics. """
         self._logger.info("Start graphics.")
-        # Print help.
+        # Print('help.')
         self.help()
         # Turn the flow of control over to GLUT.
         glutMainLoop()
@@ -462,7 +462,7 @@ class VisGraphics(object):
         min_geom = None
         min_ipt = None
         for i,ipt in enumerate(self.pick.intersect_points):
-            v = [self.pick.point1[j] - ipt[j] for j in xrange(0,3)]
+            v = [self.pick.point1[j] - ipt[j] for j in range(0,3)]
             dist = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
             if (min_dist == None) or (dist < min_dist): 
                 min_dist = dist
@@ -711,11 +711,11 @@ class VisGraphics(object):
         self.spectrum_colors = []
 
         # Generate a list of RGB colors by incrementing hue.
-        for i in xrange(0,num_colors):
+        for i in range(0,num_colors):
             rgb = self.hsv_to_rgb(hue, 1.0, 1.0)
             self.spectrum_colors.append(rgb)
             hue -= inc
-        #__for i in xrange(0,num_colors)
+        #__for i in range(0,num_colors)
 
         return self.spectrum_colors
     #__def get_spectrum_colors 

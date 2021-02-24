@@ -168,7 +168,7 @@ class ViewerWriter(object):
 
             base_coords = strand.get_base_coords()
             base_info = []
-            for i in xrange(0,len(strand.tour)):
+            for i in range(0,len(strand.tour)):
                 base = strand.tour[i]
                 coord = base_coords[i]
                 base_info.append({ 'id': base.id, 'coordinates' : list(coord), 'sequence' : base.seq,

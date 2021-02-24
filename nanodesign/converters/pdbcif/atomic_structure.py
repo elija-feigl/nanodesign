@@ -208,14 +208,14 @@ class AtomicStructure(object):
         self._logger.info("Number of triads: %d" % triads.shape[2])
 
         # Convert base node coords to angstroms.
-        for i in xrange(0,len(id_nt)):
+        for i in range(0,len(id_nt)):
             base_nodes[i,0] = 10.0*base_nodes[i,0] 
             base_nodes[i,1] = 10.0*base_nodes[i,1] 
             base_nodes[i,2] = 10.0*base_nodes[i,2] 
 
         # Reverse the directions of coordinate frames for the major groove (0) and helix axis (2). 
         if True:
-            for i in xrange(0,len(id_nt)):
+            for i in range(0,len(id_nt)):
                 triads[0,0,i] = -triads[0,0,i] 
                 triads[1,0,i] = -triads[1,0,i] 
                 triads[2,0,i] = -triads[2,0,i]
@@ -228,7 +228,7 @@ class AtomicStructure(object):
 
         # Set the rotation matrix, translation vector and sequence for strand paired bases.
         self._logger.debug("=================== set strand data ==================");
-        for i in xrange(0,len(id_nt)):
+        for i in range(0,len(id_nt)):
             self._logger.debug("---------- i %d ----------\n" % i)
             base_id1 = id_nt[i,0] 
             base1 = base_conn[base_id1]
@@ -253,7 +253,7 @@ class AtomicStructure(object):
             strand2.seq[base2_sindex] = base2.seq
             strand2.rotations[base2_sindex] = np.dot(triads[:,:,i],rot_mat)
             strand2.translations[base2_sindex] = base_nodes[i]
-        #__for i in xrange(0,len(id_nt1))
+        #__for i in range(0,len(id_nt1))
 
         self._logger.debug("=================== create bulges ==================");
         for strand in self.strands:
@@ -271,11 +271,11 @@ class AtomicStructure(object):
             strand.translations = translations
             strand.is_main = is_main
 
-            for i in xrange(0,len(seq)):
+            for i in range(0,len(seq)):
                 if (seq[i] == 'N'):
                     base_index = strand.tour[i]-1
                     strand.seq[i] = base_conn[base_index].seq
-            #_for i in xrange(0,len(seq))
+            #_for i in range(0,len(seq))
         #__for strand in self.strands
 
         # Generate atomic structures from the dna strands.
@@ -345,7 +345,7 @@ class AtomicStructure(object):
 
         # Build up a structure from the strand bases.
         atom_index = 1
-        for i in xrange(0,num_bases):
+        for i in range(0,num_bases):
             strand_R = strand.rotations[i]
             if (strand_R.size == 0):
                 continue
@@ -368,7 +368,7 @@ class AtomicStructure(object):
 
             # Duplicate and transform the atoms in the reference structure.
             num_atoms = len(current_struct)
-            for j in xrange(0,num_atoms):
+            for j in range(0,num_atoms):
                 current_atom = current_struct[j].dupe()
                 current_atom.id = first_atomID_out
                 current_atom.chainID = strand.chainID
@@ -384,8 +384,8 @@ class AtomicStructure(object):
                 current_atom.coords = xform_coord
                 molecule.add_atom(current_atom)
                 atom_index = atom_index+1
-            #__for j in xrange(0,num_atoms):
-        #_for i in xrange(0,num_bases)
+            #__for j in range(0,num_atoms):
+        #_for i in range(0,num_bases)
 
         return molecule, first_atomID_out 
 
@@ -450,7 +450,7 @@ class AtomicStructure(object):
 
         # Remove single-stranded regions with free ends.
         if (not is_circular):
-            for i in xrange(len(single_strands)-1,-1,-1):
+            for i in range(len(single_strands)-1,-1,-1):
                 strand_pos = single_strands[i]
                 if ( (strand_pos[0] == 0) or (strand_pos[-1] == num_nt-1) ):
                     single_strands[i] = [];
@@ -459,7 +459,7 @@ class AtomicStructure(object):
         self._logger.debug("Number of single_strands) %d " % len(single_strands))
 
         # Find positions and orientations of the single-stranded regions.
-        for i in xrange(0,len(single_strands)):
+        for i in range(0,len(single_strands)):
             strand_pos = single_strands[i]
             if len(strand_pos) == 0:
                 continue 
@@ -503,14 +503,14 @@ class AtomicStructure(object):
             R_fit, d_fit = self._fit_R_d(R_1, d_1, R_2, d_2, len(strand_pos))
     
             # Update the rotations and translations.
-            for j in xrange(0,len(strand_pos)):
+            for j in range(0,len(strand_pos)):
                 k = strand_pos[j]
                 is_main[k] = True
                 rotations[k] = R_fit[:,:,j]
                 translations[k] = d_fit[:,j]
-            #__for j in xrange(0,len(strand_pos))
+            #__for j in range(0,len(strand_pos))
 
-        #__for i in xrange(0,len(single_strands))
+        #__for i in range(0,len(single_strands))
 
     #__def _generate_bulge_dof
 
@@ -529,7 +529,7 @@ class AtomicStructure(object):
         num_nt = len(rotations)
         is_visited = [False]*num_nt
 
-        for i in xrange(0,num_nt):
+        for i in range(0,num_nt):
             rmat = rotations[i]
             if (rmat.size != 0):
                 is_visited[i] = True;
@@ -643,14 +643,14 @@ class AtomicStructure(object):
         self._logger.debug( "[_fit_R_d] theta2 %g  axis2 %g %g %g" % (theta2, axis2[0], axis2[1], axis2[2]))
 
         # Interpolate rotations/translations. 
-        for i in xrange(0,num_bases):
+        for i in range(0,num_bases):
             j = i+1
             angle = (theta*j)/(num_bases+1)
             self._logger.debug( "[_fit_R_d] angle %g " % angle) 
             R = self._vrrotvec2mat(axis, angle)
             R_fit[:,:,i] = np.dot(R,R_1)
             d_fit[:,i] = (d_1*(num_bases+1-j) + d_2*j) / (num_bases+1)
-        #__for i in xrange(0,num_bases)
+        #__for i in range(0,num_bases)
 
         return R_fit, d_fit
 
@@ -737,12 +737,12 @@ class AtomicStructure(object):
             M[1,0]= t*x*y + z*s;      M[1,1] = t*y*y + c;         M[1,2] = t*y*z - x*s;
             M[2,0]= t*x*z - y*s;      M[2,1] = t*y*z + x*s;       M[2,2] = t*z*z + c;
 
-            for i in xrange(0,3):
-               for j in xrange(0,3):
+            for i in range(0,3):
+               for j in range(0,3):
                    d = R[i,j] - M[i,j]
                    if abs(d) > 0.0001:
                        print("[_vrrotmat2vec] **** WARNING: R-M is not zero: %g " % (R[i,j]-M[i,j]))
-            #__for i in xrange(0,3)
+            #__for i in range(0,3)
         #__if check_result
 
         return np.array([x,y,z],dtype=float),angle
@@ -860,11 +860,11 @@ class AtomicStructure(object):
             strand.translations = translations
             strand.is_main = is_main
 
-            for i in xrange(0,len(seq)):
+            for i in range(0,len(seq)):
                 if (seq[i] == 'N'):
                     base_index = strand.tour[i]-1
                     strand.seq[i] = base_conn[base_index].seq
-            #_for i in xrange(0,len(seq))
+            #_for i in range(0,len(seq))
         #__for strand in self.strands
 
         # Generate atomic structures from the dna strands.
@@ -937,7 +937,7 @@ class AtomicStructure(object):
 
         # Build up a structure from the strand bases.
         atom_index = 1
-        for i in xrange(0,num_bases):
+        for i in range(0,num_bases):
             strand_R = strand.rotations[i]
             if (strand_R.size == 0):
                 continue
@@ -960,7 +960,7 @@ class AtomicStructure(object):
 
             # Duplicate and transform the atoms in the reference structure.
             num_atoms = len(current_struct)
-            for j in xrange(0,num_atoms):
+            for j in range(0,num_atoms):
                 current_atom = current_struct[j].dupe()
                 current_atom.id = first_atomID_out
                 current_atom.chainID = strand.chainID
@@ -976,8 +976,8 @@ class AtomicStructure(object):
                 current_atom.coords = xform_coord
                 molecule.add_atom(current_atom)
                 atom_index = atom_index+1
-            #__for j in xrange(0,num_atoms):
-        #_for i in xrange(0,num_bases)
+            #__for j in range(0,num_atoms):
+        #_for i in range(0,num_bases)
 
         return molecule, first_atomID_out 
 

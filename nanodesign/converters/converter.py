@@ -232,7 +232,7 @@ class Converter(object):
                     rtoks = s.split("-")
                     start = int(rtoks[0])
                     end = int(rtoks[1])+1
-                    for id in xrange(start,end):
+                    for id in range(start,end):
                         helix_ids.append(id)
                 elif s:
                     helix_ids.append(int(s))

@@ -213,7 +213,7 @@ def bp_interp(dnode_1, triad_1, dnode_2, triad_2, n):
     a,theta = vrrotmat2vec(R)
 
     # Calculate for dNode_interp and triad_interp.
-    for i in xrange(0,n):
+    for i in range(0,n):
         dnode_interp[i,:] = (dnode_1*(n+1-(i+1)) + dnode_2*(i+1)) / (n+1)
         angle = theta*(i+1)/(n+1)
         rot_mat = vrrotvec2mat(a, angle)

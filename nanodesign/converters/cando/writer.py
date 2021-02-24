@@ -45,7 +45,7 @@ class CandoWriter(object):
 
             # write dna topology
             cndo_file.write("dnaTop,id,up,down,across,seq\n")
-            for i in xrange(0,len(base_conn)):
+            for i in range(0,len(base_conn)):
                 base = base_conn[i] 
                 up = base.up.id if base.up else -1
                 down = base.down.id if base.down else -1
@@ -55,14 +55,14 @@ class CandoWriter(object):
 
             # base nodes
             cndo_file.write('dNode,"e0(1)","e0(2)","e0(3)"\n')
-            for i in xrange(0,len(base_conn)):
+            for i in range(0,len(base_conn)):
                 coords = base_conn[i].coordinates 
                 cndo_file.write("%d,%f,%f,%f\n" % (i+1, coords[0], coords[1], coords[2]))
             cndo_file.write("\n")
 
             # triad vectors
             cndo_file.write('triad,"e1(1)","e1(2)","e1(3)","e2(1)","e2(2)","e2(3)","e3(1)","e3(2)","e3(3)"\n')
-            for i in xrange(0,len(base_conn)):
+            for i in range(0,len(base_conn)):
                 ref_frame = base_conn[i].ref_frame
                 cndo_file.write("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f\n" % (i+1, -ref_frame[0,0], -ref_frame[1,0], -ref_frame[2,0],
                     ref_frame[0,1], ref_frame[1,1], ref_frame[2,1], -ref_frame[0,2], -ref_frame[1,2], -ref_frame[2,2]))
@@ -71,7 +71,7 @@ class CandoWriter(object):
             # Nucleotide binding table.
             id_nt = self._create_id_nt(base_conn)
             cndo_file.write("id_nt,id1,id2\n")
-            for i in xrange(0,len(id_nt)):
+            for i in range(0,len(id_nt)):
                 cndo_file.write("%d,%d,%d\n" % (i+1, id_nt[i][0]+1, id_nt[i][1]+1))
         self._logger.info("Done.")
 

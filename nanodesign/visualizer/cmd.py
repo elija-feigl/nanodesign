@@ -408,7 +408,7 @@ class VisCommand(object):
         start = int(rtoks[0])
         end = int(rtoks[1])+1
         ids = []
-        for id in xrange(start,end):
+        for id in range(start,end):
             ids.append(id)
         return ids
     #__def parse_id_range

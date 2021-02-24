@@ -32,9 +32,10 @@ The chain IDs for each strand are generated using the format:
 from collections import OrderedDict
 import json
 import logging
-import os 
+import os
 import numpy as np
 from .atomic_structure import AtomicStructure
+
 
 class CifWriter(object):
     """ The CifWriter class is used to write a CIF formated file. 
@@ -60,7 +61,7 @@ class CifWriter(object):
         """
         self.dna_structure = dna_structure
         self.entityID = 1
-        self._logger = logging.getLogger(__name__)   
+        self._logger = logging.getLogger(__name__)
 
     def write(self, file_name, infile, informat):
         """ Write a CIF file.
@@ -77,8 +78,8 @@ class CifWriter(object):
         self._logger.info("Number of bases %d " % len(base_conn))
         self._logger.info("Number of strands %d " % len(strands))
 
-        # Generate atomic models of the dna structure. A list of Molecule objects is 
-        # created for each strand.  
+        # Generate atomic models of the dna structure. A list of Molecule objects is
+        # created for each strand.
         atomic_structure = AtomicStructure(dna_structure)
         molecules = atomic_structure.generate_structure_ss()  # converts ssDNA
         #molecules = atomic_structure.generate_structure()
@@ -86,7 +87,7 @@ class CifWriter(object):
         num_atoms = 0
         for molecule in molecules:
             num_atoms += len(molecule.atoms)
-        self._logger.info("Number of atoms %d " % num_atoms) 
+        self._logger.info("Number of atoms %d " % num_atoms)
 
         # Write the CIF file.
         with open(file_name, 'w') as cif_file:
@@ -106,20 +107,21 @@ class CifWriter(object):
                 infile (string): The name of the file the DNA structure was created from.
                 informat (string): The format of the file the DNA structure was created from.
         """
-        _,infile_name = os.path.split(infile)
+        _, infile_name = os.path.split(infile)
 
-        # Define an OrderedDict of field names and values for the _struct records. 
+        # Define an OrderedDict of field names and values for the _struct records.
         struct_records = OrderedDict([
-            ("entry_id"                , CifWriter.STRUCT_ENTRY_ID), 
-            ("title"                   , '"CIF file generated from %s format file %s"' % (informat, infile_name)), 
-            ("pdbx_descriptor"         , CifWriter.EMPTY_FIELD), 
-            ("pdbx_model_details"      , CifWriter.EMPTY_FIELD),
-            ("pdbx_CASP_flag"          , CifWriter.EMPTY_FIELD),
-            ("pdbx_model_type_details" , CifWriter.EMPTY_FIELD) 
+            ("entry_id", CifWriter.STRUCT_ENTRY_ID),
+            ("title", '"CIF file generated from %s format file %s"' %
+             (informat, infile_name)),
+            ("pdbx_descriptor", CifWriter.EMPTY_FIELD),
+            ("pdbx_model_details", CifWriter.EMPTY_FIELD),
+            ("pdbx_CASP_flag", CifWriter.EMPTY_FIELD),
+            ("pdbx_model_type_details", CifWriter.EMPTY_FIELD)
         ])
 
-        for name,value in struct_records.iteritems(): 
-            cif_file.write("_struct.%-30s       %s\n" % (name, value)) 
+        for name, value in struct_records.iteritems():
+            cif_file.write("_struct.%-30s       %s\n" % (name, value))
         cif_file.write(CifWriter.COMMENT_SPACES)
 
     def _write_entity_records(self, cif_file, strands):
@@ -132,18 +134,18 @@ class CifWriter(object):
             A single entity is defined with ID 1. The number of molecules is equal to the number of strands in the DNA structure.
         """
 
-        # Define an OrderedDict of field names and values for the _entity records. 
+        # Define an OrderedDict of field names and values for the _entity records.
         entity_records = OrderedDict([
-            ("id"                      , self.entityID),
-            ("type"                    , "polymer"),
-            ("pdbx_description"        , CifWriter.ENTITY_PDBX_DESCRIPTION),   
-            ("formula_weight"          , CifWriter.EMPTY_FIELD),
-            ("pdbx_number_of_molecule" , len(strands)),
+            ("id", self.entityID),
+            ("type", "polymer"),
+            ("pdbx_description", CifWriter.ENTITY_PDBX_DESCRIPTION),
+            ("formula_weight", CifWriter.EMPTY_FIELD),
+            ("pdbx_number_of_molecule", len(strands)),
             ("details", CifWriter.EMPTY_FIELD)
         ])
 
         # Write the _entity records.
-        for name,value in entity_records.iteritems():
+        for name, value in entity_records.iteritems():
             cif_file.write("_entity.%-30s       %s\n" % (name, value))
         cif_file.write(CifWriter.COMMENT_SPACES)
 
@@ -154,12 +156,13 @@ class CifWriter(object):
                 cif_file (file): The file object used to write the CIF file.
                 strands (List[AtomicStructureStrand]): The list of the strands for the DNA atomic structure. The chain IDs for the
                    _struct_asym records are obtained from the strands in this list.
-          
+
             The _struct_asym records define the chain IDs for each of the entities in the structure.
         """
 
-        # Define the list of field names for the _struct_asym records. 
-        struct_asym_records = [ "id", "pdbx_blank_PDB_chainid_flag", "pdbx_modified", "entity_id", "details" ]
+        # Define the list of field names for the _struct_asym records.
+        struct_asym_records = [
+            "id", "pdbx_blank_PDB_chainid_flag", "pdbx_modified", "entity_id", "details"]
         cif_file.write(CifWriter.LOOP)
 
         # Write the _struct_asym record field names.
@@ -168,7 +171,8 @@ class CifWriter(object):
 
         # Write the _struct_asym record data.
         for strand in strands:
-            cif_file.write("%s N N %d %s\n" % (strand.chainID, self.entityID, CifWriter.EMPTY_FIELD))
+            cif_file.write("%s N N %d %s\n" % (
+                strand.chainID, self.entityID, CifWriter.EMPTY_FIELD))
         cif_file.write(CifWriter.COMMENT_SPACES)
 
     def _write_atom_site_records(self, cif_file, molecules):
@@ -182,7 +186,7 @@ class CifWriter(object):
             from a Molecule object.
         """
 
-        # Define an OrderedDict of field names,values and print format. 
+        # Define an OrderedDict of field names,values and print('format. ')
         # Note (davep) I was using this for a nice (but slow) way to keep track of data
         # and fields. I'll keep it around for now because it gives a nice visual for field data.
         atom_site_records = OrderedDict([
@@ -205,15 +209,15 @@ class CifWriter(object):
             ("Cartn_y_esd",       [CifWriter.EMPTY_FIELD, "%s"]),
             ("Cartn_z_esd",       [CifWriter.EMPTY_FIELD, "%s"]),
             ("occupancy_esd",     [CifWriter.EMPTY_FIELD, "%s"]),
-            ("B_iso_or_equiv_esd",[CifWriter.EMPTY_FIELD, "%s"]),
-            ("pdbx_formal_charge",[CifWriter.EMPTY_FIELD, "%s"]),
+            ("B_iso_or_equiv_esd", [CifWriter.EMPTY_FIELD, "%s"]),
+            ("pdbx_formal_charge", [CifWriter.EMPTY_FIELD, "%s"]),
             ("auth_seq_id",       [None, "%d"]),
             ("auth_comp_id",      [None, "%s"]),
             ("auth_asym_id",      [None, "%s"]),
             ("auth_atom_id",      [None, "%s"]),
-            ("pdbx_PDB_model_num",[1,  "%d"])
-       ])
-  
+            ("pdbx_PDB_model_num", [1,  "%d"])
+        ])
+
         # Set the values of fields that doe not change.
         label_alt_id = "."
         label_entity_id = self.entityID
@@ -230,13 +234,13 @@ class CifWriter(object):
 
         # Create the atom record format.
         format = ""
-        for _,value in atom_site_records.iteritems():
+        for _, value in atom_site_records.iteritems():
             format += value[1] + "  "
         format += "\n"
 
         # Write atom field names.
         cif_file.write(CifWriter.LOOP)
-        for name,value in atom_site_records.iteritems():
+        for name, value in atom_site_records.iteritems():
             cif_file.write("_atom_site.%s\n" % name)
 
         # Write atom data.
@@ -255,11 +259,9 @@ class CifWriter(object):
                 auth_comp_id = atom.res_name
                 auth_asym_id = atom.chainID
                 auth_atom_id = atom.name
-                cif_file.write(format % ("ATOM ", id, type_symbol, label_atom_id, label_alt_id, label_comp_id, label_asym_id, 
-                    label_entity_id, label_seq_id, pdbx_PDB_ins_code, Cartn_x, Cartn_y, Cartn_z, occupancy, B_iso_or_equiv, 
-                    Cartn_x_esd, Cartn_y_esd, Cartn_z_esd, occupancy_esd, B_iso_or_equiv_esd, pdbx_formal_charge, auth_seq_id, 
-                    auth_comp_id, auth_asym_id, auth_atom_id, pdbx_PDB_model_num))
-            #__for atom in molecule.atoms
-        #__for molecule in molecules
-
-
+                cif_file.write(format % ("ATOM ", id, type_symbol, label_atom_id, label_alt_id, label_comp_id, label_asym_id,
+                                         label_entity_id, label_seq_id, pdbx_PDB_ins_code, Cartn_x, Cartn_y, Cartn_z, occupancy, B_iso_or_equiv,
+                                         Cartn_x_esd, Cartn_y_esd, Cartn_z_esd, occupancy_esd, B_iso_or_equiv_esd, pdbx_formal_charge, auth_seq_id,
+                                         auth_comp_id, auth_asym_id, auth_atom_id, pdbx_PDB_model_num))
+            # __for atom in molecule.atoms
+        # __for molecule in molecules

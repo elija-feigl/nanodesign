@@ -178,7 +178,7 @@ class CadnanoConvertDesign(object):
         if self._logger.getEffectiveLevel() == logging.DEBUG:
             self._logger.debug("---------- base_connectivity  ---------- ")
             self._logger.debug("size of base_connectivity: %d " % len(base_connectivity))
-            for i in xrange(0,num_bases):
+            for i in range(0,num_bases):
                 base = base_connectivity[i]
                 up = base.up.id if base.up else -1
                 down = base.down.id if base.down else -1
@@ -424,7 +424,7 @@ class CadnanoConvertDesign(object):
         self._logger.debug("num_inserts %d " % num_inserts)
 
         # Create bases to insert.
-        for i in xrange(0,num_inserts):
+        for i in range(0,num_inserts):
             base = DnaBase(base_id)
             if curr_base.h not in new_bases:
                 new_bases[curr_base.h] = []
@@ -456,7 +456,7 @@ class CadnanoConvertDesign(object):
             base.coordinates = insert_coords[i]
             base.ref_frame = insert_frames[:,:,i]
             last_base = base
-        #__for i in xrange(0,num_inserts)
+        #__for i in range(0,num_inserts)
 
         return base_id 
     #__def _insert_bases_ssDNA
@@ -509,7 +509,7 @@ class CadnanoConvertDesign(object):
         # Create bases to insert.
         last_base1 = None 
         last_base2 = None 
-        for i in xrange(0,num_inserts,2):
+        for i in range(0,num_inserts,2):
             base1 = DnaBase(base_id)
             if curr_base.h not in new_bases:
                 new_bases[curr_base.h] = []
@@ -563,7 +563,7 @@ class CadnanoConvertDesign(object):
 
             last_base1 = base1
             last_base2 = base2
-        #__for i in xrange(0,num_inserts,2)
+        #__for i in range(0,num_inserts,2)
 
         return base_id 
     #__def _insert_bases_dsDNA
@@ -660,7 +660,7 @@ class CadnanoConvertDesign(object):
         # Iterate over the vhelix scaffold and staple bases.
         scaffold_bases = []
         staple_bases = []
-        for i in xrange(0,num_bases):
+        for i in range(0,num_bases):
             current_scaffold = scaffolds[i] 
             current_staple = staples[i] 
             helix_pos = i
@@ -679,7 +679,7 @@ class CadnanoConvertDesign(object):
                 base.num_deletions = deletions[i]
                 base.num_insertions = insertions[i]
 
-        #__for i in xrange(0,num_lattice)__
+        #__for i in range(0,num_lattice)__
 
         return scaffold_bases, staple_bases 
 
@@ -734,10 +734,10 @@ class CadnanoConvertDesign(object):
         num_strands = len(strands)
         staple_ends = {}
 
-        for i in xrange(0,num_strands):
+        for i in range(0,num_strands):
             strand = strands[i]
             is_scaf_strand = strand.tour[0].is_scaf
-            for j in xrange(0,len(strand.tour)):
+            for j in range(0,len(strand.tour)):
                 is_scaf_base = strand.tour[j].is_scaf
             if (not is_scaf_strand):
                 h0 = strand.tour[0].h
@@ -745,7 +745,7 @@ class CadnanoConvertDesign(object):
                 h1 = strand.tour[-1].h
                 p1 = strand.tour[-1].p
                 staple_ends[(h0,p0)] = i+1
-        #__for i in xrange(0,num_strands)__
+        #__for i in range(0,num_strands)__
         return staple_ends
     #__def _calculate_staple_ends
 
@@ -841,7 +841,7 @@ class CadnanoConvertDesign(object):
                 min_p = base.p
                 start_index = 0
 
-                for j in xrange(0,len(tour)):
+                for j in range(0,len(tour)):
                     base = tour[j]
                     if (base.h < min_vh):
                         min_vh = base.h
@@ -856,7 +856,7 @@ class CadnanoConvertDesign(object):
                 base = start_base 
                 even_vh = min_vh % 2
 
-                for j in xrange(0,len(tour)):
+                for j in range(0,len(tour)):
                     letter = sequence[seq_index]
                     up_base = base.up
                     down_base = base.down
@@ -899,11 +899,11 @@ class CadnanoConvertDesign(object):
                             base = across_base
                             even_vh = base.h % 2
 
-                 #__for j in xrange(0,len(tour)):
+                 #__for j in range(0,len(tour)):
 
             else: 
                 self._logger.debug("---------- unordered traverse scaffold strand --------------------")
-                for i in xrange(0,len(strand.tour)):
+                for i in range(0,len(strand.tour)):
                     letter = sequence[seq_index]
                     base = strand.tour[i]
                     across_base = base.across
@@ -929,7 +929,7 @@ class CadnanoConvertDesign(object):
 
                     if (base.across != None):
                         base.across.seq = self._wspair(letter)
-                #__for i in xrange(0,len(strand.tour))
+                #__for i in range(0,len(strand.tour))
         #__for strand in strands
 
         print_strands = True
@@ -943,7 +943,7 @@ class CadnanoConvertDesign(object):
                 self._logger.debug("    seq:")
                 for base in tour:
                     self._logger.debug("    vhelix: %d  pos: %d  seq: %s" % (int(base.h), int(base.p), base.seq))
-            #__for i in xrange(0,len(strands))
+            #__for i in range(0,len(strands))
 
     #__def set_sequence_from_name
 
@@ -963,7 +963,7 @@ class CadnanoConvertDesign(object):
         strands = dna_structure.strands 
         staple_ends = dna_structure.staple_ends 
 
-        for i in xrange(0,len(sequence)):
+        for i in range(0,len(sequence)):
             seq = sequence[i]
             h0 = int(sequence[i].start[0])
             p0 = int(sequence[i].start[1])
@@ -972,7 +972,7 @@ class CadnanoConvertDesign(object):
             tour = strand.tour
 
             if (modified_structure):
-                for j in xrange(0,len(strands[istrand-1].tour)):
+                for j in range(0,len(strands[istrand-1].tour)):
                     base = tour[j]
                     base.seq = seq.letters[j]
                     if (base.across != None):
@@ -981,7 +981,7 @@ class CadnanoConvertDesign(object):
 
             else:
                 seq_index = 0
-                for j in xrange(0,len(tour)):
+                for j in range(0,len(tour)):
                     letter = seq.letters[seq_index]
                     base = tour[j]
                     if (base.num_deletions != 0):

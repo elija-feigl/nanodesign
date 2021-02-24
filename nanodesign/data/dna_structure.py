@@ -433,7 +433,7 @@ class DnaStructure(object):
             domain_bases = [ base ]
 
             # Traverse the bases in a strand and create domains.
-            for i in xrange(1,len(strand.tour)):
+            for i in range(1,len(strand.tour)):
                 base = strand.tour[i]
                 across_sign = 0 if base.across else -1
                 add_curr_base = True
@@ -490,7 +490,7 @@ class DnaStructure(object):
                 # Add the current base to the current list of domain bases.
                 if add_curr_base:
                     domain_bases.append(base)
-            #__for i in xrange(1,len(strand.tour))
+            #__for i in range(1,len(strand.tour))
 
             # Add a domain for any remaining bases.
             if len(domain_bases) != 0:

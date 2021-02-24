@@ -42,21 +42,24 @@ try:
     from OpenGL.GLUT import *
 
 except ImportError as e:
-    print "Could not import PyOpenGL."
+    print('"Could not import PyOpenGL."')
     raise e
+
 
 class VisMenuItem:
     """ This class defines the two menu items that appear in all submenus. """
-    ALL  = "All"
+    ALL = "All"
     NONE = "None"
 
+
 class VisMenuEntity:
-    """ This class defines the entities that can be visualized. """ 
+    """ This class defines the entities that can be visualized. """
     UNKNOWN = 'unknown'
     ATOMIC_STRUCTURE = 'atomic_structure'
-    HELIX    = 'helix'
-    MODEL    = 'model'
-    STRAND   = 'strand'
+    HELIX = 'helix'
+    MODEL = 'model'
+    STRAND = 'strand'
+
 
 class VisMenuItemSelect(object):
     """ This class is used to process the selection of submenu item for a given representation from submenus. 
@@ -68,7 +71,8 @@ class VisMenuItemSelect(object):
 
         When a submenu item it selected the callback method in this class is called with the item number selected.
         The item number and the representation is then used to process the selection of an entiy of that representation.
-    """ 
+    """
+
     def __init__(self, selection, rep):
         self.selection = selection
         self.rep = rep
@@ -84,14 +88,17 @@ class VisMenuItemSelect(object):
         self.selection.select_rep(item, self.rep)
         return 0
 
+
 class VisMenuMainEntry(object):
     """ This class is used to manage the main menu selections. 
     """
+
     def __init__(self, name, menu_id, callback):
         self.name = name
         self.menu_id = menu_id
         self.callback = callback
         self.selected = False
+
 
 class VisSubMenu(object):
     """ This class is used to manage a submenu for a set of representations.
@@ -109,6 +116,7 @@ class VisSubMenu(object):
         entities (e.g. helix, strand, etc.). A submenu is created for representations that can be selected. A boolean 
         is stored for all the representations. If the boolean is True the the representation is seleced and is visible.
     """
+
     def __init__(self, menu, menu_name, rep, command_generate):
         """ Initialize a VisSubMenu object.
 
@@ -126,8 +134,10 @@ class VisSubMenu(object):
         self.menu_name = menu_name
         self.command_generate = command_generate
         # Get the representation type names.
-        attributes = inspect.getmembers(rep, lambda a:not(inspect.isroutine(a)))
-        rep_types = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
+        attributes = inspect.getmembers(
+            rep, lambda a: not(inspect.isroutine(a)))
+        rep_types = [a for a in attributes if not(
+            a[0].startswith('__') and a[0].endswith('__'))]
         # Create the selections dict, set callbacks and create submenus for each rep.
         self.selections = {}
         self.menuIDs = {}
@@ -138,9 +148,10 @@ class VisSubMenu(object):
                 continue
             self.selections[rep] = False
             self.rep_names.append(rep)
-        #__for rep_type in rep_types
+        # __for rep_type in rep_types
         menu_item_select = VisMenuItemSelect(self, menu_name)
-        self.menuID = self.menu._add_submenu_item(menu_item_select.callback, self.rep_names)
+        self.menuID = self.menu._add_submenu_item(
+            menu_item_select.callback, self.rep_names)
 
     def add_submenu(self):
         glutAddSubMenu(self.menu_name, self.menuID)
@@ -156,7 +167,8 @@ class VisSubMenu(object):
             and then executed to perform the visualization of the representation.
         """
         selected_rep = self.rep_names[item]
-        show = self.menu.set_selections(self.rep_names, self.selections, item, rep, self.menuID)
+        show = self.menu.set_selections(
+            self.rep_names, self.selections, item, rep, self.menuID)
         self.command_generate(selected_rep, show)
 
     def update_selection(self, name, rep):
@@ -166,11 +178,12 @@ class VisSubMenu(object):
                 name (String): Not used. 
                 rep (String): The name of the representation.
         """
-        for item,rep_name in enumerate(self.rep_names):
+        for item, rep_name in enumerate(self.rep_names):
             if rep_name == rep:
-                show = self.menu.set_selections(self.rep_names, self.selections, item, rep, self.menuID)
+                show = self.menu.set_selections(
+                    self.rep_names, self.selections, item, rep, self.menuID)
                 break
-        #__for item,rep_name in enumerate(self.rep_names)
+        # __for item,rep_name in enumerate(self.rep_names)
 
 
 class VisRepMenu(object):
@@ -190,6 +203,7 @@ class VisRepMenu(object):
         entity names (e.g. helix number or strand name) that can be selected. A boolean is stored for all the entities
         defined for each representation. If the boolean is True the the entity is seleced and is visible. 
     """
+
     def __init__(self, menu, rep, entity_names, command_generate):
         """ Initialize a VisRepMenu object.
 
@@ -206,9 +220,11 @@ class VisRepMenu(object):
         self.menu = menu
         self.entity_names = entity_names
         self.command_generate = command_generate
-        # Get the representation type names. 
-        attributes = inspect.getmembers(rep, lambda a:not(inspect.isroutine(a)))
-        rep_types = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
+        # Get the representation type names.
+        attributes = inspect.getmembers(
+            rep, lambda a: not(inspect.isroutine(a)))
+        rep_types = [a for a in attributes if not(
+            a[0].startswith('__') and a[0].endswith('__'))]
         # Create the selections dict, set callbacks and create submenus for each rep.
         self.selections = {}
         self.menuIDs = {}
@@ -221,8 +237,9 @@ class VisRepMenu(object):
             for name in entity_names:
                 self.selections[rep][name] = False
             menu_item_select = VisMenuItemSelect(self, rep)
-            self.menuIDs[rep] = self.menu._add_submenu_item(menu_item_select.callback, entity_names)
-        #__for rep_type in rep_types
+            self.menuIDs[rep] = self.menu._add_submenu_item(
+                menu_item_select.callback, entity_names)
+        # __for rep_type in rep_types
 
     def add_submenu(self, rep, menu_name):
         """ Create a GLUT representation submenu. 
@@ -244,7 +261,8 @@ class VisRepMenu(object):
             and then executed to perform the visualization of the representation.
         """
         selected_name = self.entity_names[item]
-        show = self.menu.set_selections(self.entity_names, self.selections[rep], item, rep, self.menuIDs[rep])
+        show = self.menu.set_selections(
+            self.entity_names, self.selections[rep], item, rep, self.menuIDs[rep])
         self.command_generate(selected_name, rep, show)
 
     def update_selection(self, name, rep):
@@ -254,11 +272,13 @@ class VisRepMenu(object):
                 name (String): The entity name.
                 rep (String): The name of the representation.
         """
-        for item,entity_name in enumerate(self.entity_names):
+        for item, entity_name in enumerate(self.entity_names):
             if entity_name == name:
-                show = self.menu.set_selections(self.entity_names, self.selections[rep], item, rep, self.menuIDs[rep])
+                show = self.menu.set_selections(
+                    self.entity_names, self.selections[rep], item, rep, self.menuIDs[rep])
                 break
-        #__for item,item_name in enumerate(self.entity_names)
+        # __for item,item_name in enumerate(self.entity_names)
+
 
 class VisMenu(object):
     """ This class is used to manage the visualizer menus. 
@@ -280,7 +300,7 @@ class VisMenu(object):
         The entity names are used to selectively visualize components of the DNA structure design. Entity selections are
         managed using a the 'selections' attribute, a dictionary of VisRepMenu objects.
     """
-    menu_items = {} 
+    menu_items = {}
     item_count = 1
     updated = False
     delayed_updates = []
@@ -289,9 +309,9 @@ class VisMenu(object):
 
     def __init__(self, command, helix_names, strand_names, atomic_struct_names):
         self.command = command
-        self.helix_names = helix_names 
+        self.helix_names = helix_names
         self.strand_names = strand_names
-        self.atomic_struct_names = atomic_struct_names 
+        self.atomic_struct_names = atomic_struct_names
         self.selections = {}
         self._logger = logging.getLogger(__name__)
         self._create_menu_items()
@@ -304,60 +324,81 @@ class VisMenu(object):
         """
 
         # Create model sub-menu.
-        model_select = VisSubMenu(self, "Model", model.VisModelRepType, self.command.generate_model_cmd)
+        model_select = VisSubMenu(
+            self, "Model", model.VisModelRepType, self.command.generate_model_cmd)
         self.selections[VisMenuEntity.MODEL] = model_select
 
         # Create helix sub-menus.
-        helix_select = VisRepMenu(self, VisHelixRepType, self.helix_names, self.command.generate_helix_cmd)
+        helix_select = VisRepMenu(
+            self, VisHelixRepType, self.helix_names, self.command.generate_helix_cmd)
         self.selections[VisMenuEntity.HELIX] = helix_select
 
         # Create strand sub-menus.
-        strand_select = VisRepMenu(self, VisStrandRepType, self.strand_names, self.command.generate_strand_cmd)
+        strand_select = VisRepMenu(
+            self, VisStrandRepType, self.strand_names, self.command.generate_strand_cmd)
         self.selections[VisMenuEntity.STRAND] = strand_select
 
         # Create atomic stucture sub-menus.
         if len(self.atomic_struct_names) > 2:
-            atomic_select = VisRepMenu(self, VisAtomicStructureRepType, self.atomic_struct_names, 
-                self.command.generate_atomic_struct_cmd)
+            atomic_select = VisRepMenu(self, VisAtomicStructureRepType, self.atomic_struct_names,
+                                       self.command.generate_atomic_struct_cmd)
             self.selections[VisMenuEntity.ATOMIC_STRUCTURE] = atomic_select
         else:
-            self.selections[VisMenuEntity.ATOMIC_STRUCTURE] = None 
-            atomic_select = None 
+            self.selections[VisMenuEntity.ATOMIC_STRUCTURE] = None
+            atomic_select = None
 
         # Create main menu items. Most of the main menu items will be a submenu of entity names.
         self.menu = glutCreateMenu(self.main_callback)
 
-        # Create the submenus for atomic structure representations. 
-        if atomic_select: 
-            atomic_select.add_submenu(VisAtomicStructureRepType.BACKBONE, "Atomic structure backbone") 
-            atomic_select.add_submenu(VisAtomicStructureRepType.BONDS,    "Atomic structure bonds") 
-            atomic_select.add_submenu(VisAtomicStructureRepType.CHECK,    "Atomic structure check") 
+        # Create the submenus for atomic structure representations.
+        if atomic_select:
+            atomic_select.add_submenu(
+                VisAtomicStructureRepType.BACKBONE, "Atomic structure backbone")
+            atomic_select.add_submenu(
+                VisAtomicStructureRepType.BONDS,    "Atomic structure bonds")
+            atomic_select.add_submenu(
+                VisAtomicStructureRepType.CHECK,    "Atomic structure check")
 
         # Create the submenu for the model menu. This only has model representations for its submenu.
         model_select.add_submenu()
 
-        # Create the submenus for strand representations. 
-        strand_select.add_submenu(VisStrandRepType.CONNECTORS,  "Strand connectors")
-        strand_select.add_submenu(VisStrandRepType.DOMAINS,     "Strand domains")
-        strand_select.add_submenu(VisStrandRepType.FRAMES,      "Strand frames")
+        # Create the submenus for strand representations.
+        strand_select.add_submenu(
+            VisStrandRepType.CONNECTORS,  "Strand connectors")
+        strand_select.add_submenu(
+            VisStrandRepType.DOMAINS,     "Strand domains")
+        strand_select.add_submenu(
+            VisStrandRepType.FRAMES,      "Strand frames")
         strand_select.add_submenu(VisStrandRepType.PATH,        "Strand path")
-        strand_select.add_submenu(VisStrandRepType.TEMPERATURE, "Strand temperature")
+        strand_select.add_submenu(
+            VisStrandRepType.TEMPERATURE, "Strand temperature")
 
-        # Create the submenus for the virtual helix representations. 
-        helix_select.add_submenu(VisHelixRepType.BASE_POSITIONS,    "Virtual helix base positions") 
-        helix_select.add_submenu(VisHelixRepType.COORDINATE_FRAMES, "Virtual helix coordinate frames") 
-        helix_select.add_submenu(VisHelixRepType.DESIGN_CROSSOVERS, "Virtual helix design crossovers")
-        helix_select.add_submenu(VisHelixRepType.COORDINATES,       "Virtual helix DNA helix P coordinates")
-        helix_select.add_submenu(VisHelixRepType.DOMAINS,           "Virtual helix domains")
-        helix_select.add_submenu(VisHelixRepType.GEOMETRY,          "Virtual helix geometry")
-        helix_select.add_submenu(VisHelixRepType.INSERTS_DELETES,   "Virtual helix inserts and deletes")
-        helix_select.add_submenu(VisHelixRepType.MAXIMAL_CROSSOVERS,"Virtual helix maximal crossovers")
-        helix_select.add_submenu(VisHelixRepType.PAIRED_GEOMETRY,   "Virtual helix paired geometry")
-        helix_select.add_submenu(VisHelixRepType.STRANDS,           "Virtual helix strands")
-        helix_select.add_submenu(VisHelixRepType.TEMPERATURE,       "Virtual helix temperature")
+        # Create the submenus for the virtual helix representations.
+        helix_select.add_submenu(
+            VisHelixRepType.BASE_POSITIONS,    "Virtual helix base positions")
+        helix_select.add_submenu(
+            VisHelixRepType.COORDINATE_FRAMES, "Virtual helix coordinate frames")
+        helix_select.add_submenu(
+            VisHelixRepType.DESIGN_CROSSOVERS, "Virtual helix design crossovers")
+        helix_select.add_submenu(
+            VisHelixRepType.COORDINATES,       "Virtual helix DNA helix P coordinates")
+        helix_select.add_submenu(VisHelixRepType.DOMAINS,
+                                 "Virtual helix domains")
+        helix_select.add_submenu(VisHelixRepType.GEOMETRY,
+                                 "Virtual helix geometry")
+        helix_select.add_submenu(
+            VisHelixRepType.INSERTS_DELETES,   "Virtual helix inserts and deletes")
+        helix_select.add_submenu(
+            VisHelixRepType.MAXIMAL_CROSSOVERS, "Virtual helix maximal crossovers")
+        helix_select.add_submenu(
+            VisHelixRepType.PAIRED_GEOMETRY,   "Virtual helix paired geometry")
+        helix_select.add_submenu(VisHelixRepType.STRANDS,
+                                 "Virtual helix strands")
+        helix_select.add_submenu(
+            VisHelixRepType.TEMPERATURE,       "Virtual helix temperature")
 
         # Add the quit menu item.
-        self._add_menu_item("Quit", self.quit_callback) 
+        self._add_menu_item("Quit", self.quit_callback)
         glutAttachMenu(GLUT_RIGHT_BUTTON)
 
     @staticmethod
@@ -390,7 +431,7 @@ class VisMenu(object):
 
     def update(self):
         """ Update the menu with selections given from commands. 
-          
+
             This is needed because the menus must be defined and GLUT finished initializing
             before the menus can be updated with selections from commands.
         """
@@ -416,7 +457,7 @@ class VisMenu(object):
         glutAddMenuEntry(name, VisMenu.item_count)
         entry = VisMenuMainEntry(name, VisMenu.item_count, callback)
         VisMenu.menu_items[VisMenu.item_count] = entry
-        VisMenu.item_count += 1 
+        VisMenu.item_count += 1
 
     def _add_submenu_item(self, callback, name_list):
         """ Add a submenu item. 
@@ -430,15 +471,16 @@ class VisMenu(object):
         for name in name_list:
             glutAddMenuEntry(str(name),  n)
             n += 1
-        VisMenu.item_count += 1 
-        return sub_menu 
+        VisMenu.item_count += 1
+        return sub_menu
 
     def update_selection(self, type, rep, delay=False):
         """ Update a selection for the given rep name. """
         if delay:
-            self.delayed_updates.append((self.update_selection, type, None, rep))
+            self.delayed_updates.append(
+                (self.update_selection, type, None, rep))
             return
-        self.selections[type].update_selection(type,rep)
+        self.selections[type].update_selection(type, rep)
 
     def update_submenu_selection(self, type, name, rep, delay=False):
         """ Update a selection for the given rep and entity name. 
@@ -450,9 +492,10 @@ class VisMenu(object):
                 delay (bool): If False then delay the menu update until the graphics has been initialized.
         """
         if delay:
-            self.delayed_submenu_updates.append((self.update_submenu_selection, type, name, rep))
+            self.delayed_submenu_updates.append(
+                (self.update_submenu_selection, type, name, rep))
             return
-        self.selections[type].update_selection(name,rep)
+        self.selections[type].update_selection(name, rep)
 
     def set_selections(self, names, selections, item, rep, menu=-1):
         """ Set the selection of an entity submenu item.
@@ -475,16 +518,16 @@ class VisMenu(object):
         if menu != -1:
             glutSetMenu(menu)
         # Select all of the submenu entities.
-        if name == VisMenuItem.ALL: 
-            for item,name in enumerate(names):
+        if name == VisMenuItem.ALL:
+            for item, name in enumerate(names):
                 if item < 2:
                     continue
                 entry_name = name + VisMenu.selected_symbol
                 selections[name] = True
                 glutChangeToMenuEntry(item+1, entry_name, item)
         # Select none  of the submenu entities.
-        elif name == VisMenuItem.NONE: 
-            for item,name in enumerate(names):
+        elif name == VisMenuItem.NONE:
+            for item, name in enumerate(names):
                 if item < 2:
                     continue
                 selections[name] = False
@@ -499,7 +542,7 @@ class VisMenu(object):
                 selections[name] = False
             glutChangeToMenuEntry(item+1, entry_name, item)
         return selections[name]
- 
+
     def main_callback(self, item):
         """ This is the callback function for menus that are not submenus. """
         entry = VisMenu.menu_items[item]
@@ -509,5 +552,3 @@ class VisMenu(object):
     def quit_callback(self, entry):
         """ This the callback function for the 'quit' menu selection. """
         sys.exit(0)
-
-

@@ -89,7 +89,7 @@ class Domain(object):
                     "a":"t","t":"a",
                     "N":"N","n":"n"}
             rev = []
-            for i in xrange(len(seq)):
+            for i in range(len(seq)):
                 rev.append(comp[seq[len(seq)-i-1]])
             return "".join( rev )
 
