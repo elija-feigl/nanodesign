@@ -20,18 +20,15 @@ Module containing data types (classes) for representing and operating on DNA nan
 """
 
 
-# bring in the classes from internaldata
-import internaldata
-from .internaldata import *
 
-import domain
-from .domain import *
+from .internaldata import InternalData
+from .domain import Domain
+from .energymodel import EnergyModel
 
-import energymodel
-from .energymodel import *
 
+# Designate which components will be in the * namespace.
 __all__ = []
-__all__.extend( internaldata.__all__ )
-__all__.extend( domain.__all__ )
-__all__.extend( energymodel.__all__ )
-
+__all__.extend(['InternalData'])
+__all__.extend(["Domain"])
+__all__.extend(["EnergyModel", "energy_model",
+                "BOLTZMANN_CONSTANT", "convert_temperature_K_to_C"])

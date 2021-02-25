@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO: Revisit this file.
 
-# from . import pdb_reader
-# from . import pdb_writer
-# from . import cif_writer
+from .pdb_reader import PdbReader
+from .pdb_writer import PdbWriter
+from .cif_writer import CifWriter
 
-# # Designate which components will be in the * namespace.
 
-# __all__ = []
-# __all__.extend(['pdb_writer','pdb_reader','cif_writer'])
+# Designate which components will be in the * namespace.
+__all__ = []
+__all__.extend(['pdb_writer', 'pdb_reader', 'cif_writer'])

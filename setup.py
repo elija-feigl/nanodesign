@@ -12,11 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This file is the basic package setup. It's currently fleshed out with a very minimal package list. If this goes into the PyPI repository, we need to add appropriate metadata, etc.
+# This file is the basic package setup. It's currently fleshed out with a very
+# minimal package list. If this goes into the PyPI repository, we need to add
+# appropriate metadata, etc.
 
-from distutils.core import setup
+# 2021.02.25.: switched to setuptools @Elija, Feigl
+import setuptools
 
-if __name__ == '__main__':
-    setup(name="nanodesign", version="1.0",
-          packages=['nanodesign','nanodesign.converters','nanodesign.algorithms','nanodesign.data'],
-      )
+setuptools.setup(
+    name="nanodesign",
+    version="1.0",
+    packages=setuptools.find_packages(),
+    include_package_data=True,
+    install_requires=(
+        'numpy>=1.14',
+    ),
+    classifiers=(
+        "Programming Language :: Python :: 3",
+        "License :: Apache, Version 2.0",
+        "Operating System :: OS Independent",
+    ),
+)

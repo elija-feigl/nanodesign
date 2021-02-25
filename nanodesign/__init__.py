@@ -34,22 +34,15 @@ algorithms
     Statistics and other algorithms on these file types (maybe should just be in the core package? maybe all of it should?)
 
 """
-from __future__ import print_function
 
 # Load the basic core elements, as well as subpackages.
-from . import core
-from .core import *
 
-from . import data
-from . import converters
-from . import algorithms
-from . import utils
-from . import visualizer
-
+from .core import load
+from .converters import converter
 from .data import Domain
-
 from .data import energy_model
 from .data import convert_temperature_K_to_C
+
 
 # Create a logger console handler and set logging output format.
 def _init_logging():
@@ -61,10 +54,10 @@ def _init_logging():
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
+
 _init_logging()
 
 # Designate which components will be in the * namespace.
 __all__ = []
-__all__.extend(core.__all__)
-__all__.extend(['data','converters','algorithms','utils','visualizer'])
-
+__all__.extend(['load'])
+__all__.extend(['data', 'converter', 'algorithms', 'utils', 'visualizer'])
