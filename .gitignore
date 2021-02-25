@@ -2,3 +2,5 @@
 *.pyc
 docs/_build/
 *build/
+*nanodesign.egg-info/
+*dist/
