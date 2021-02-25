@@ -412,10 +412,10 @@ class VisGeometryPath(VisGeometry):
         self.bend_points = []
         self.bend_index = []
         colors = None
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             if key == "colors":
                 colors = value
-        # __for key, value in kwargs.iteritems()
+        # __for key, value in kwargs.items()
         self._create_geometry(points, colors, show_vertices, show_arrows)
 
     def _create_geometry(self, points, colors, show_vertices, show_arrows):

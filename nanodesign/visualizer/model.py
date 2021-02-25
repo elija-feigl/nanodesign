@@ -191,7 +191,7 @@ class VisModel(object):
 
     def _set_extent(self):
         """ Set the model extent from the DNA structure. """
-        for helix in self.dna_structure.structure_helices_map.itervalues():
+        for helix in self.dna_structure.structure_helices_map.values():
             for coord in helix.helix_axis_coords:
                 self.extent.update(coord[0], coord[1], coord[2])
         xmin, xmax, ymin, ymax, zmin, zmax = self.extent.get_bounds()

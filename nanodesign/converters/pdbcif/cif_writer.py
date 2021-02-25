@@ -120,7 +120,7 @@ class CifWriter(object):
             ("pdbx_model_type_details", CifWriter.EMPTY_FIELD)
         ])
 
-        for name, value in struct_records.iteritems():
+        for name, value in struct_records.items():
             cif_file.write("_struct.%-30s       %s\n" % (name, value))
         cif_file.write(CifWriter.COMMENT_SPACES)
 
@@ -145,7 +145,7 @@ class CifWriter(object):
         ])
 
         # Write the _entity records.
-        for name, value in entity_records.iteritems():
+        for name, value in entity_records.items():
             cif_file.write("_entity.%-30s       %s\n" % (name, value))
         cif_file.write(CifWriter.COMMENT_SPACES)
 
@@ -234,13 +234,13 @@ class CifWriter(object):
 
         # Create the atom record format.
         format = ""
-        for _, value in atom_site_records.iteritems():
+        for _, value in atom_site_records.items():
             format += value[1] + "  "
         format += "\n"
 
         # Write atom field names.
         cif_file.write(CifWriter.LOOP)
-        for name, value in atom_site_records.iteritems():
+        for name, value in atom_site_records.items():
             cif_file.write("_atom_site.%s\n" % name)
 
         # Write atom data.

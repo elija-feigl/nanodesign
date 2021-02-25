@@ -74,7 +74,7 @@ def main():
         strand_lengths[num_bases] += 1
     #__for strand in self.strands
     print("\nStrand length counts:")
-    for length, count in sorted(strand_lengths.iteritems(), key=lambda (k,v): (v,k)):
+    for length, count in sorted(strand_lengths.items(), key=lambda (k,v): (v,k)):
         print 'Length {:>4}  Count {:>4}'.format(length, count)
     #__for length in strand_lengths
 
@@ -91,7 +91,7 @@ def main():
         strand_helix[num_helices] += 1
     #__for strand in dna_structure.strands
     print("\nStrand helix counts:")
-    for num_helices, count in sorted(strand_helix.iteritems(), key=lambda (k,v): (v,k)):
+    for num_helices, count in sorted(strand_helix.items(), key=lambda (k,v): (v,k)):
         print 'Number of helices {:>4}  Count {:>4}'.format(num_helices, count) 
     #__for num_helices in strand_helix
 

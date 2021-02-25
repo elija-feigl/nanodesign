@@ -20,8 +20,9 @@ A DNA strand is a continuous chain of nucleotides. It can be either a scaffold o
 import random
 import sys
 import os
-from sets import Set
+#from sets import Set
 import numpy as np
+
 
 class DnaStrand(object):
     """ The DnaStrand class stores data for a DNA strand.
@@ -57,7 +58,7 @@ class DnaStrand(object):
         self.is_scaffold = is_scaffold
         self.is_circular = is_circular
         self.tour = tour
-        self.color = self.create_random_color() 
+        self.color = self.create_random_color()
         self.icolor = None
         self.helix_list = dict()
         self.base_id_list = dict()
@@ -65,7 +66,7 @@ class DnaStrand(object):
         self.domain_list = []
         self.insert_seq = []
 
-    def create_random_color(self): 
+    def create_random_color(self):
         """ Create a random color for the strand. 
 
             Colors are generated from the limited set of intensity values 
@@ -83,14 +84,14 @@ class DnaStrand(object):
             # Don't generate blue (that's for a scaffold in cadnano) or black.
             if (rgb[0] == 0.0) and (rgb[1] == 0.0):
                 rgb[0] = random.choice(color_list[1:])
-                if rgb[2] == 0.0: 
-                    rgb[2] = random.choice(color_list[1:])    
+                if rgb[2] == 0.0:
+                    rgb[2] = random.choice(color_list[1:])
             #__if (rgb[0] == 0) and (rgb[1] == 0)
-        #__if self.is_scaffold
-        return rgb 
-    #__def create_random_color
+        # __if self.is_scaffold
+        return rgb
+    # __def create_random_color
 
-    def add_helix(self, helix): 
+    def add_helix(self, helix):
         """ Add a helix reference to the strand. 
 
             Arguments:
@@ -99,21 +100,21 @@ class DnaStrand(object):
         id = helix.lattice_num
         if (id not in self.helix_list):
             self.helix_list[id] = helix
-    #__def add_helix
+    # __def add_helix
 
     def get_base_coords(self):
         """ Get the coordinates of bases along the dna helix axis. 
             This is only used when writing a visualization file.
         """
         num_bases = len(self.tour)
-        base_coords = np.zeros((num_bases,3), dtype=float)
-        for i,base in enumerate(self.tour):
+        base_coords = np.zeros((num_bases, 3), dtype=float)
+        for i, base in enumerate(self.tour):
             helix_num = base.h
             helix_pos = base.p
             helix = self.helix_list[helix_num]
             base_coords[i] = base.coordinates
         return base_coords
-    #__def get_base_coords
+    # __def get_base_coords
 
     def get_base_index(self, base):
         """ Get the index into the strand for the given base. 
@@ -123,11 +124,11 @@ class DnaStrand(object):
         """
         num_bases = len(self.tour)
         if (not self.base_id_list):
-            for i,sbase in enumerate(self.tour):
+            for i, sbase in enumerate(self.tour):
                 self.base_id_list[sbase.id] = i
         if base.id not in self.base_id_list:
-            sys.stderr.write("[strand::get_base_index] **** WARNING: base %d not found in strand %d.\n" % (base.id, self.id))
+            sys.stderr.write(
+                "[strand::get_base_index] **** WARNING: base %d not found in strand %d.\n" % (base.id, self.id))
             return None
         return self.base_id_list[base.id]
-    #__def get_base_index
-
+    # __def get_base_index
