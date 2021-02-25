@@ -1,11 +1,14 @@
+NOTE
+==========
+This fork is a python3 port of the discontinued original. we are also trying to finish & cleanup code to extends nanodesigns functionality. Contributions are welcome!
+
 Nanodesign
 ==========
-
 Create, interact and modify nucleic acid based structures. The Nanodesign Python Package is aimed at providing a toolkit for working with structural DNA/RNA nanotechnology designs. This package is meant to support all types of interaction with these designs, including loading Cadnano files and modifying them, building new structures from scratch, or just converting formats so you can easily visualize or simulate your design.
 
 ## Getting Started
 
-You should have [`git`](https://git-scm.com/downloads) installed as well as [Python 2.7](https://python.org). Note that this part of the guide is aimed towards Mac OS X or Linux installs. For a Windows install, a similar pattern should work using one of the command line shells.
+You should have [`git`](https://git-scm.com/downloads) installed as well as [Python 3.6](https://python.org). Note that this part of the guide is aimed towards Mac OS X or Linux installs. For a Windows install, a similar pattern should work using one of the command line shells.
 
 On the command line, change to the directory you want Nanodesign installed under, and run:
 ```shell
