@@ -35,17 +35,11 @@ import sys
 # site-packages. If you have it in site packages, the first block should just work.
 # Otherwise, it will assume you can import it based on a relative path from this source
 # file's directory, and try to do so by adjusting the system paths temporarily.
-try:
-    import nanodesign
-except ImportError:
-    import sys
-    base_path = os.path.abspath( os.path.join( os.path.dirname(os.path.abspath( __file__)), '../'))
-    sys.path.append(base_path)
-    import nanodesign
-    # If the import fails now, we let the exception go all the way up to halt execution.
-    sys.path = sys.path[:-1]
+
+import nanodesign
 
 from nanodesign.converters import Converter
+
 
 def read_file(file_name, seq_name):
     """ Read in a cadnano file. """
@@ -53,6 +47,7 @@ def read_file(file_name, seq_name):
     seq_file = None
     converter.read_cadnano_file(file_name, seq_file, seq_name)
     return converter
+
 
 def main():
     # Set caDNAno file name.
@@ -72,11 +67,11 @@ def main():
         if num_bases not in strand_lengths:
             strand_lengths[num_bases] = 0
         strand_lengths[num_bases] += 1
-    #__for strand in self.strands
+    # __for strand in self.strands
     print("\nStrand length counts:")
-    for length, count in sorted(strand_lengths.items(), key=lambda (k,v): (v,k)):
-        print 'Length {:>4}  Count {:>4}'.format(length, count)
-    #__for length in strand_lengths
+    for length, count in sorted(strand_lengths.items(), key=lambda (k, v): (v, k)):
+        print('Length {:>4}  Count {:>4}'.format(length, count))
+    # __for length in strand_lengths
 
     # Calculate the number of helices each strand visits.
     strand_helix = OrderedDict()
@@ -89,12 +84,13 @@ def main():
         if num_helices not in strand_helix:
             strand_helix[num_helices] = 0
         strand_helix[num_helices] += 1
-    #__for strand in dna_structure.strands
+    # __for strand in dna_structure.strands
     print("\nStrand helix counts:")
-    for num_helices, count in sorted(strand_helix.items(), key=lambda (k,v): (v,k)):
-        print 'Number of helices {:>4}  Count {:>4}'.format(num_helices, count) 
-    #__for num_helices in strand_helix
+    for num_helices, count in sorted(strand_helix.items(), key=lambda (k, v): (v, k)):
+        print('Number of helices {:>4}  Count {:>4}'.format(
+            num_helices, count))
+    # __for num_helices in strand_helix
+
 
 if __name__ == '__main__':
     main()
-
