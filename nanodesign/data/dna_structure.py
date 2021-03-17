@@ -31,7 +31,7 @@ from ..converters.cadnano.utils import generate_coordinates
 from .dna_structure_helix import DnaStructureHelix, DnaHelixConnection
 from .lattice import Lattice
 from .strand import DnaStrand
-from . import Domain
+from .domain import Domain
 
 
 class DnaStructure(object):
