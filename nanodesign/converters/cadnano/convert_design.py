@@ -514,13 +514,13 @@ class CadnanoConvertDesign(object):
         # Find the neighboring bases.
         neighbor_down = curr_base.down
         curr_across = curr_base.across
-        if curr_across != None:
+        if curr_across is not None:
             neighbor_across_up = curr_across.up
         else:
             neighbor_across_up = None
 
         # Interpolate positions and orientations.
-        num_inserts = 2*curr_base.num_insertions
+        num_inserts = curr_base.num_insertions
         curr_coords = curr_base.coordinates
         curr_frame = curr_base.ref_frame.copy()
         curr_frame = curr_frame.reshape(3, 3)
@@ -531,7 +531,7 @@ class CadnanoConvertDesign(object):
         [insert_coords, insert_frames] = bp_interp(
             curr_coords, curr_frame, next_coords, next_frame, num_inserts/2)
         self._logger.debug("Insert dsDNA")
-        self._logger.debug("num_inserts %d " % num_inserts)
+        self._logger.debug("num_inserts %d " % 2 * num_inserts)
         self._logger.debug("next_coords %s" % str(next_coords))
         self._logger.debug("curr_coords %s" % str(curr_coords))
         self._logger.debug("insert coords %s" % str(insert_coords))
@@ -539,7 +539,7 @@ class CadnanoConvertDesign(object):
         # Create bases to insert.
         last_base1 = None
         last_base2 = None
-        for i in range(0, num_inserts, 2):
+        for i in range(num_inserts):
             base1 = DnaBase(base_id)
             if curr_base.h not in new_bases:
                 new_bases[curr_base.h] = []
@@ -565,10 +565,10 @@ class CadnanoConvertDesign(object):
                 last_base1.down = base1
                 last_base2.up = base2
 
-            if i == num_inserts-2:
-                if neighbor_down != None:
+            if i == (num_inserts - 1):
+                if neighbor_down is not None:
                     neighbor_down.up = base1
-                if neighbor_across_up != None:
+                if neighbor_across_up is not None:
                     neighbor_across_up.down = base2
                 base1.down = neighbor_down
                 base2.up = neighbor_across_up
@@ -580,22 +580,22 @@ class CadnanoConvertDesign(object):
             base1.h = curr_base.h
             base1.p = curr_base.p
             base1.is_scaf = curr_base.is_scaf
-            base1.nt_coords = curr_base.nt_coords + dy*(i+1+1)/2
-            base1.coordinates = insert_coords[i/2]
-            base1.ref_frame = insert_frames[i/2]
+            base1.nt_coords = curr_base.nt_coords + dy * (i + 1.)
+            base1.coordinates = insert_coords[i]
+            base1.ref_frame = insert_frames[i]
 
             base2.across = base1
             base2.h = curr_across.h
             base2.p = curr_across.p
             base2.is_scaf = curr_across.is_scaf
-            base2.nt_coords = curr_across.nt_coords + dy*(i+1)/2
-            base2.coordinates = insert_coords[i/2]
-            base2.ref_frame = insert_frames[i/2]
+            base2.nt_coords = curr_across.nt_coords + dy * (i + 0.5)
+            base2.coordinates = insert_coords[i]
+            base2.ref_frame = insert_frames[i]
 
             last_base1 = base1
             last_base2 = base2
-        # __for i in range(0,num_inserts,2)
-
+            # __for i in range(0,num_inserts,2)
+        
         return base_id
     # __def _insert_bases_dsDNA
 
