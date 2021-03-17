@@ -124,10 +124,10 @@ class VisGeometry(object):
             The self.entity_indexes list stores the index range for each entity in the geometry. Searching this list will
             will determine the entity referenced by the index.
         """
-        if self.entity_indexes == None:
+        if self.entity_indexes is None:
             return
 
-        if (self.intersect_point != None) and (self.intersect_index != None):
+        if (self.intersect_point is not None) and (self.intersect_index is not None):
             for entity, index in enumerate(self.entity_indexes):
                 if self.intersect_index < index:
                     self.selected_entity = entity
@@ -264,7 +264,7 @@ class VisGeometryBox(VisGeometry):
             i, pt = get_closest_point(intersect_points, point1)
             self.intersect_point = pt
             self.intersect_index = intersect_indexes[i]
-        return (self.intersect_point != None)
+        return (self.intersect_point is not None)
 
 
 class VisGeometryLines(VisGeometry):
@@ -336,7 +336,7 @@ class VisGeometryLines(VisGeometry):
             self.intersect_point = pt
             self.intersect_index = intersect_indexes[i]
         self.select_entity()
-        return (self.intersect_point != None)
+        return (self.intersect_point is not None)
 
     def render(self):
         """ Render the lines. """
@@ -578,7 +578,7 @@ class VisGeometryPath(VisGeometry):
                 else:
                     self.selected_vertex = i1
         # __if len(intersect_points) != 0
-        return (self.intersect_point != None)
+        return (self.intersect_point is not None)
 
     def render(self):
         """ Render the path geometry.  """
@@ -601,7 +601,7 @@ class VisGeometryPath(VisGeometry):
         # Render vertex spheres.
         if self.vertex_spheres:
             # Determine if a sphere has been selected and should be highlighted.
-            if not self.selected or (self.selected_entity == None):
+            if not self.selected or (self.selected_entity is None):
                 highlight = False
             elif self.sphere_selected:
                 highlight = True
@@ -653,7 +653,7 @@ class VisGeometryPath(VisGeometry):
 
         # Highlight selected entity. This will either be a line between two
         # vertices or a region around the selected vertix.
-        if self.selected and (self.entity_indexes != None) and (self.selected_entity != None) and (not self.sphere_selected):
+        if self.selected and (self.entity_indexes is not None) and (self.selected_entity is not None) and (not self.sphere_selected):
             glColor4fv(self.highlight_color)
             glLineWidth(8.0)
             glBegin(GL_LINES)
@@ -693,7 +693,7 @@ class VisGeometryPath(VisGeometry):
                     glVertex3dv(self.vertices[i])
             # __if self.select_vertex
             glEnd()
-        # __if self.selected and (self.entity_indexes != None) and (self.selected_entity != None) and (not self.sphere_selected)
+        # __if self.selected and (self.entity_indexes is not  None) and (self.selected_entity is not  None) and (not self.sphere_selected)
 
         # Display arrows at the mid points between bends and markers at bend points.
         if self.bend_points:
@@ -828,7 +828,7 @@ class VisGeometryCylinder(VisGeometry):
             self.intersect_point = ipt
             # Set the selected entity. A cylinder has only one entity.
             self.selected_entity = 0
-        return (ipt != None)
+        return (ipt is not None)
     # __def intersect_line(self, point1, point2)
 
     def intersect_cyl_line(self, point1, point2):
@@ -1036,7 +1036,7 @@ class VisGeometryCylinder(VisGeometry):
             glEnd()
 
         # Highlight the ends of the cylinder.
-        if self.ends_highlight_color != None:
+        if self.ends_highlight_color is not None:
             verts = self.vertices
             glColor4fv(self.ends_highlight_color)
             glLineWidth(1.5)
@@ -1250,7 +1250,7 @@ class VisGeometryAxes(VisGeometry):
         glEnable(GL_LIGHTING)
 
         # Highlight the selected axis.
-        if self.selected and (self.selected_entity != None):
+        if self.selected and (self.selected_entity is not None):
             glColor4fv(self.highlight_color)
             glLineWidth(6.0)
             glBegin(GL_LINES)
@@ -1361,7 +1361,7 @@ class VisGeometryPolygon(VisGeometry):
             self.intersect_point = pt
             self.intersect_index = intersect_indexes[i]
             self.select_entity()
-        return (self.intersect_point != None)
+        return (self.intersect_point is not None)
 
     def render(self):
         """ Render the polygons. """
@@ -1376,7 +1376,7 @@ class VisGeometryPolygon(VisGeometry):
 
         # If an entity in the geomertry has been seleced get
         # the range of indexes in the counts[] array.
-        if self.selected_entity != None:
+        if self.selected_entity is not None:
             if self.selected_entity == 0:
                 i1 = 0
             else:
@@ -1385,7 +1385,7 @@ class VisGeometryPolygon(VisGeometry):
             highlight = True
         else:
             highlight = False
-        # __if self.selected_entity != None
+        # __if self.selected_entity is not  None
 
         # Render polygons storing selected vertices for later highlighting.
         highlight_vindex = []
@@ -1538,7 +1538,7 @@ class VisGeometrySymbols(VisGeometry):
         glEnable(GL_LIGHTING)
 
         # Highlight the selected axis.
-        if self.selected and (self.selected_entity != None):
+        if self.selected and (self.selected_entity is not None):
             glColor4fv(self.highlight_color)
             glLineWidth(6.0)
             glBegin(GL_LINES)
@@ -1601,13 +1601,13 @@ class VisGeometryCircle(VisGeometry):
         # Find the intersection by intersecting a line passing through the circle
         # center and perpendicular to the pick line. Then solve for the angle
         # for the intersected point to get the point on the circle.
-        if ipt == None:
+        if ipt is None:
             vn = vector_norm(v)
             u = cross_product(self.axis_normal, vn)
             cpt1 = [c[i] + self.radius*u[i] for i in range(3)]
             cpt2 = [c[i] - self.radius*u[i] for i in range(3)]
             ipt = comp_line_line_intersect(cpt1, cpt2, point1, point2)
-            if ipt != None:
+            if ipt is not None:
                 vr = [c[i] - ipt[i] for i in range(3)]
                 dp = vector_dot(vr, u)
                 s = np.sign(dp)
@@ -1617,13 +1617,13 @@ class VisGeometryCircle(VisGeometry):
                 ipt = [c[i] - s*a*u[i] + b*vn[i] for i in range(3)]
         # __if vdh != 0.0
 
-        if ipt != None:
+        if ipt is not None:
             self.intersect_index = 0
             self.intersect_point = ipt
             # Set the selected entity. A circle has only one entity.
             self.selected_entity = 0
 
-        return (ipt != None)
+        return (ipt is not None)
 
     def render(self):
         """ Render the circle. """
@@ -1724,7 +1724,7 @@ class VisGeometryNumber(VisGeometry):
                 self.intersect_index = i
                 self.intersect_point = ipt
         # __for i in range(0,self.num_vertices)
-        return (self.intersect_point != None)
+        return (self.intersect_point is not None)
 
     def render(self):
         """ Render the number. """
@@ -1836,11 +1836,11 @@ def get_closest_point(points, point):
     for i, pt in enumerate(points):
         v = [point[j] - pt[j] for j in range(0, 3)]
         dist = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
-        if (min_dist == None) or (dist < min_dist):
+        if (min_dist is None) or (dist < min_dist):
             min_dist = dist
             min_pt = pt
             min_i = i
-        #__if (min_dist == None) or (dist < min_dist)
+        #__if (min_dist is None) or (dist < min_dist)
     # __for i,pt in enumerate(points)
     return min_i, min_pt
 

@@ -239,7 +239,7 @@ class CadnanoConvertDesign(object):
 
         # Generate strands.
         strands = self.dna_structure.create_strands()
-        if strands == None:
+        if strands is None:
             self._logger.error("Create strands failed.")
             sys.exit(1)
         self._set_strands_colors(strands)
@@ -347,7 +347,7 @@ class CadnanoConvertDesign(object):
             helix_axis = curr_base.ref_frame[:, 2]
             curr_across = curr_base.across
 
-            if curr_across != None:
+            if curr_across is not None:
                 self._logger.debug(
                     "Current across base ID %d" % curr_across.id)
                 neighbor_across_up = curr_across.up
@@ -377,10 +377,10 @@ class CadnanoConvertDesign(object):
                         "Can't find reference axis when inserting bases.")
                     sys.exit(0)
                 #__if (np.linalg.norm(tmp_a - y_up_vec) < 1e-10)
-            # __if curr_across != None
+            # __if curr_across is not  None
 
             # Insert base into dsDNA.
-            if curr_across != None:
+            if curr_across is not None:
                 base_id = self._insert_bases_dsDNA(
                     curr_base, base_id, helix_axis, new_bases, base_connectivity)
 
@@ -388,7 +388,7 @@ class CadnanoConvertDesign(object):
             else:
                 base_id = self._insert_bases_ssDNA(
                     curr_base, base_id, helix_axis, new_bases, base_connectivity)
-            # __if curr_across != None
+            # __if curr_across is not  None
         # __for base in inserted_bases
 
         # Add the inserted bases into their parent helices.
@@ -427,7 +427,7 @@ class CadnanoConvertDesign(object):
         # Find the neighboring bases.
         curr_across = curr_base.across
         neighbor_down = curr_base.down
-        if curr_across != None:
+        if curr_across is not None:
             neighbor_across_up = curr_across.up
         else:
             neighbor_across_up = None
@@ -468,7 +468,7 @@ class CadnanoConvertDesign(object):
                 last_base.down = base
 
             if (i == num_inserts-1):
-                if neighbor_down != None:
+                if neighbor_down is not None:
                     neighbor_down.up = base
                 base.down = neighbor_down
             else:
@@ -595,7 +595,7 @@ class CadnanoConvertDesign(object):
             last_base1 = base1
             last_base2 = base2
             # __for i in range(0,num_inserts,2)
-        
+
         return base_id
     # __def _insert_bases_dsDNA
 
@@ -920,7 +920,7 @@ class CadnanoConvertDesign(object):
                     across_base = base.across
 
                     if (not modified_structure):
-                        if (across_base != None):
+                        if (across_base is not None):
                             if (base.num_deletions != 0):
                                 self._logger.debug(
                                     "deleted base: id %d " % base.id)
@@ -942,19 +942,19 @@ class CadnanoConvertDesign(object):
                     self._logger.debug("base id %d  vh %d  pos %d  up %d  down %d  across %d  seq %s",
                                        base.id, base.h, base.p, up, down, across, base.seq)
 
-                    if (across_base != None):
+                    if (across_base is not None):
                         across_base.seq = self._wspair(letter)
 
                     if (even_vh):
                         if (up != -1):
                             base = base_up
-                        elif (across_base != None):
+                        elif (across_base is not None):
                             base = across_base
                             even_vh = base.h % 2
                     else:
-                        if (down_base != None):
+                        if (down_base is not None):
                             base = down_base
-                        elif (across_base != None):
+                        elif (across_base is not None):
                             base = across_base
                             even_vh = base.h % 2
 
@@ -990,7 +990,7 @@ class CadnanoConvertDesign(object):
                     if (seq_index == sequence_length):
                         seq_index = 0
 
-                    if (base.across != None):
+                    if (base.across is not None):
                         base.across.seq = self._wspair(letter)
                 # __for i in range(0,len(strand.tour))
         # __for strand in strands
@@ -1040,7 +1040,7 @@ class CadnanoConvertDesign(object):
                 for j in range(0, len(strands[istrand-1].tour)):
                     base = tour[j]
                     base.seq = seq.letters[j]
-                    if (base.across != None):
+                    if (base.across is not None):
                         base.across.seq = self._wspair(seq.letters[j])
                 # __for j
 
@@ -1057,7 +1057,7 @@ class CadnanoConvertDesign(object):
                     else:
                         seq_index += 1
                     base.seq = letter
-                    if (base.across != None):
+                    if (base.across is not None):
                         base.across.seq = self._wspair(letter)
                 # __for j
 

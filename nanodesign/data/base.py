@@ -19,6 +19,7 @@ A list of DnaBase objects, stored in the DnaStructure object, is used to define 
 of a DNA structure: bases that are adjacent along a single DNA helix and which base they are paired with (if any). 
 """
 
+
 class DnaBase(object):
     """ This class stores information for a DNA base. 
 
@@ -43,7 +44,7 @@ class DnaBase(object):
         the helix they are associated with.
     """
 
-    def __init__( self, id, up=None, down=None, across=None, seq='N'):
+    def __init__(self, id, up=None, down=None, across=None, seq='N'):
         self.id = int(id)
         self.up = up
         self.down = down
@@ -71,7 +72,7 @@ class DnaBase(object):
         neighbor_up = self.up
         neighbor_down = self.down
         across = self.across
-        if across != None:
+        if across is not None:
             neighbor_across_up = across.up
             neighbor_across_down = across.down
         else:
@@ -79,19 +80,17 @@ class DnaBase(object):
             neighbor_across_down = None
 
         # Update base connectivity.
-        if neighbor_up != None:
+        if neighbor_up is not None:
             neighbor_up.down = neighbor_down
-        if neighbor_down != None:
+        if neighbor_down is not None:
             neighbor_down.up = neighbor_up
 
         # Update paired base connectivity.
-        if neighbor_across_up != None:
+        if neighbor_across_up is not None:
             neighbor_across_up.down = neighbor_across_down
-        if neighbor_across_down != None:
+        if neighbor_across_down is not None:
             neighbor_across_down.up = neighbor_across_up
 
-    #__def remove
+    # __def remove
 
-#__class DnaBase(object)
-
-
+# __class DnaBase(object)

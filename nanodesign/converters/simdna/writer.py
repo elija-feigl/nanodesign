@@ -41,14 +41,16 @@ import collections
 import itertools
 import logging
 
+
 class SimDnaWriter(object):
     """ The SimDnaWriter class writes out a SimDNA pairs file. 
     """
+
     def __init__(self, dna_structure):
         self.dna_structure = dna_structure
-        self._logger = logging.getLogger(__name__)   
+        self._logger = logging.getLogger(__name__)
 
-    def write(self,file_name):
+    def write(self, file_name):
         """ Write a pairs file.
 
         Arguments:
@@ -70,7 +72,7 @@ class SimDnaWriter(object):
                     scaffold_strands.append(strand)
                 else:
                     staple_strands.append(strand)
-            #__for strand in dna_structure.strands
+            # __for strand in dna_structure.strands
 
             # Redefine output strand IDs to make sure scaffold strand has a 0 ID.
             strand_id = 0
@@ -78,30 +80,31 @@ class SimDnaWriter(object):
             for strand in itertools.chain(scaffold_strands, staple_strands):
                 strand_map[strand.id] = strand_id
                 strand_id += 1
-            #__for strand in itertools.chain(scaffold_strands, staple_strands)
+            # __for strand in itertools.chain(scaffold_strands, staple_strands)
 
             # Write base records.
             for strand in itertools.chain(scaffold_strands, staple_strands):
                 strand_id = strand_map[strand.id]
                 base_coords = strand.get_base_coords()
 
-                for i in range(0,len(strand.tour)):
+                for i in range(0, len(strand.tour)):
                     base = strand.tour[i]
-                    if base.across == None:
+                    if base.across is None:
                         paired_strand_id = -1
                         paired_base_id = -1
                     else:
                         across_base = base.across
                         paired_strand_id = across_base.strand
                         paired_strand = self.dna_structure.strands_map[paired_strand_id]
-                        paired_base_id = paired_strand.get_base_index(across_base)+1
-                    #__if base.across == None
+                        paired_base_id = paired_strand.get_base_index(
+                            across_base)+1
+                    # __if base.across is None
                     coord = nm_to_ang * base.nt_coords
                     base_id = strand.get_base_index(base)+1
-                    outfile.write("%4d %4d %8g %8g %8g %4d %4d\n" % 
-                        (strand_id, i+1, coord[0], coord[1], coord[2], paired_strand_id, paired_base_id))
-                #__for i in range(0,len(strand.tour))
-            #__for strand in itertools.chain(scaffold_strands, staple_strands)
-        #__with open(file_name, 'w') as outfile
-    #__def write
-#__class SimDnaWriter
+                    outfile.write("%4d %4d %8g %8g %8g %4d %4d\n" %
+                                  (strand_id, i+1, coord[0], coord[1], coord[2], paired_strand_id, paired_base_id))
+                # __for i in range(0,len(strand.tour))
+            # __for strand in itertools.chain(scaffold_strands, staple_strands)
+        # __with open(file_name, 'w') as outfile
+    # __def write
+# __class SimDnaWriter

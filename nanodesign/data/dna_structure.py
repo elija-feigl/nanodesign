@@ -489,7 +489,7 @@ class DnaStructure(object):
                     domain_bases = []
 
                 # Check the base paired to this base for: crossover or termination.
-                elif base.across != None:
+                elif base.across is not None:
                     abase = base.across
                     if self._check_base_crossover(abase):
                         domain_bases.append(base)
@@ -498,9 +498,9 @@ class DnaStructure(object):
                             domain_id, strand, domain_bases, merge_domains, "abase crossover")
                         domain_bases = []
                     # If a strand terminates make sure the current base is in the same strand.
-                    elif (abase.down == None) or (abase.up == None):
+                    elif (abase.down is None) or (abase.up is None):
                         last_base = domain_bases[-1]
-                        if last_base.across != None:
+                        if last_base.across is not None:
                             last_abase = last_base.across
                             if abase.strand == last_abase.strand:
                                 domain_bases.append(base)
@@ -534,13 +534,13 @@ class DnaStructure(object):
         for domain in self.domain_list:
             across_base = None
             for base in domain.base_list:
-                if (base.across != None):
+                if (base.across is not None):
                     across_base = base.across
                     break
             # __for base in domain.base_list
             conn_dom = -1
             conn_strand = -1
-            if (across_base != None):
+            if (across_base is not None):
                 conn_dom = across_base.domain
                 conn_strand = across_base.strand
             domain.connected_strand = conn_strand
@@ -555,12 +555,12 @@ class DnaStructure(object):
 
             Returns True if there is a crossover at the base.
         """
-        if base.down == None:
+        if base.down is None:
             return False
         if base.down.h != base.h:
             return True
 
-        if base.up == None:
+        if base.up is None:
             return False
         if base.up.h != base.h:
             return True
@@ -780,7 +780,7 @@ class DnaStructure(object):
                 if helix1 == helix2:
                     continue
                 if (abs(row-helix2.lattice_row) + abs(col-helix2.lattice_col) < 2) and \
-                        self.lattice.get_neighbor_index(row, col, helix2.lattice_row, helix2.lattice_col) != None:
+                        self.lattice.get_neighbor_index(row, col, helix2.lattice_row, helix2.lattice_col) is not None:
                     connection = DnaHelixConnection(helix1, helix2)
                     helix_connectivity.append(connection)
                     self._logger.debug("connected to %d " % helix2.lattice_num)

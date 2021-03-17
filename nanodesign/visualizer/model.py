@@ -242,9 +242,9 @@ class VisModel(object):
         # Show a helix named 'name'.
         else:
             helix = self.helices[name]
-            if color != None:
+            if color is not None:
                 helix.set_color(rep, color)
-            if show != None:
+            if show is not None:
                 helix.show(rep, show)
         self.graphics.display()
 
@@ -304,11 +304,11 @@ class VisModel(object):
         # Show a strand named 'name'.
         else:
             strand = self.strands[name]
-            if color != None:
+            if color is not None:
                 strand.set_color(rep, color)
-            if line_width != None:
+            if line_width is not None:
                 strand.set_line_width(rep, line_width)
-            if show != None:
+            if show is not None:
                 strand.show(rep, show)
             self.graphics.display()
 
@@ -480,7 +480,7 @@ class VisModel(object):
 
     def get_domains_temperature_range(self):
         """ Get the domains temperature range. """
-        if self.domains_temperature_range == None:
+        if self.domains_temperature_range is None:
             tmin = None
             tmax = None
             for domain in self.dna_structure.domain_list:
@@ -498,7 +498,7 @@ class VisModel(object):
             self._logger.info(
                 "Domain temperature range min %g  max %g" % (tmin, tmax))
             self.domains_temperature_range = (tmin, tmax)
-        # __if self.domains_temperature_range == None
+        # __if self.domains_temperature_range is None
 
         return self.domains_temperature_range[0], self.domains_temperature_range[1]
     # __def get_domain_temperature_range

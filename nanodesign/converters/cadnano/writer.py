@@ -157,13 +157,13 @@ class CadnanoWriter(object):
         """
         base_info = [[-1, -1, -1, -1]]*helix_size
         for base in base_list:
-            if base.up == None:
+            if base.up is None:
                 up_pos = -1
                 up_vh = -1
             else:
                 up_pos = base.up.p
                 up_vh = base.up.h
-            if base.down == None:
+            if base.down is None:
                 down_pos = -1
                 down_vh = -1
             else:

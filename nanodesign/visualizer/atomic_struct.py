@@ -315,7 +315,7 @@ class VisAtomicStructure(object):
                 geom (VisGeometry): The geometry selected.
                 index (int): The index into the geometry selected.
         """
-        if index == None:
+        if index is None:
             return
         geom = self.representations[VisAtomicStructureRepType.CHECK][0]
         lengths = geom.data[0][1]

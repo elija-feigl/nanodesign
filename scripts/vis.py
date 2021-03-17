@@ -64,7 +64,8 @@ try:
     import nanodesign
 except ImportError:
     import sys
-    base_path = os.path.abspath( os.path.join( os.path.dirname(os.path.abspath( __file__)), '../'))
+    base_path = os.path.abspath(os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), '../'))
     sys.path.append(base_path)
     import nanodesign
     # if it fails now, we let the exception go all the way up to halt execution.
@@ -73,20 +74,24 @@ except ImportError:
 
 from nanodesign.visualizer.model import VisModel
 from nanodesign.converters import Converter
-from nanodesign.converters.pdbcif.atomic_structure import AtomicStructure  
+from nanodesign.converters.pdbcif.atomic_structure import AtomicStructure
+
 
 def parse_args():
     """ Parse command-line arguments. """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a",  "--atomic_model",   help="generate atomic model")
+    parser.add_argument("-a",  "--atomic_model",
+                        help="generate atomic model")
     parser.add_argument("-c",  "--commands",       help="commands")
     parser.add_argument("-cf", "--cmdfile",        help="command file")
     parser.add_argument("-i",  "--infile",         help="input file")
     parser.add_argument("-is", "--inseqfile",      help="input sequence file")
-    parser.add_argument("-isn","--inseqname",      help="input sequence name")
+    parser.add_argument("-isn", "--inseqname",      help="input sequence name")
     parser.add_argument("-s",   "--staples",       help="staple operations")
-    parser.add_argument("-x",   "--transform",     help="apply a transformation to a set of helices")
+    parser.add_argument("-x",   "--transform",
+                        help="apply a transformation to a set of helices")
     return parser.parse_args()
+
 
 def read_file(args, logger):
     """ Read in a cadnano file. """
@@ -94,16 +99,17 @@ def read_file(args, logger):
     logger = logging.getLogger('nanodesign.visualizer')
     converter.logger = logger
 
-    if args.infile == None:
+    if args.infile is None:
         logger.error("No input file name given.")
         sys.exit(1)
     else:
         logger.info("Input file name: %s" % args.infile)
         infile = args.infile
 
-    converter.read_cadnano_file( args.infile, args.inseqfile, args.inseqname )
+    converter.read_cadnano_file(args.infile, args.inseqfile, args.inseqname)
 
     return converter
+
 
 def main():
     logger = logging.getLogger("vis")
@@ -130,11 +136,12 @@ def main():
         atomic_structure = None
 
     # Initialize visualization.
-    vis_model = VisModel(args.infile, args.cmdfile, args.commands, dna_structure, atomic_structure)
+    vis_model = VisModel(args.infile, args.cmdfile,
+                         args.commands, dna_structure, atomic_structure)
 
-    # Start interactive visualization. 
+    # Start interactive visualization.
     vis_model.start_interactive()
+
 
 if __name__ == '__main__':
     main()
-

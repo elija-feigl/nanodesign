@@ -201,9 +201,9 @@ class DnaStructureHelix(object):
         self.max_staple_pos = None
         for base in self.staple_bases:
             self.staple_pos[base.p] = base
-            if (self.min_staple_pos == None) or (base.p < self.min_staple_pos):
+            if (self.min_staple_pos is None) or (base.p < self.min_staple_pos):
                 self.min_staple_pos = base.p
-            if (self.max_staple_pos == None) or (base.p > self.max_staple_pos):
+            if (self.max_staple_pos is None) or (base.p > self.max_staple_pos):
                 self.max_staple_pos = base.p
         # __for base in self.staple_bases
         self.scaffold_pos = {}
@@ -211,9 +211,9 @@ class DnaStructureHelix(object):
         self.max_scaffold_pos = None
         for base in self.scaffold_bases:
             self.scaffold_pos[base.p] = base
-            if (self.min_scaffold_pos == None) or (base.p < self.min_scaffold_pos):
+            if (self.min_scaffold_pos is None) or (base.p < self.min_scaffold_pos):
                 self.min_scaffold_pos = base.p
-            if (self.max_scaffold_pos == None) or (base.p > self.max_scaffold_pos):
+            if (self.max_scaffold_pos is None) or (base.p > self.max_scaffold_pos):
                 self.max_scaffold_pos = base.p
         # __for base in self.scaffold_bases
     # __def build_base_pos_maps
@@ -366,10 +366,10 @@ class DnaStructureHelix(object):
         """ Get the list of IDs of the domains in this helix.  """
         domain_ids = set()
         for base in self.staple_bases:
-            if base.domain != None:
+            if base.domain is not None:
                 domain_ids.add(base.domain)
         for base in self.scaffold_bases:
-            if base.domain != None:
+            if base.domain is not None:
                 domain_ids.add(base.domain)
         return list(domain_ids)
 
@@ -393,7 +393,7 @@ class DnaStructureHelix(object):
                     if not base:
                         continue
                     self._logger.debug(">>> Base  id %d" % base.id)
-                    if (base.down != None):
+                    if (base.down is not None):
                         if (base.down.h != base.h) and (base.down.h == num):
                             self._logger.debug(
                                 "base:%4d  p:%4d  h:%4d" % (base.id, base.p, base.h))
@@ -405,7 +405,7 @@ class DnaStructureHelix(object):
                             connection.crossovers.append(crossover)
                     #__if (down != -1)
 
-                    if (base.up != None):
+                    if (base.up is not None):
                         if (base.up.h != base.h) and (base.up.h == num):
                             self._logger.debug(
                                 "base:%4d  p:%4d  h:%4d" % (base.id, base.p, base.h))
