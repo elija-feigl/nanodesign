@@ -28,11 +28,10 @@ by visualization.
     will be slow.
 
 """
-import copy
-from math import ceil, sqrt
-import os
+
+from math import sqrt
+import logging
 import sys
-import random
 from .menu import VisMenu
 from .extent import VisExtent
 
@@ -140,7 +139,7 @@ class VisGraphicsPick(object):
             if (i == 0) or (dist < min_dist):
                 min_dist = dist
                 min_point = point
-        # __for point in self.intersect_points
+
         return min_point
 
     def render(self):
@@ -194,7 +193,8 @@ class VisGraphics(object):
             render_geometry (Dict[VisGeometry]): The list of geometry to render.
             title (String): The title of the graphics window.
             width (int): The width of the graphics window.
-            xform (VisGraphicsXform): The transformation object storing the graphics scene rotation, translation and scaling.
+            xform (VisGraphicsXform): The transformation object storing the graphics
+                scene rotation, translation and scaling.
             x_start (int): The x screen position at the start of a mouse move event.
             y_start (int): The y screen position at the start of a mouse move event.
     """
@@ -411,7 +411,6 @@ class VisGraphics(object):
         """ Clear selections for all geometry. """
         for geom in self.render_geometry.values():
             geom.selected = False
-        # __for geom in self.render_geometry.values()
 
     def perform_pick(self, x, y):
         """ Perform a pick operation. """
@@ -433,7 +432,7 @@ class VisGraphics(object):
         # Process the list of geometry IDs determined at the picked point.
         hit_buffer = glRenderMode(GL_RENDER)
         self._logger.debug("Hit record buffer size %d" % len(hit_buffer))
-        num_hits = len(hit_buffer)
+        # num_hits = len(hit_buffer)
         picked_geoms = []
         for i, hit_record in enumerate(hit_buffer):
             min_depth, max_depth, names = hit_record
@@ -449,8 +448,7 @@ class VisGraphics(object):
                         name = " "
                     self._logger.debug(
                         "Selected geom id %s name %s " % (id, name))
-            # __for id in names
-        # __for hit_record in buffer:
+
         self.pick.active = False
 
         # Determine the intersection of the 3D line defined by the
@@ -467,7 +465,6 @@ class VisGraphics(object):
                     continue
                 self.pick.intersect_points.append(ipt)
                 intersect_geoms.append(geom)
-        # __for geom in picked_geoms
 
         # Find the closest point to the viewer.
         min_dist = None
@@ -480,7 +477,6 @@ class VisGraphics(object):
                 min_dist = dist
                 min_geom = intersect_geoms[i]
                 min_ipt = ipt
-        # __for i,ipt in enumerate(self.pick.intersect_points)
 
         # Set the closest geometry to be selected.
         if (min_dist is not None):
@@ -490,7 +486,6 @@ class VisGraphics(object):
             if min_geom.selected_callback is not None:
                 min_geom.selected_callback(min_geom, min_geom.selected_entity)
             self.pick.intersect_point = min_ipt
-        # __if (min_dist is not  None)
 
         # Re-display the scene.
         self.display()
@@ -589,13 +584,13 @@ class VisGraphics(object):
         if (width <= height):
             sy = float(height) / float(width)
             dy = dx * sy
-            ymin = cy - dy / 2.0
-            ymax = cy + dy / 2.0
+            # ymin = cy - dy / 2.0
+            # ymax = cy + dy / 2.0
         else:
             sx = float(width) / float(height)
             dx = dy * sx
-            xmin = cx - dx / 2.0
-            xmax = cx + dx / 2.0
+            # xmin = cx - dx / 2.0
+            # xmax = cx + dx / 2.0
 
         oxmin = cx - sx*max_dim
         oxmax = cx + sx*max_dim
@@ -644,7 +639,6 @@ class VisGraphics(object):
                     glLoadName(geom.id)
                 geom.render()
                 pick_id += 1
-        # __for geom in self.render_geometry.values()
 
         # Render transparent geometry.
         for geom in self.render_geometry.values():
@@ -653,7 +647,6 @@ class VisGraphics(object):
                     glLoadName(geom.id)
                 geom.render()
                 pick_id += 1
-        # __for geom in self.render_geometry.values()
 
         glFlush()
 
@@ -697,7 +690,6 @@ class VisGraphics(object):
         glMatrixMode(GL_MODELVIEW)
 
         self.xform.set(self.initial_xform)
-    # __def init_view
 
     def map_value_to_color(self, colors, vmin, vmax, value):
         num_colors = len(colors)
@@ -712,10 +704,8 @@ class VisGraphics(object):
             color = colors[ci]
         else:
             color = colors[0]
-        # __if dv != 0.0
 
         return color[:]
-    # __def get_color_map
 
     def get_spectrum_colors(self):
         """ Get a spectrum color map. """
@@ -732,10 +722,8 @@ class VisGraphics(object):
             rgb = self.hsv_to_rgb(hue, 1.0, 1.0)
             self.spectrum_colors.append(rgb)
             hue -= inc
-        # __for i in range(0,num_colors)
 
         return self.spectrum_colors
-    # __def get_spectrum_colors
 
     def hsv_to_rgb(self, h, s, v):
         """ Convert a hsv color to rgb. """
@@ -763,9 +751,5 @@ class VisGraphics(object):
                 rgb = [t, p, v]
             elif i == 5:
                 rgb = [v, p, q]
-        # __if s == 0.0
 
         return rgb
-    # __def hsv_to_rgb
-
-# __class VisGraphics

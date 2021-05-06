@@ -35,14 +35,6 @@ algorithms
 
 """
 
-# Load the basic core elements, as well as subpackages.
-
-from .core import load
-from .converters import converter
-from .data import Domain
-from .data import energy_model
-from .data import convert_temperature_K_to_C
-
 
 # Create a logger console handler and set logging output format.
 def _init_logging():
@@ -56,8 +48,3 @@ def _init_logging():
 
 
 _init_logging()
-
-# Designate which components will be in the * namespace.
-__all__ = []
-__all__.extend(['load'])
-__all__.extend(['data', 'converter', 'algorithms', 'utils', 'visualizer'])

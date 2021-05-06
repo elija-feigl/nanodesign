@@ -28,7 +28,6 @@
 
 """
 import logging
-import numpy as np
 from .geometry import VisGeometryPath, VisGeometryLines, VisGeometryPolygon
 from math import sqrt
 
@@ -121,7 +120,7 @@ class VisAtomicStructure(object):
     @staticmethod
     def compare(a, b):
         """ The compare function used to sort strands by helix number and then position. """
-        return cmp(a.strand.start_helix, b.strand.start_helix) or cmp(a.strand.start_pos, b.strand.start_pos)
+        return (a.strand.start_helix != b.strand.start_helix) or (a.strand.start_pos != b.strand.start_pos)
 
     def show(self, rep, show, display=True):
         """ Show the strand atomic structure with the given representation.
@@ -160,7 +159,7 @@ class VisAtomicStructure(object):
             if atom.element.strip() == 'P':
                 point = [s*atom.coords[0], s*atom.coords[1], s*atom.coords[2]]
                 points.append(point)
-        # __for atom in self.molecule.atoms
+
         # Create the backbone geometry.
         show_vertices = True
         name = "Backbone:%s" % self.strand_name
@@ -185,8 +184,8 @@ class VisAtomicStructure(object):
         if (index >= 0) and (index < num_res):
             residue_atoms = res_list[index]
             atom = residue_atoms["P"]
-            self._logger.info("Selected backbone %s. Residue sequence number %d  Base name %s" % (self.name,
-                                                                                                  atom.res_seq_num, atom.res_name))
+            self._logger.info(
+                f"Selected backbone {self.name}. Residue sequence number {atom.res_seq_num}  Base name {atom.res_name}")
             self.print_info()
 
     def create_bonds_rep(self):
@@ -226,7 +225,6 @@ class VisAtomicStructure(object):
             plane_indexes.append(num_plane_points)
             # self._logger.debug("Residue %d  number of bounds points %d " % (i,num_bond_points))
             # self._logger.debug("Residue %d  number of plane points %d " % (i,num_plane_points))
-        # __for i in range(0,num_res)
 
         # Create the lines geometry for atom bonds.
         name = "BaseBonds:%s" % self.strand_name
@@ -258,16 +256,17 @@ class VisAtomicStructure(object):
         if (index >= 0) and (index < num_res):
             residue_atoms = res_list[index]
             atom = residue_atoms["P"]
-            self._logger.info("Selected bonds %s  Residue sequence number %d  Base name %s" % (self.name, atom.res_seq_num,
-                                                                                               atom.res_name))
+            self._logger.info(
+                f"Selected bonds {self.name}. Residue sequence number {atom.res_seq_num}  Base name {atom.res_name}")
             self.print_info()
-        # __if residue_num >= 0 and residue_num < num_res
 
     def create_check_rep(self):
         """ Create the geometry for the atomic structure check representation.
 
-            This visualization is used to display P atoms bond lengths that deviate from too much from an average length.
-            The geometry will be a set of thick lines for only those bonds whose deviation is larger than a given tolerance.
+            This visualization is used to display P atoms bond lengths that deviate
+            from too much from an average length.
+            The geometry will be a set of thick lines for only those bonds whose
+            deviation is larger than a given tolerance.
         """
         self._logger.debug("Create atomic structure check rep.")
         points = []
@@ -276,7 +275,6 @@ class VisAtomicStructure(object):
             if atom.element.strip() == 'P':
                 point = [s*atom.coords[0], s*atom.coords[1], s*atom.coords[2]]
                 points.append(point)
-        # __for atom in self.molecule.atoms
 
         # Check P atom distances.
         verts = []
@@ -294,10 +292,9 @@ class VisAtomicStructure(object):
                 lengths.append(dist)
                 entity_indexes.append(n)
                 n += 2
-        # __for i in range(0,len(points)-1)
 
         # Create the geometry.
-        show_vertices = True
+        # show_vertices = True
         name = "Check:%s" % self.strand_name
         geom = VisGeometryLines(name, verts)
         geom.line_width = 8.0
@@ -321,7 +318,6 @@ class VisAtomicStructure(object):
         lengths = geom.data[0][1]
         self._logger.info("Selected check \'%s\'  P-P length %g " %
                           (self.name, lengths[index]))
-        # __if residue_num >= 0 and residue_num < num_res
 
     def _get_residue_bond_geometry(self, points, res_name, residue_atoms):
         """ Create the atomic bond geometry for the given residue.
@@ -390,7 +386,6 @@ class VisAtomicStructure(object):
                 atom = residue_atoms[atom_name]
                 points.append(
                     [s*atom.coords[0], s*atom.coords[1], s*atom.coords[2]])
-        # __for plane in planes
 
     def _add_bonds(self, residue_atoms, bonds, points):
         """ Add the bond geometry for the given residue.

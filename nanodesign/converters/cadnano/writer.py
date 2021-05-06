@@ -18,8 +18,6 @@ This module is used to write caDNAno design JSON files.
 import json
 import logging
 import os.path
-from .common import CadnanoLatticeName, CadnanoLatticeType
-from ...data.parameters import DnaParameters
 
 
 class CadnanoWriter(object):
@@ -48,12 +46,12 @@ class CadnanoWriter(object):
             json.dump(design, outfile, indent=4, separators=(',', ': '))
 
     def _get_vstrand_info(self, dna_structure):
-        """ Get virtual helix information for the design. 
+        """ Get virtual helix information for the design.
 
             In caDNAno all the virtual helices are the same size (i.e. the same number of base positions).
-            The lists of helix bases for staple and scaffold strands may contain fewer bases than the 
-            virtual helix size so we create an array of empty helix positions ([-1,-1,-1,-1]) for the caDNAno 
-            virtual helix size and fill from the base lists. 
+            The lists of helix bases for staple and scaffold strands may contain fewer bases than the
+            virtual helix size so we create an array of empty helix positions ([-1,-1,-1,-1]) for the caDNAno
+            virtual helix size and fill from the base lists.
         """
         self._logger.info("Number of helices %d " %
                           len(dna_structure.structure_helices_map))
@@ -74,7 +72,6 @@ class CadnanoWriter(object):
             if base.h not in helix_strands_map:
                 helix_strands_map[base.h] = []
             helix_strands_map[base.h].append(strand)
-        # __for strand in dna_structure.strands
 
         # Create a map of the helices by ID so we can reproduce the order in which
         # they were read in from the original caDNAno file.
@@ -89,8 +86,8 @@ class CadnanoWriter(object):
             helix = helix_map[load_order]
             scaffold_bases = helix.scaffold_bases
             staple_bases = helix.staple_bases
-            self._logger.debug("Helix num %d  num staple bases %d   num scaffold bases %d" % (helix.id,
-                                                                                              len(staple_bases), len(scaffold_bases)))
+            self._logger.debug(
+                f"Helix num {helix.id}  num staple bases {len(staple_bases)} num scaffold bases {len(scaffold_bases)}")
             helix_size = helix.lattice_max_vhelix_size
             row = helix.lattice_row
             col = helix.lattice_col
@@ -119,10 +116,8 @@ class CadnanoWriter(object):
                        }
 
             vstrands_info.append(vstrand)
-        # __for load_order in sorted(helix_map)
 
         return vstrands_info
-    # __def _get_vstrand_info
 
     def _get_staple_colors(self, strands):
         """ Get the array of staple colors for the strands originating in a given helix.
@@ -141,16 +136,15 @@ class CadnanoWriter(object):
             color = int(255*strand.color[0]) << 16 | int(255 *
                                                          strand.color[1]) << 8 | int(255*strand.color[2])
             staple_colors.append([pos, color])
-        # __for strand in strands
+
         return staple_colors
-    # __def _get_staple_colors
 
     def _get_base_info(self, helix_size, base_list):
-        """ Get the array defining caDNAno base information from the list of bases. 
+        """ Get the array defining caDNAno base information from the list of bases.
 
             Arguments:
                 helix_size (int): The size of caDNAno virtual helix.
-                base_list (DnaBase): The list of bases for a helix. 
+                base_list (DnaBase): The list of bases for a helix.
 
             Create an array of empty helix positions ([-1,-1,-1,-1]) for the caDNAno virtual helix
             and fill it in at the positions given by the bases in the base list (DnaBase.p).
@@ -170,31 +164,29 @@ class CadnanoWriter(object):
                 down_pos = base.down.p
                 down_vh = base.down.h
             base_info[base.p] = [up_vh, up_pos, down_vh, down_pos]
-        # __for base in base_list
+
         return base_info
 
     def _get_loop_info(self, helix_size, base_list):
-        """ Get the loop (insert) information for each base. 
+        """ Get the loop (insert) information for each base.
 
             Arguments:
                 helix_size (int): The size of caDNAno virtual helix.
-                base_list (DnaBase): The list of bases for a helix. 
+                base_list (DnaBase): The list of bases for a helix.
         """
         loop_info = [0]*helix_size
         for base in base_list:
             loop_info[base.p] = base.num_insertions
         return loop_info
-    # __def _get_loop_info
 
     def _get_skip_info(self, helix_size, base_list):
         """ Get the skip (deletion) information for each base.
 
             Arguments:
                 helix_size (int): The size of caDNAno virtual helix.
-                base_list (DnaBase): The list of bases for a helix. 
+                base_list (DnaBase): The list of bases for a helix.
         """
         skip_info = [0]*helix_size
         for base in base_list:
             skip_info[base.p] = base.num_deletions
         return skip_info
-    # __def _get_skip_info

@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" 
-This module is used to write CIF formated files for the atomic structure of a dna structure. 
+"""
+This module is used to write CIF formated files for the atomic structure of a dna structure.
 
 The atomic structure is generated using an AtomicStructure object and an input DnaStructure object.
 A Molecular object is created for each strand in the dna structure and contains the atoms for each
 base residue the strand.
 
 A single entity is created (id=1) with the number of chains equal to the number of strands in the dna structure.
-The chain IDs for each strand are generated using the format: 
+The chain IDs for each strand are generated using the format:
 
     <sc|st>.<vhelixNum>.<startPos>
 
@@ -30,15 +30,14 @@ The chain IDs for each strand are generated using the format:
 
 """
 from collections import OrderedDict
-import json
 import logging
 import os
-import numpy as np
+
 from .atomic_structure import AtomicStructure
 
 
 class CifWriter(object):
-    """ The CifWriter class is used to write a CIF formated file. 
+    """ The CifWriter class is used to write a CIF formated file.
 
         Attributes:
             dna_structure (DnaStructure) : The dna structure to convert to an atomic structure and write to a CIF file.
@@ -57,7 +56,8 @@ class CifWriter(object):
             Initialize the CifWriter object.
 
             Arguments:
-                dna_structure (DnaStructure) : The dna structure to convert to an atomic structure and write to a CIF file.
+                dna_structure (DnaStructure) : The dna structure to convert to an
+                    atomic structure and write to a CIF file.
         """
         self.dna_structure = dna_structure
         self.entityID = 1
@@ -82,7 +82,7 @@ class CifWriter(object):
         # created for each strand.
         atomic_structure = AtomicStructure(dna_structure)
         molecules = atomic_structure.generate_structure_ss()  # converts ssDNA
-        #molecules = atomic_structure.generate_structure()
+        # molecules = atomic_structure.generate_structure()
         self._logger.info("Number of molecules %d " % len(molecules))
         num_atoms = 0
         for molecule in molecules:
@@ -100,7 +100,7 @@ class CifWriter(object):
         self._logger.info("Done.")
 
     def _write_struct_records(self, cif_file, informat, infile):
-        """ Write CIF _struct records. 
+        """ Write CIF _struct records.
 
             Arguments:
                 cif_file (file): The file object used to write the CIF file.
@@ -125,13 +125,14 @@ class CifWriter(object):
         cif_file.write(CifWriter.COMMENT_SPACES)
 
     def _write_entity_records(self, cif_file, strands):
-        """ Write CIF _entity records. 
+        """ Write CIF _entity records.
 
             Arguments:
                 cif_file (file): The file object used to write the CIF file.
-                strands (List[AtomicStructureStrand]): The list of the strands for the DNA atomic structure. 
+                strands (List[AtomicStructureStrand]): The list of the strands for the DNA atomic structure.
 
-            A single entity is defined with ID 1. The number of molecules is equal to the number of strands in the DNA structure.
+            A single entity is defined with ID 1. The number of molecules is equal
+            to the number of strands in the DNA structure.
         """
 
         # Define an OrderedDict of field names and values for the _entity records.
@@ -150,12 +151,12 @@ class CifWriter(object):
         cif_file.write(CifWriter.COMMENT_SPACES)
 
     def _write_struct_asym_records(self, cif_file, strands):
-        """ Write CIF _struct_asym records. 
+        """ Write CIF _struct_asym records.
 
             Arguments:
                 cif_file (file): The file object used to write the CIF file.
-                strands (List[AtomicStructureStrand]): The list of the strands for the DNA atomic structure. The chain IDs for the
-                   _struct_asym records are obtained from the strands in this list.
+                strands (List[AtomicStructureStrand]): The list of the strands for the DNA atomic structure.
+                    The chain IDs for the _struct_asym records are obtained from the strands in this list.
 
             The _struct_asym records define the chain IDs for each of the entities in the structure.
         """
@@ -176,13 +177,13 @@ class CifWriter(object):
         cif_file.write(CifWriter.COMMENT_SPACES)
 
     def _write_atom_site_records(self, cif_file, molecules):
-        """ Write CIF _atom_site records. 
+        """ Write CIF _atom_site records.
 
             Arguments:
                 cif_file (file): The file object used to write the CIF file.
-                molecules(List[AtomicStructureMolecule]): The list of the molecules for the DNA atomic structure. 
+                molecules(List[AtomicStructureMolecule]): The list of the molecules for the DNA atomic structure.
 
-            The CIF _atom_site records describe the atom data for the DNA structure. The atom data is obtained 
+            The CIF _atom_site records describe the atom data for the DNA structure. The atom data is obtained
             from a Molecule object.
         """
 
@@ -259,9 +260,9 @@ class CifWriter(object):
                 auth_comp_id = atom.res_name
                 auth_asym_id = atom.chainID
                 auth_atom_id = atom.name
-                cif_file.write(format % ("ATOM ", id, type_symbol, label_atom_id, label_alt_id, label_comp_id, label_asym_id,
-                                         label_entity_id, label_seq_id, pdbx_PDB_ins_code, Cartn_x, Cartn_y, Cartn_z, occupancy, B_iso_or_equiv,
-                                         Cartn_x_esd, Cartn_y_esd, Cartn_z_esd, occupancy_esd, B_iso_or_equiv_esd, pdbx_formal_charge, auth_seq_id,
-                                         auth_comp_id, auth_asym_id, auth_atom_id, pdbx_PDB_model_num))
-            # __for atom in molecule.atoms
-        # __for molecule in molecules
+                cif_file.write(format % (
+                    "ATOM ", id, type_symbol, label_atom_id, label_alt_id, label_comp_id, label_asym_id,
+                    label_entity_id, label_seq_id, pdbx_PDB_ins_code, Cartn_x, Cartn_y, Cartn_z, occupancy,
+                    B_iso_or_equiv, Cartn_x_esd, Cartn_y_esd, Cartn_z_esd, occupancy_esd, B_iso_or_equiv_esd,
+                    pdbx_formal_charge, auth_seq_id, auth_comp_id, auth_asym_id, auth_atom_id, pdbx_PDB_model_num)
+                )

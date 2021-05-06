@@ -38,13 +38,10 @@
     strands - The strands passing through the helix are displayed as a
               continuous line with arrows.
 """
-from itertools import chain
 import logging
-import os
-import sys
 import numpy as np
 from ..data.parameters import DnaPolarity
-from .geometry import VisGeometryCylinder, VisGeometryPath, VisGeometryAxes, VisGeometryLines, VisGeometrySymbols, vector_norm
+from .geometry import VisGeometryCylinder, VisGeometryPath, VisGeometryAxes, VisGeometryLines, VisGeometrySymbols
 from .strand import VisStrand
 
 
@@ -114,7 +111,7 @@ class VisHelix(object):
 
     def get_boundaries(self):
         """ Get the start-end base positions of regions of dsDNA. """
-        num_axis_nodes = len(self.vhelix.helix_axis_coords)
+        # num_axis_nodes = len(self.vhelix.helix_axis_coords)
 
         # Get paired bases.
         boundary_bases = []
@@ -126,15 +123,12 @@ class VisHelix(object):
                     boundary_bases.append((start_base, end_base))
                     start_base = None
                     end_base = None
-                # __if start_base is not  None
             else:
                 if start_base is None:
                     start_base = base
                     # self._logger.info("Start base %d" % start_base.p)
                 else:
                     end_base = base
-                # __if start_base is None
-        # __for base in self.vhelix.staple_bases
         if end_base is not None:
             boundary_bases.append((start_base, end_base))
 
@@ -145,7 +139,6 @@ class VisHelix(object):
             end_base = paired_bases[1]
             boundary_points.append(
                 (start_base.coordinates, end_base.coordinates))
-        # __for paired_bases in boundary_bases
         return boundary_points
 
     def print_info(self):
@@ -161,7 +154,6 @@ class VisHelix(object):
                 domain = domain_list[id]
                 if domain.strand.id not in self.strand_ids:
                     self.strand_ids.add(domain.strand.id)
-        # __if not self.strand_ids
         self._logger.info("Number of strands %d " % (len(self.strand_ids)))
 
     def show(self, rep, show, display=True):
@@ -241,7 +233,6 @@ class VisHelix(object):
                 n += 2
                 crossover_data.append(
                     (from_helix.lattice_num, to_helix.lattice_num, base.p))
-        # __for connection in helix_connectivity
 
         name = "HelixCrossovers:%s" % self.id
         arrows = False
@@ -267,8 +258,8 @@ class VisHelix(object):
         from_vh = crossover[0]
         to_vh = crossover[1]
         pos = crossover[2]
-        self._logger.info("Selected Helix %s crossover. From vhelix %d to vhelix %d at position %d" % (self.name,
-                                                                                                       from_vh, to_vh, pos))
+        self._logger.info(
+            f"Selected Helix {self.name} crossover. From vhelix {from_vh} to vhelix {to_vh} at position {pos}")
         self.print_info()
 
     def create_maximal_crossovers_rep(self):
@@ -277,7 +268,7 @@ class VisHelix(object):
             "Create maximal_crossover rep for helix num %d " % self.vhelix.lattice_num)
         dna_structure = self.dna_structure
         helix = self.vhelix
-        helix_axis_coords = helix.helix_axis_coords
+        # helix_axis_coords = helix.helix_axis_coords
         lattice = dna_structure.lattice
         num_neigh = lattice.number_of_neighbors
         self._logger.debug("Number of lattice directions: %d " % num_neigh)
@@ -320,18 +311,17 @@ class VisHelix(object):
                 self._logger.debug(
                     "%s Crossover to helix %d at %d " % (stype, to_helix.id, pos))
                 connection = helix_conn_map[to_helix.id]
-                nindex = lattice.get_neighbor_index(helix.lattice_row, helix.lattice_col,
-                                                    to_helix.lattice_row, to_helix.lattice_col)
-                dir = connection.direction
+                # nindex = lattice.get_neighbor_index(helix.lattice_row, helix.lattice_col,
+                #                                    to_helix.lattice_row, to_helix.lattice_col)
+                direct = connection.direction
                 pt1 = coords
-                pt2 = pt1 + s*dir
+                pt2 = pt1 + s*direct
                 verts.append(pt1)
                 verts.append(pt2)
                 entity_indexes.append(n)
                 n += 2
                 crossover_data.append(
                     (helix.lattice_num, to_helix.lattice_num, pos))
-            # __for crossover in crossovers
 
             name = "HelixMaximal%sCrossovers:%s" % (stype, self.id)
             arrows = False
@@ -347,7 +337,6 @@ class VisHelix(object):
             geom.data = crossover_data
             self.representations[VisHelixRepType.MAXIMAL_CROSSOVERS] = [geom]
             self.graphics.add_render_geometry(geom)
-        # __for i,crossovers in enumerate([staple_crossovers,scaffold_crossovers])
 
     def select_maximal_crossover(self, geom, index):
         """ Process helix crossover selection.
@@ -361,8 +350,8 @@ class VisHelix(object):
         from_vh = crossover[0]
         to_vh = crossover[1]
         pos = crossover[2]
-        self._logger.info("Selected Helix %s maximal crossover. From vhelix %d to vhelix %d at position %d" % (self.name,
-                                                                                                               from_vh, to_vh, pos))
+        self._logger.info(
+            f"Selected Helix {self.name} maximal crossover. From vhelix {from_vh} to vhelix {to_vh} at position {pos}")
         self.print_info()
 
     def create_geometry_rep(self):
@@ -396,12 +385,12 @@ class VisHelix(object):
 
             The helix geometry is one or more cylinders representing regions containing double-stranded DNA.
         """
-        point1 = self.vhelix.end_coordinates[0]
-        point2 = self.vhelix.end_coordinates[1]
-        dna_structure = self.dna_structure
+        # point1 = self.vhelix.end_coordinates[0]
+        # point2 = self.vhelix.end_coordinates[1]
+        # dna_structure = self.dna_structure
         radius = 1.15
         num_sides = 16
-        angle_offset = 45.0
+        # angle_offset = 45.0
         helix = self.vhelix
         # Get the indexes into helix_axis_coords of dsDNA regions.
         boundary_points = self.get_boundaries()
@@ -417,7 +406,6 @@ class VisHelix(object):
             geom.color[3] = 1.0
             self.graphics.add_render_geometry(geom)
             self.representations[VisHelixRepType.PAIRED_GEOMETRY].append(geom)
-        # __for pos in boundary_pos
 
     def select_paired_geometry(self, geom, index):
         """ Process helix geometry selection.
@@ -451,8 +439,8 @@ class VisHelix(object):
                 index (int): The index into the geometry selected.
         """
         coords = self.vhelix.helix_axis_coords[index]
-        self._logger.info("Selected Helix %s node.  Location in helix %d  Coordinates (%g %g %g) " % (self.name, index+1,
-                                                                                                      coords[0], coords[1], coords[2]))
+        self._logger.info(
+            f"Selected Helix {self.name} node.  Location in helix {index+1} Coordinates ({coords})")
         self.print_info()
 
     def create_coords_rep(self):
@@ -465,12 +453,11 @@ class VisHelix(object):
         for base in self.vhelix.staple_bases:
             if base:
                 staple_points.append(base.nt_coords)
-        # __for id in base_ids
+
         scaffold_points = []
         for base in self.vhelix.scaffold_bases:
             if base:
                 scaffold_points.append(base.nt_coords)
-        # __for id in base_ids
 
         # Create the scaffold geometry.
         show_vertices = True
@@ -530,8 +517,8 @@ class VisHelix(object):
                 index (int): The index into the geometry selected.
         """
         coords = self.vhelix.helix_axis_coords[index]
-        self._logger.info("Selected Helix %s frame. Location in helix %d  Coordinates (%g %g %g) " % (self.name, index+1,
-                                                                                                      coords[0], coords[1], coords[2]))
+        self._logger.info(
+            f"Selected Helix {self.name} frame. Location in helix {index+1}  Coordinates ({coords})")
         self.print_info()
 
     def create_domains_rep(self):
@@ -557,8 +544,6 @@ class VisHelix(object):
             geom.selected_callback = self.select_domains
             self.representations[VisHelixRepType.DOMAINS].append(geom)
             self.graphics.add_render_geometry(geom)
-        # __for domain in self.dna_structure.domain_list
-    # __create_domains_rep(self):
 
     def select_domains(self, geom, index):
         """ Process helix geometry selection.
@@ -569,7 +554,7 @@ class VisHelix(object):
         """
         domain_id = int(geom.name.split(".")[1])
         domain_list = self.dna_structure.domain_list
-        domain_ids = self.vhelix.get_domain_ids()
+        # domain_ids = self.vhelix.get_domain_ids()
         domain = domain_list[domain_id]
         num_bases = len(domain.base_list)
         start_base = domain.base_list[0]
@@ -603,7 +588,6 @@ class VisHelix(object):
             else:
                 min_p = base1.p
             domain_map[min_p] = id
-        # __for id in domain_ids
 
         # Get a spectrums of colors (blue to red) and the max/min
         # domain melting temperatures for all domains in the structure.
@@ -655,8 +639,6 @@ class VisHelix(object):
             geom.selected_callback = self.select_domains_temperature
             self.representations[VisHelixRepType.TEMPERATURE].append(geom)
             self.graphics.add_render_geometry(geom)
-        # __for domain in self.dna_structure.domain_list
-    # __create_domains_rep(self):
 
     def select_domains_temperature(self, geom, index):
         """ Process helix geometry selection.
@@ -667,7 +649,7 @@ class VisHelix(object):
         """
         domain_id = int(geom.name.split(".")[1])
         domain_list = self.dna_structure.domain_list
-        domain_ids = self.vhelix.get_domain_ids()
+        # domain_ids = self.vhelix.get_domain_ids()
         domain = domain_list[domain_id]
         num_bases = len(domain.base_list)
         start_base = domain.base_list[0]
@@ -698,8 +680,7 @@ class VisHelix(object):
                 base = self.vhelix.staple_base_list[j]
                 insert_origins[i] = base.coordinates
                 insert_directions[:, :, i] = base.ref_frame
-            # __for id in base_ids
-            show_vertices = True
+            # show_vertices = True
             name = "HelixInserts:%s" % self.id
             scale = 0.2
             symbol = VisGeometrySymbols.BASE_INSERT
@@ -713,7 +694,6 @@ class VisHelix(object):
             self.representations[VisHelixRepType.INSERTS_DELETES] = [
                 inserts_geom]
             self.graphics.add_render_geometry(inserts_geom)
-        # __if num_inserts != 0
 
         # Create the deletes geometry.
         deletes = [i for i, base in enumerate(
@@ -726,8 +706,7 @@ class VisHelix(object):
                 base = self.vhelix.staple_base_list[j]
                 delete_origins[i] = base.coordinates
                 delete_directions[:, :, i] = base.ref_frame
-            # __for id in base_ids
-            show_vertices = True
+            # show_vertices = True
             name = "HelixDeletes:%s" % self.id
             scale = 0.2
             symbol = VisGeometrySymbols.BASE_DELETE
@@ -741,7 +720,6 @@ class VisHelix(object):
             self.representations[VisHelixRepType.INSERTS_DELETES] = [
                 deletes_geom]
             self.graphics.add_render_geometry(deletes_geom)
-        # __if num_inserts != 0
 
         if (num_deletes == 0) and (num_inserts == 0):
             self.representations[VisHelixRepType.INSERTS_DELETES] = []
@@ -773,7 +751,7 @@ class VisHelix(object):
         for strand in self.dna_structure.strands:
             if not strand.is_scaffold and (self.id in strand.helix_list):
                 strand_list.append(strand)
-        # __for strand in self.dna_structure
+
         # Create the strands geometry.
         show_verts = False
         show_arrows = True
@@ -791,8 +769,6 @@ class VisHelix(object):
             geom.entity_indexes = range(0, len(base_coords))
             self.representations[VisHelixRepType.STRANDS].append(geom)
             self.graphics.add_render_geometry(geom)
-        # __for strand in strand_list
-    # __create_strands_rep
 
     def select_strand(self, geom, index):
         """ Process helix strand selection.

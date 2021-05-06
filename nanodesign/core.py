@@ -24,7 +24,7 @@ __all__ = ['load']
 def load(filename, type='auto'):
     """Load an arbitrary file which is assumed to be some nanostructure design file
     type, such as Cadnano, Cando, Tiamat, etc.
-    
+
     Parameters
     ----------
     filename : str
@@ -38,13 +38,14 @@ def load(filename, type='auto'):
     Returns
     -------
     filedata : data.InternalData
-    
+
     Raises
     ------
-    Some exceptions based on standard python open, plus specific ones for when type could not be detected. (more details should go here)
+    Some exceptions based on standard python open, plus specific ones for when type could not be detected.
+    (more details should go here)
     """
 
     # Right now this is just going to return a string containing the first line of the file, rather than any real data.
-    f = open(filename,'rt')
+    f = open(filename, 'rt')
     filedata = f.readline()
     return filedata

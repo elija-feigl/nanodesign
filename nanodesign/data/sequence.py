@@ -13,8 +13,9 @@
 # limitations under the License.
 
 """
-This module is used to store information for a DNA sequence. 
+This module is used to store information for a DNA sequence.
 """
+
 
 class DnaSequence(object):
     def __init__(self, start, end, letters, length):

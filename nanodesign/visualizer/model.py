@@ -20,7 +20,7 @@
    visualization representations (i.e. the geometry used to display an entity).
 """
 import os
-import numpy as np
+import logging
 from .atomic_struct import VisAtomicStructure
 from .cmd import VisCommand
 from .extent import VisExtent
@@ -51,24 +51,24 @@ class VisModelRepType:
 
 
 class VisModel(object):
-    """ This class is used to visualize the entities (virtual helices, strands, atomistic model) of a DNA design structure. 
+    """ This class is used to visualize the entities (virtual helices, strands, atomistic model) of a DNA design structure.
 
         Attributes:
             atomic_structure (AtomicStructure): The atomic structure of a DNA structure derived from a DNA design.
             atomic_structures (Dict[VisAtomicStructure]): The list of objects for atomic structure representations.
             atomic_structure_names (List[String]): The list of atomic structure names.
             cmd_file_name (String): The name of the input visualization commands file. This may be None.
-            command (VisCommand): The command processing object. 
-            commands (String): The string containing visualization commands from the command line. 
+            command (VisCommand): The command processing object.
+            commands (String): The string containing visualization commands from the command line.
             dna_structure (DnaStructure): The DNA structure derived from a DNA design.
-            extent (VisExtent): The extent of the DNA structure. 
+            extent (VisExtent): The extent of the DNA structure.
             file_name (String): The design file name.
             graphics (VisGraphics): The visualization graphics object that manages the display of geometry for
                 various entity representations.
-            helices (Dict[VisHelix]): The list of objects for virtual helix representations. 
+            helices (Dict[VisHelix]): The list of objects for virtual helix representations.
             helix_names (List[String]): The list of virtual helix names.
             menu (VisMenu): The menu object that manages the popup menu.
-            name (String): The model name. This is the base name of the input file name. 
+            name (String): The model name. This is the base name of the input file name.
             strands (Dict[VisStrand]): The list of objects for strand representations.
             strand_names (List[String]): The list of strand names.
     """
@@ -79,7 +79,7 @@ class VisModel(object):
             Arguments:
                 file_name (String): The design file name.
                 cmd_file_name (String): The name of the input visualization commands file. This may be None.
-                commands (String): The string containing visualization commands from the command line. 
+                commands (String): The string containing visualization commands from the command line.
                 dna_structure (DnaStructure): The DNA structure derived from a DNA design.
                 atomic_structure (AtomicStructure): The atomic structure of a DNA structure derived from a DNA design.
         """
@@ -136,7 +136,7 @@ class VisModel(object):
             vis_strand = VisStrand(self, self.graphics, dna_structure, strand)
             self.strands[vis_strand.name] = vis_strand
             strand_list.append(vis_strand)
-        # __for strand in dna_structure.strands
+
         # Create a list of sorted strand names.
         strand_list.sort(VisStrand.compare)
         self._logger.info("Number of strands %d" % (len(strand_list)))
@@ -144,40 +144,36 @@ class VisModel(object):
         self.strand_names.append(VisMenuItem.NONE)
         for strand in strand_list:
             self.strand_names.append(strand.name)
-        # __for strand in strand_list
-    # _create_strands
 
     def _create_atomic_structures(self):
         """ Create a VisAtomicStructure object for each atomic structure object. """
         if not self.atomic_structure:
             return
-        dna_structure = self.dna_structure
         self.atomic_structure_names.append(VisMenuItem.ALL)
         self.atomic_structure_names.append(VisMenuItem.NONE)
         molecules = self.atomic_structure.generate_structure_ss()
-        #molecules = self.atomic_structure.generate_structure()
+        # molecules = self.atomic_structure.generate_structure()
         self._logger.info("Number of molecules %d" % (len(molecules)))
         id = 1
         atomic_struct_list = []
         for molecule in molecules:
-            #self._logger.info("Molecule %d  nchains %d  chainIDs %s " % (id, len(molecule.chains), str(list(molecule.chains))))
+            # self._logger.info("Molecule %d  nchains %d  chainIDs %s " %
+            #  (id, len(molecule.chains), str(list(molecule.chains))))
             atomic_struct = VisAtomicStructure(
                 id, self, molecule, self.graphics)
             self.atomic_structures[atomic_struct.strand_name] = atomic_struct
             atomic_struct_list.append(atomic_struct)
             id += 1
-        # __for molecule in molecules
         # Create a list of sorted atomic structure names.
         atomic_struct_list.sort(VisAtomicStructure.compare)
         for atomic_struct in atomic_struct_list:
             self.atomic_structure_names.append(atomic_struct.strand_name)
-    # __create_atomic_structures
 
     def start_interactive(self):
         """ Start the interactive visualization of the model. """
         self.graphics.set_extent(self.extent)
-        cell_width = 0.1
-        #self.graphics.initial_xform.rotate_x = -90.0
+        # cell_width = 0.1
+        # self.graphics.initial_xform.rotate_x = -90.0
         self.graphics.initialize_graphics()
         # Create the popup menu.
         self._create_menu()
@@ -204,18 +200,18 @@ class VisModel(object):
         """ Create the popup menu for visualizing helices, strands, etc. """
         self.menu = VisMenu(self.command, self.helix_names,
                             self.strand_names, self.atomic_structure_names)
-        #self._logger.info("Helix names %s " % str(self.helix_names))
-        #self._logger.info("Strand names %s " % str(self.strand_names))
-        #self._logger.info("Atomic structure names %s " % str(self.atomic_structure_names))
+        # self._logger.info("Helix names %s " % str(self.helix_names))
+        # self._logger.info("Strand names %s " % str(self.strand_names))
+        # self._logger.info("Atomic structure names %s " % str(self.atomic_structure_names))
         self.graphics.menu = self.menu
 
     def show_helix(self, name, rep, attributes):
-        """ Show a helix with the given representation. 
+        """ Show a helix with the given representation.
 
             Arguments:
-                name (String): The name of the helix. 
+                name (String): The name of the helix.
                 rep (String): The representation name from VisHelixRepType.
-                attributes (List[String,Object)]: The list of attributes for the helix. 
+                attributes (List[String,Object)]: The list of attributes for the helix.
         """
         show = None
         color = None
@@ -226,7 +222,6 @@ class VisModel(object):
                 show = value
             elif key == 'color':
                 color = value
-        # __for name,value in attibutes
 
         if name not in self.helix_names:
             self._logger.error("Unknown helix named \'%s\' " % name)
@@ -236,7 +231,7 @@ class VisModel(object):
         if name == VisMenuItem.ALL:
             self._logger.info("Show all ")
             display = False
-            for i, helix in enumerate(self.helices.values()):
+            for helix in self.helices.values():
                 helix.show(rep, show, display)
 
         # Show a helix named 'name'.
@@ -252,7 +247,7 @@ class VisModel(object):
         """ Show an atomic structure with the given representation.
 
             Arguments:
-                name (String): The name of the atomic structure. 
+                name (String): The name of the atomic structure.
                 rep (String): The representation name from VisAtomicStructureRepType.
                 show (bool): If true then show the geometry for the representation, else hide it.
         """
@@ -270,12 +265,12 @@ class VisModel(object):
             atomic_struct.show(rep, show)
 
     def show_strand(self, name, rep, attributes):
-        """ Show a strand with the given representation. 
+        """ Show a strand with the given representation.
 
             Arguments:
-                name (String): The name of the strand . 
+                name (String): The name of the strand .
                 rep (String): The representation name from VisStrandRepType.
-                attributes (List[String,Object)]: The list of attributes for the helix. 
+                attributes (List[String,Object)]: The list of attributes for the helix.
         """
         # Process attributes.
         show = None
@@ -288,7 +283,6 @@ class VisModel(object):
                 color = value
             elif key == 'line_width':
                 line_width = value
-        # __for name,value in attibutes
 
         if name not in self.strand_names:
             self._logger.error("Unknown strand named \'%s\' " % name)
@@ -378,8 +372,8 @@ class VisModel(object):
 
     def _create_helix_numbers(self):
         """ Create the geometry for virtual helix ends projected onto box and numbered. """
-        cx, cy, cz = self.extent.get_center()
-        dx, dy, dz = self.extent.get_widths()
+        _, cy, _ = self.extent.get_center()
+        _, dy, _ = self.extent.get_widths()
         s = 1.0
         ymin = cy - s*dy
 
@@ -411,8 +405,8 @@ class VisModel(object):
 
     def _create_helix_projections(self):
         """ Create the geometry for virtual helices projected along coordinate axes. """
-        cx, cy, cz = self.extent.get_center()
-        dx, dy, dz = self.extent.get_widths()
+        cx, _, cz = self.extent.get_center()
+        dx, _, dz = self.extent.get_widths()
         s = 1.0
         xmin = cx - s*dx
         zmin = cz - s*dz
@@ -440,17 +434,15 @@ class VisModel(object):
             geom.color = color
             self.graphics.add_render_geometry(geom)
             self.helix_projection_geometry.append(geom)
-        # __for helix in self.helices.values()
 
     def _create_structure_geometry(self):
-        """ Create the structure geometry. 
+        """ Create the structure geometry.
 
             The structure geometry shows dsDNA regions as solid cylinders.
         """
-        dna_structure = self.dna_structure
         radius = 1.15
         num_sides = 16
-        angle_offset = 45.0
+        # angle_offset = 45.0
         helix_list = list(self.helices.values())
         self._logger.info("Number of virtual helices %d" % (len(helix_list)))
         for helix in helix_list:
@@ -460,14 +452,13 @@ class VisModel(object):
             for i, points in enumerate(boundary_points):
                 pt1 = points[0]
                 pt2 = points[1]
-                #self._logger.info("Pt1 %s  pt2 %s" % (str(pt1), str(pt2)))
+                # self._logger.info("Pt1 %s  pt2 %s" % (str(pt1), str(pt2)))
                 verts.append(pt1)
                 verts.append(pt2)
                 name = "ModelGeometry:%d_%d" % (helix.vhelix.lattice_num, i+1)
                 geom = VisGeometryCylinder(name, radius, pt1, pt2, num_sides)
                 self.graphics.add_render_geometry(geom)
                 self.structure_geometry.append(geom)
-            # __for pos in boundary_pos
             name = "ModelGeometry:%d" % (helix.vhelix.lattice_num)
             arrows = False
             geom = VisGeometryLines(name, verts, arrows)
@@ -475,8 +466,6 @@ class VisModel(object):
             geom.color = [0.8, 0.0, 0.8, 1]
             self.graphics.add_render_geometry(geom)
             self.structure_geometry.append(geom)
-
-        # __for helix in helix_list
 
     def get_domains_temperature_range(self):
         """ Get the domains temperature range. """
@@ -489,18 +478,14 @@ class VisModel(object):
                     continue
                 if not tmin:
                     tmin = temp
-                    vmax = temp
+                    # vmax = temp
                 elif temp < tmin:
                     tmin = temp
                 elif temp > tmax:
                     tmax = temp
-            # __for domain in domain_list
+
             self._logger.info(
                 "Domain temperature range min %g  max %g" % (tmin, tmax))
             self.domains_temperature_range = (tmin, tmax)
-        # __if self.domains_temperature_range is None
 
         return self.domains_temperature_range[0], self.domains_temperature_range[1]
-    # __def get_domain_temperature_range
-
-    # __create_structure_geometry(self)

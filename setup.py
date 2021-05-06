@@ -27,9 +27,9 @@ setuptools.setup(
     install_requires=(
         'numpy>=1.14',
     ),
-    classifiers=(
+    classifiers=[
         "Programming Language :: Python :: 3",
         "License :: Apache, Version 2.0",
         "Operating System :: OS Independent",
-    ),
+    ],
 )

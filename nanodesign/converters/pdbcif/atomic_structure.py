@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# 2021.02.25.: moved matix math to seperate file @Elija, Feigl
+# 2021.02.25.: moved matrix math to seperate file @Elija, Feigl
 # 2021.02.25.: moved atom, molecule to seperate file @Elija, Feigl
 
 """
@@ -222,7 +222,6 @@ class AtomicStructure(object):
             strand2.seq[base2_sindex] = base2.seq
             strand2.rotations[base2_sindex] = np.dot(triads[:, :, i], rot_mat)
             strand2.translations[base2_sindex] = base_nodes[i]
-        # __for i in range(0,len(id_nt1))
 
         self._logger.debug(
             "=================== create bulges ==================")
@@ -248,7 +247,6 @@ class AtomicStructure(object):
                     base_index = strand.tour[i]-1
                     strand.seq[i] = base_conn[base_index].seq
             # _for i in range(0,len(seq))
-        # __for strand in self.strands
 
         # Generate atomic structures from the dna strands.
         self._logger.debug(
@@ -292,10 +290,8 @@ class AtomicStructure(object):
             molecule, first_atomID = self._create_atoms_from_strand(
                 strand, forward_struct, reverse_struct, first_atomID)
             molecular_structures.append(molecule)
-        # __for strand in strands
 
         return molecular_structures
-    # __def _pdb_generate(self, strands)
 
     def _create_atoms_from_strand(self, strand, forward_struct, reverse_struct,
                                   first_atomID_in):
@@ -376,7 +372,7 @@ class AtomicStructure(object):
                 current_atom.coords = xform_coord
                 molecule.add_atom(current_atom)
                 atom_index = atom_index+1
-            # __for j in range(0,num_atoms):
+
         # _for i in range(0,num_bases)
 
         return molecule, first_atomID_out
@@ -432,7 +428,6 @@ class AtomicStructure(object):
                 xform_coord = np.dot(R, xform_coord)
                 atom.coords = xform_coord
                 reverse_struct.append(atom)
-        # __for atom in molecule.atoms:
 
         return forward_struct, reverse_struct
 
@@ -473,7 +468,6 @@ class AtomicStructure(object):
                     base = base_conn[base_id]
                     base_str += "(%d,%d) " % (base.h, base.p)
                 self._logger.debug("bases: %s" % base_str)
-            # __if self._logger.getEffectiveLevel() == logging.DEBUG
 
             # Get the rotation/translation at the start of the single-strand
             # region.
@@ -508,11 +502,6 @@ class AtomicStructure(object):
                 is_main[k] = True
                 rotations[k] = R_fit[:, :, j]
                 translations[k] = d_fit[:, j]
-            # __for j in range(0,len(strand_pos))
-
-        # __for i in range(0,len(single_strands))
-
-    # __def _generate_bulge_dof
 
     def _find_single_strands(self, rotations, is_circular):
         """ Find all regions in the strand that are not paired.
@@ -585,7 +574,6 @@ class AtomicStructure(object):
         # _while(True)
 
         return single_strands
-    # __def _find_single_strands
 
     def _fit_R_d(self, R_1, d_1, R_2, d_2, num_bases):
         """ This function interpolates the rotations and translations between
@@ -646,7 +634,6 @@ class AtomicStructure(object):
             R = _vrrotvec2mat(axis, angle)
             R_fit[:, :, i] = np.dot(R, R_1)
             d_fit[:, i] = (d_1*(num_bases+1-j) + d_2*j) / (num_bases+1)
-        # __for i in range(0,num_bases)
 
         return R_fit, d_fit
 
@@ -688,8 +675,6 @@ class AtomicStructure(object):
                         zmax = z
                 num_atoms += 1
 
-            # __for atom in molecule.atoms
-        # __for molecule in self.molecules
         return xmin, xmax, ymin, ymax, zmin, zmax
 
     # =========================================================================
@@ -740,8 +725,6 @@ class AtomicStructure(object):
                     strand.seq[i] = base.seq
                 strand.rotations[i] = np.dot(frame, rot_mat)
                 strand.translations[i] = nm_to_ang*base_coords[i]
-            # __for base_id in strand.tour
-        # __for strand in self.strands
 
         self._logger.debug(
             "=================== create bulges ==================")
@@ -766,7 +749,6 @@ class AtomicStructure(object):
                     base_index = strand.tour[i]-1
                     strand.seq[i] = base_conn[base_index].seq
             # _for i in range(0,len(seq))
-        # __for strand in self.strands
 
         # Generate atomic structures from the dna strands.
         self.molecules = self._generate_atoms_ss(self.strands)
@@ -809,10 +791,8 @@ class AtomicStructure(object):
             molecule, first_atomID = self._create_atoms_from_strand_ss(
                 strand, forward_struct, reverse_struct, first_atomID)
             molecular_structures.append(molecule)
-        # __for strand in strands
 
         return molecular_structures
-    # __def _pdb_generate_ss(self, strands)
 
     def _create_atoms_from_strand_ss(self, strand, forward_struct,
                                      reverse_struct, first_atomID_in):
@@ -899,9 +879,7 @@ class AtomicStructure(object):
                 current_atom.coords = xform_coord
                 molecule.add_atom(current_atom)
                 atom_index = atom_index+1
-            # __for j in range(0,num_atoms):
+
         # _for i in range(0,num_bases)
 
         return molecule, first_atomID_out
-
-# __class AtomicStructure

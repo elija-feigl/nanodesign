@@ -49,11 +49,17 @@ class EnergyModel(object):
 
         # These energies are from the following papers:
         # For Watson-Crick pairs, Table 1 and 2 in:
-        # John SantaLucia Jr., "A unified view of polymer, dumbbell, and oligonucleotide DNA nearest-neighbor thermodynamics", Proceedings of the National Academy of Sciences 95.4 (1998): 1460-1465.
+        # John SantaLucia Jr., "A unified view of polymer, dumbbell, and oligonucleotide
+        #   DNA nearest-neighbor thermodynamics", Proceedings of the National Academy of
+        #   Sciences 95.4 (1998): 1460-1465.
         # For GT wobble pairs, Table 5 in:
-        # Hatim T. Allawi and John SantaLucia Jr., "Thermodynamics and NMR of Internal G-T Mismatches in DNA", Biochemistry 36 (1997): 10581-10594.
+        # Hatim T. Allawi and John SantaLucia Jr., "Thermodynamics and NMR of Internal
+        #   G-T Mismatches in DNA", Biochemistry 36 (1997): 10581-10594.
 
-        # We use the following convention for storage, which is similar to the one used by Nupack (J. N. Zadeh, C. D. Steenberg, J. S. Bois, B. R. Wolfe, M. B. Pierce, A. R. Khan, R. M. Dirks, N. A. Pierce. NUPACK: analysis and design of nucleic acid systems. J Comput Chem, 32:170-173, 2011.)
+        # We use the following convention for storage, which is similar to the one used
+        #   by Nupack (J. N. Zadeh, C. D. Steenberg, J. S. Bois, B. R. Wolfe, M. B. Pierce,
+        #   A. R. Khan, R. M. Dirks, N. A. Pierce. NUPACK: analysis and design of nucleic
+        #   acid systems. J Comput Chem, 32:170-173, 2011.)
         #
         # For a given NN stack:
         #   Stacking 5' W Y 3'
@@ -125,7 +131,7 @@ class EnergyModel(object):
         Computes the nearest neighbor energy of the above stack. If the sequences are more than 2 bases, e.g.:
 
         sequence_1:   5'-GGCCA-3'    "GGCCA"
-        sequence_2:   3'-CCGGT-5'    "TGGCC" 
+        sequence_2:   3'-CCGGT-5'    "TGGCC"
 
         it will compute the NN energies for each stack in turn and return the sum. In this case, it would compute
         the energy of the four stacks below and return the sum:
@@ -171,9 +177,9 @@ class EnergyModel(object):
 
         return (dG_37, dG_check, dH, dS)
 
-    def melting_temperature(self, dH, dS, staple_conc=100e-9, scaffold_conc=10e-9, sodium_conc=1.0, magnesium_conc=20e-3):
+    def melting_temperature(
+            self, dH, dS, staple_conc=100e-9, scaffold_conc=10e-9, sodium_conc=1.0, magnesium_conc=20e-3):
         """
-
         Units: dH is in kcal/mol, dS is in cal/mol (note difference). All concentrations are in M.
         """
 

@@ -15,11 +15,11 @@
 """
 This module defines the classes used to define a structure helix of a DNA structure.
 
-A structure helix is a region in a DNA structure that forms a cylindrical structural element. It can be composed of 
-one or two DNA strands defined by the set of scaffold and staple bases assigned to the helix. 
+A structure helix is a region in a DNA structure that forms a cylindrical structural element. It can be composed of
+one or two DNA strands defined by the set of scaffold and staple bases assigned to the helix.
 
-A helix can be considered to be a container for storing scaffold and staple bases. The position of a base in a helix 
-is given by an integer between 0 and N-1, where N is the maximum number of bases staple or scaffold, assigned to it. 
+A helix can be considered to be a container for storing scaffold and staple bases. The position of a base in a helix
+is given by an integer between 0 and N-1, where N is the maximum number of bases staple or scaffold, assigned to it.
 
     Positions     0       1       2       3       4       5             N-1
               -----------------------------------------------------------------
@@ -28,72 +28,67 @@ is given by an integer between 0 and N-1, where N is the maximum number of bases
     staple    | base1 | base2 | base3 | base4 | base5 | base6 |       | baseN |
               -----------------------------------------------------------------
 """
-from collections import OrderedDict
-import inspect
 import itertools
-import json
 import logging
 import numpy as np
-import sys
 
-# Within package imports
-from .parameters import DnaParameters, DnaPolarity
-from ..converters.cadnano.common import CadnanoLatticeType
-from .lattice import Lattice
+from .parameters import DnaPolarity
 from .base import DnaBase
 
 
 class DnaStructureHelix(object):
-    """ This class stores information for a DNA structure helix. 
+    """ This class stores information for a DNA structure helix.
 
         Attributes:
-            load_order (int): The order (0-based) the helix was processed. This is needed when writing a caDNAno file. 
+            load_order (int): The order (0-based) the helix was processed. This is needed when writing a caDNAno file.
             dna_parameters (DnaParameters): The DNA parameters to use when creating the 3D geometry for the design.
             end_coordinates (NumPy 2x3 ndarray[float]): The coordinates at the ends of the helix.
             end_frames (NumPy 3x3x2 ndarray[float]): The coordinate frames at the ends of the helix.
-            helix_axis_frames (NumPy 3x3xN ndarray[float]): The coordinate frames of base nodes along the helix axis, 
+            helix_axis_frames (NumPy 3x3xN ndarray[float]): The coordinate frames of base nodes along the helix axis,
                 where N is the number of bases of the caDNAno virtual helix.
-            helix_axis_coords (NumPy Nx3 ndarray[float]): The coordinates of base nodes along the helix axis, where N is the 
-                number of bases of the caDNAno virtual helix. The elements of the array are sorted according to their position
-                in the helix. 
+            helix_axis_coords (NumPy Nx3 ndarray[float]): The coordinates of base nodes along the
+                helix axis, where N is the number of bases of the caDNAno virtual helix. The
+                elements of the array are sorted according to their position in the helix.
             helix_connectivity (List[DnaHelixConnection]): The list helices that this helix is connected to.
             id (int): Helix ID. This should be the same IDs used for a base helix number (i.e. the DnaBase.h ID).
             lattice_col (int): The caDNAno lattice column number.
             lattice_num (int): The caDNAno helix number.
-            lattice_row (int): The caDNAno lattice row number. 
+            lattice_row (int): The caDNAno lattice row number.
             lattice_type (CadnanoLatticeType): The lattice type the geometry of this structure is derived from.
-            possible_scaffold_crossovers (List[(DnaStructureHelix,int,NumPy 3x1 array[float])]): The list of possible 
-                scaffold crossovers for this helix. Each entry in the list is a 3-tuple giving the helix it crosses over 
-                to (object pointer), the helix position where the crossover occurs and the helix axis coodinates.
-            possible_staple_crossovers (List[(DnaStructureHelix,int,NumPy 3x1 array[float])]): The list of possible staple 
-                crossovers for this helix. Each entry in the list is a 3-tuple giving the helix it crosses over to 
-                (object pointer), the helix position where the crossover occurs the helix axis coodinates.
-            scaffold_bases (List[DnaBase]): The list of helix scaffold bases. 
-            scaffold_polarity (DnaPolarity): The polarity of the scaffold. 
+            possible_scaffold_crossovers (List[(DnaStructureHelix,int,NumPy 3x1 array[float])]): The list of possible
+                scaffold crossovers for this helix. Each entry in the list is a 3-tuple giving the helix it crosses over
+                to (object pointer), the helix position where the crossover occurs and the helix axis coordinates.
+            possible_staple_crossovers (List[(DnaStructureHelix,int,NumPy 3x1 array[float])]): The list of possible
+                staple crossovers for this helix. Each entry in the list is a 3-tuple giving the helix it crosses over
+                to (object pointer), the helix position where the crossover occurs the helix axis coordinates.
+            scaffold_bases (List[DnaBase]): The list of helix scaffold bases.
+            scaffold_polarity (DnaPolarity): The polarity of the scaffold.
             scaffold_pos (Dict[int,DnaBase]: The dict mapping helix positions to scaffold bases.
-            staple_bases (List[DnaBase]): The list of helix staple bases. 
+            staple_bases (List[DnaBase]): The list of helix staple bases.
             staple_pos (Dict[int,DnaBase]: The dict mapping helix positions to staple bases.
 
-        The geometry of a helix is determined by the coordinates of base nodes along its axis. The coordinates and reference
-        frames of the bases defined for the helix are references into the helix_axis_coords and helix_axis_frames arrays.
+        The geometry of a helix is determined by the coordinates of base nodes along its axis.
+        The coordinates and reference frames of the bases defined for the helix are references
+        into the helix_axis_coords and helix_axis_frames arrays.
     """
 
     # TODO (DaveP) We need to remove the references to caDNAno lattice-based information.
 
-    def __init__(self, load_order, id, scaffold_polarity, helix_axis_coords, helix_axis_frames, scaffold_coords, staple_coords,
+    def __init__(self, load_order, id, scaffold_polarity, helix_axis_coords,
+                 helix_axis_frames, scaffold_coords, staple_coords,
                  scaffold_bases, staple_bases):
         """ Initialize a DnaStructureHelix object.
 
             Arguments:
                 load_order (int): The order the helix was processed.
                 id (int): The helix ID.
-                scaffold_polarity (DnaPolarity): The helix polarity. 
-                helix_axis_coords (NumPy Nx3 ndarray[float]): The coordinates of base nodes along the helix axis. 
-                helix_axis_frames (NumPy 3x3xN ndarray[float]): The coordinate frames base nodes alonge the helix axis.
+                scaffold_polarity (DnaPolarity): The helix polarity.
+                helix_axis_coords (NumPy Nx3 ndarray[float]): The coordinates of base nodes along the helix axis.
+                helix_axis_frames (NumPy 3x3xN ndarray[float]): The coordinate frames base nodes along the helix axis.
                 scaffold_bases (List[DnaBase]): The list of scaffold bases defined for the helix.
-                scaffold_coords (NumPy Nx3 ndarray[float]): The scaffold DNA helix nucleotide coordinates. 
+                scaffold_coords (NumPy Nx3 ndarray[float]): The scaffold DNA helix nucleotide coordinates.
                 staple_bases (List[DnaBase]): The list of staple bases defined for the helix.
-                staple_coords (NumPy Nx3 ndarray[float]): The staple DNA helix nucleotide coordinates. 
+                staple_coords (NumPy Nx3 ndarray[float]): The staple DNA helix nucleotide coordinates.
         """
         self.id = id
         self.load_order = load_order
@@ -141,26 +136,24 @@ class DnaStructureHelix(object):
 
         self.end_frames[:, :, 0] = frame1
         self.end_frames[:, :, 1] = frame2
-    # __def set_end_coords
 
     def set_coordinates(self, helix_axis_coords, helix_axis_frames, scaffold_coords, staple_coords):
-        """ Set the helix axis coordinates and frames, and DNA helix nucleotide coordinates. 
+        """ Set the helix axis coordinates and frames, and DNA helix nucleotide coordinates.
 
             Arguments:
-                helix_axis_coords (NumPy Nx3 ndarray[float]): The coordinates of base nodes along the helix axis. 
+                helix_axis_coords (NumPy Nx3 ndarray[float]): The coordinates of base nodes along the helix axis.
                 helix_axis_frames (NumPy 3x3xN ndarray[float]): The coordinate frames base nodes alonge the helix axis.
-                scaffold_coords (NumPy Nx3 ndarray[float]): The scaffold DNA helix nucleotide coordinates. 
-                staple_coords (NumPy Nx3 ndarray[float]): The staple DNA helix nucleotide coordinates. 
+                scaffold_coords (NumPy Nx3 ndarray[float]): The scaffold DNA helix nucleotide coordinates.
+                staple_coords (NumPy Nx3 ndarray[float]): The staple DNA helix nucleotide coordinates.
         """
         self.helix_axis_coords = helix_axis_coords
         self.helix_axis_frames = helix_axis_frames
         self.staple_coords = staple_coords
         self.scaffold_coords = scaffold_coords
         self.set_end_coords()
-    # __def set_coordinates
 
     def get_start_pos(self):
-        """ Get the starting helix position of the scaffold or staple strands. 
+        """ Get the starting helix position of the scaffold or staple strands.
         """
         num_bases = len(self.staple_bases)
         if num_bases == 0:
@@ -169,32 +162,30 @@ class DnaStructureHelix(object):
         scaffold_start_pos = self.scaffold_bases[0].p
         start_pos = min(staple_start_pos, scaffold_start_pos)
         return start_pos
-    # __def get_start_pos
 
     def has_base_pos(self, pos):
         """ Check if the helix has bases at the given helix position.
 
             Arguments:
-                pos (int): The position in the helix to check. 
+                pos (int): The position in the helix to check.
 
-            Returns two booleans, each set to True if there is a staple base and a scaffold 
+            Returns two booleans, each set to True if there is a staple base and a scaffold
             base at the given position.
         """
         return pos in self.staple_pos, pos in self.scaffold_pos
-    # __def has_base_pos
 
     def build_base_pos_maps(self):
-        """ Create maps for base positions. 
+        """ Create maps for base positions.
 
             This creates dicts to mapping helix positions to bases:
                 self.staple_pos
                 self.scaffold_pos
 
             The max/min positions for staple and scaffold bases are also calculated.
-                self.min_staple_pos 
-                self.max_staple_pos 
-                self.min_scaffold_pos 
-                self.max_scaffold_pos 
+                self.min_staple_pos
+                self.max_staple_pos
+                self.min_scaffold_pos
+                self.max_scaffold_pos
         """
         self.staple_pos = {}
         self.min_staple_pos = None
@@ -205,7 +196,7 @@ class DnaStructureHelix(object):
                 self.min_staple_pos = base.p
             if (self.max_staple_pos is None) or (base.p > self.max_staple_pos):
                 self.max_staple_pos = base.p
-        # __for base in self.staple_bases
+
         self.scaffold_pos = {}
         self.min_scaffold_pos = None
         self.max_scaffold_pos = None
@@ -215,13 +206,11 @@ class DnaStructureHelix(object):
                 self.min_scaffold_pos = base.p
             if (self.max_scaffold_pos is None) or (base.p > self.max_scaffold_pos):
                 self.max_scaffold_pos = base.p
-        # __for base in self.scaffold_bases
-    # __def build_base_pos_maps
 
     def add_maximal_staple_bases(self):
-        """ Add bases for the maximal staple set. 
+        """ Add bases for the maximal staple set.
 
-            New bases are created and added to the helix at locations not occupied by bases. 
+            New bases are created and added to the helix at locations not occupied by bases.
             The helix locations to add bases are detemined by the max/min positions of the
             helix scaffold bases.
         """
@@ -252,7 +241,6 @@ class DnaStructureHelix(object):
                 self.staple_pos[base.p] = base
                 new_base_pos.add(pos)
                 id += 1
-        # __for pos in range(start_pos,self.max_staple_pos)
 
         # Recreate list of staple bases.
         self.staple_bases = []
@@ -276,9 +264,6 @@ class DnaStructureHelix(object):
                 down_base = self.staple_pos.get(down_pos, None)
                 if down_pos in new_base_pos:
                     base.down = down_base
-        # __for base in self.staple_bases
-
-    # __def add_maximal_staple_bases
 
     def add_maximal_staple_crossovers(self):
         """ Add crossover connections for bases for the maximal staple set. """
@@ -316,9 +301,6 @@ class DnaStructureHelix(object):
                         to_base.down = base
                 self._logger.debug(
                     "Crossover base at pos %d to helix %d" % (base.p, to_helix.id))
-        # __for crossover in possible_staple_crossovers
-
-    # __def add_maximal_staple_crossovers
 
     def apply_xform(self, xform):
         """ Apply a transformation to the helix coordiates and reference frames.
@@ -349,15 +331,14 @@ class DnaStructureHelix(object):
             xframe = np.dot(R, frame)
             self.helix_axis_coords[i, :] = xcoord[:]
             self.helix_axis_frames[:, :, i] = xframe[:, :]
-        # __for i in range(0, num_coords)
 
         # Reset helix end coordinates.
         self.set_end_coords()
 
     def get_center(self):
-        """ Get helix geometric center. 
+        """ Get helix geometric center.
 
-            Returns the helix geometric center (NumPy 3x1 array[float]). 
+            Returns the helix geometric center (NumPy 3x1 array[float]).
         """
         center = np.mean(self.helix_axis_coords, axis=0)
         return center
@@ -381,13 +362,13 @@ class DnaStructureHelix(object):
         self._logger.debug("Helix polarity %s " % self.scaffold_polarity)
         self._logger.debug("Helix connectivity: %d " %
                            len(self.helix_connectivity))
-        strands = dna_structure.strands
+        # strands = dna_structure.strands
         for connection in self.helix_connectivity:
             num = connection.to_helix.lattice_num
             self._logger.debug("Crossover helix num %d" % num)
             self._logger.debug("Number of staple bases: %d" %
                                len(self.staple_bases))
-            last_crossover = None
+            # last_crossover = None
             for base_list in [self.staple_bases, self.scaffold_bases]:
                 for base in base_list:
                     if not base:
@@ -403,7 +384,6 @@ class DnaStructureHelix(object):
                             crossover = DnaHelixCrossover(
                                 self, connection, base, strand)
                             connection.crossovers.append(crossover)
-                    #__if (down != -1)
 
                     if (base.up is not None):
                         if (base.up.h != base.h) and (base.up.h == num):
@@ -415,13 +395,9 @@ class DnaStructureHelix(object):
                             crossover = DnaHelixCrossover(
                                 self, connection, base, strand)
                             connection.crossovers.append(crossover)
-                    #__if (up != -1)
-                # __for base in base_list
-            # __for base_list in [self.staple_bases,self.scaffold_bases]
+
             self._logger.debug(">>> added %d crossovers " %
                                len(connection.crossovers))
-        # __for connection in self.helix_connectivity:
-    # __def compute_design_crossovers_p
 
     def remove_bases(self, base_list):
         """ Remove a list of bases from the helix.
@@ -429,7 +405,7 @@ class DnaStructureHelix(object):
             Arguments:
                 base_list (List[DnaBase]): The list of bases to remove.
 
-            This function is used to remove bases after a design file has been processed. 
+            This function is used to remove bases after a design file has been processed.
             For example, it is called when removing strands from a structure.
         """
         self._logger.debug("========== remove bases ==========")
@@ -445,7 +421,6 @@ class DnaStructureHelix(object):
                 removed_scaffold_bases.add(base.p)
             else:
                 removed_staple_bases.add(base.p)
-        # __for base in base_list
 
         # Modify list of staple bases.
         remaining_staple_bases = []
@@ -458,8 +433,6 @@ class DnaStructureHelix(object):
                 if base.across:
                     base.across.across = None
                     base.across = None
-            # __if base.p not in removed_staple_bases
-        # __for base in self.staple_bases
 
         self._logger.debug("Number of bases removed %d" % (
             len(self.staple_bases) - len(remaining_staple_bases)))
@@ -480,9 +453,9 @@ class DnaStructureHelix(object):
     def process_base_deletes(self):
         """ Process bases flagged for deletion.
 
-            This function is used to remove bases flagged for deletion (DnaBase.num_deletion) in the 
-            design file. It is called when the design file is being processed. Bases are removed from 
-            the helix staple_bases and scaffold_bases. The coordinates and frames for the helix are then 
+            This function is used to remove bases flagged for deletion (DnaBase.num_deletion) in the
+            design file. It is called when the design file is being processed. Bases are removed from
+            the helix staple_bases and scaffold_bases. The coordinates and frames for the helix are then
             recreated from the new list of bases.
 
             A list of deleted bases is returned.
@@ -494,7 +467,6 @@ class DnaStructureHelix(object):
         for base in self.staple_bases:
             if base.num_deletions != 0:
                 num_del += 1
-        # __for base in self.staple_bases
 
         if num_del != 0:
             staple_bases = []
@@ -504,16 +476,14 @@ class DnaStructureHelix(object):
                 else:
                     base.remove()
                     deleted_bases.append(base)
-            # __for base in self.staple_bases
+
             self.staple_bases = staple_bases
-        # __if num_del != 0
 
         # Delete scaffold bases.
         num_del = 0
         for base in self.scaffold_bases:
             if base.num_deletions != 0:
                 num_del += 1
-        # __for base in self.scaffold_bases
 
         if num_del != 0:
             scaffold_bases = []
@@ -523,9 +493,8 @@ class DnaStructureHelix(object):
                 else:
                     base.remove()
                     deleted_bases.append(base)
-            # __for base in self.scaffold_bases
+
             self.scaffold_bases = scaffold_bases
-        # __if num_del != 0
 
         # Regenerate the helix coordinate and reference frame  arrays
         # from the new list of bases.
@@ -533,7 +502,6 @@ class DnaStructureHelix(object):
             self.regenerate_coordinate_arrays()
             self.build_base_pos_maps()
         return deleted_bases
-    # __def process_base_deletes(self)
 
     def insert_bases(self, insert_bases):
         """ Insert a list of bases into the helix lists of scaffold and staple bases.
@@ -541,7 +509,7 @@ class DnaStructureHelix(object):
             Arguments:
                 insert_bases (List[DnaBase]): The list of bases to insert.
 
-            Bases are inserted into the scaffold and staple base lists at the 
+            Bases are inserted into the scaffold and staple base lists at the
             position given in the base (i.e. DnaBase.p).
         """
         self._logger.debug(
@@ -559,7 +527,7 @@ class DnaStructureHelix(object):
                             "    insert base coord %s" % str(insert_base.coordinates))
                         self.scaffold_bases.insert(i, insert_base)
                         break
-                # __for i,base in enumerate(self.scaffold_bases)
+
             else:
                 for i, base in enumerate(self.staple_bases):
                     if base.p == insert_base.p:
@@ -571,20 +539,17 @@ class DnaStructureHelix(object):
                             "    insert base coord %s" % str(insert_base.coordinates))
                         self.staple_bases.insert(i, insert_base)
                         break
-                # __for i,base in enumerate(self.staple_bases)
-        # __for insert_base in insert_bases
 
         # Regenerate the helix coordinate arrays from the new list of bases.
         if len(insert_bases) != 0:
             self.regenerate_coordinate_arrays()
             self.build_base_pos_maps()
-    # __def insert_bases(self, insert_bases)
 
     def regenerate_coordinate_arrays(self):
         """ Regenerate the coordinate arrays after a change in the base lists.
 
-            This will regenerate the coordinate arrays after deletions or insertions. The base 
-            helix position cannot be used to sort the arrays because inserted bases will have the 
+            This will regenerate the coordinate arrays after deletions or insertions. The base
+            helix position cannot be used to sort the arrays because inserted bases will have the
             same position. The arrays will therefore be sorted by base distance from the beginning
             helix coordinates.
         """
@@ -603,7 +568,6 @@ class DnaStructureHelix(object):
             v = coords - origin
             d = np.dot(axis, v)
             distances.append((d, base))
-        # __for base in itertools.chain(self.scaffold_bases,self.staple_bases)
 
         # Sort and count the number of unique distances.
         sorted_distances = sorted(distances, key=lambda x: x[0])
@@ -614,7 +578,6 @@ class DnaStructureHelix(object):
             if d != last_d:
                 num_unique_dist += 1
             last_d = d
-        # __for entry in sorted_distances
 
         # Create new coordinates and reference frame arrays.
         axis_coords = np.zeros((num_unique_dist, 3), dtype=float)
@@ -629,22 +592,19 @@ class DnaStructureHelix(object):
                 axis_frames[:, :, num_unique_dist] = base.ref_frame
                 num_unique_dist += 1
             last_d = d
-        # __for entry in sorted_distances
+
         self.helix_axis_coords = axis_coords
         self.helix_axis_frames = axis_frames
         self.set_end_coords()
-    # __def regenerate_coordinate_arrays(self)
-
-# __class DnaStructureHelix
 
 
 class DnaHelixConnection(object):
     """ This class stores information for a pair of connected helices.
 
         Attributes:
-            from_helix (DnaStructureHelix): The source helix of the connection. 
-            to_helix (DnaStructureHelix): The destination helix the connection. 
-            direction (NumPy 3x1 adarray[float]): The unit vector in the direction of the connection. 
+            from_helix (DnaStructureHelix): The source helix of the connection.
+            to_helix (DnaStructureHelix): The destination helix the connection.
+            direction (NumPy 3x1 adarray[float]): The unit vector in the direction of the connection.
             crossovers (List[DnaHelixCrossover]): The list of crossovers between the two helices.
     """
 
@@ -658,7 +618,8 @@ class DnaHelixConnection(object):
     def _compute_direction(self):
         """ Compute the unit vector in the direction of the adjacent helix.
 
-            This function uses helix axes to compute the direction so it can be used for lattice or off-lattice geometries.
+            This function uses helix axes to compute the direction so it can be used for
+            lattice or off-lattice geometries.
             However, for lattice-based geometries the directions can be calculated implicitly using a lookup table.
         """
         # Get the first helix axis and a point on that axis from the staple bases.
@@ -669,8 +630,8 @@ class DnaHelixConnection(object):
         elif len(helix1.scaffold_bases) != 0:
             helix1_base = helix1.scaffold_bases[0]
         pt1 = helix1_base.coordinates
-        axis1 = [helix1.end_frames[0, 2, 0],
-                 helix1.end_frames[1, 2, 0], helix1.end_frames[2, 2, 0]]
+        # axis1 = [helix1.end_frames[0, 2, 0],
+        #         helix1.end_frames[1, 2, 0], helix1.end_frames[2, 2, 0]]
 
         # Get the second (adjacent) helix axis and a point on that axis.
         helix2 = self.to_helix
@@ -689,8 +650,6 @@ class DnaHelixConnection(object):
         a2pt = pt2 + np.dot(axis2, d)
         self.direction = a2pt - pt1
         self.direction = self.direction / np.linalg.norm(self.direction)
-    # __def _compute_direction
-# __class DnaHelixConnection
 
 
 class DnaHelixCrossover(object):
@@ -699,7 +658,7 @@ class DnaHelixCrossover(object):
         Attributes:
             helix (DnaStructureHelix): The helix the crossover is in.
             helix_connection (DnaHelixConnection): The connection object defining the crossover helix.
-            crossover_base (Base): The base where the crossover occurs. 
+            crossover_base (Base): The base where the crossover occurs.
             strand (DnaStrand): The strand the crossover is in.
     """
 
@@ -708,5 +667,3 @@ class DnaHelixCrossover(object):
         self.helix_connection = helix_connection
         self.crossover_base = crossover_base
         self.strand = strand
-
-# __class DnaHelixCrossover

@@ -11,13 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-from .pdb_reader import PdbReader
-from .pdb_writer import PdbWriter
-from .cif_writer import CifWriter
-
-
-# Designate which components will be in the * namespace.
-__all__ = []
-__all__.extend(['pdb_writer', 'pdb_reader', 'cif_writer'])

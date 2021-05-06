@@ -12,20 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" 
-This module is used to write DNA Design viewer JSON files. 
+"""
+This module is used to write DNA Design viewer JSON files.
 """
 import collections
 import json
 import logging
 import numpy as np
 from math import pi
-from ..cadnano.common import CadnanoLatticeName, CadnanoLatticeType
-from ...data.parameters import DnaParameters
+from ..cadnano.common import CadnanoLatticeType
 
 
 class ViewerWriter(object):
-    """ The ViewerWriter class writes out a DNA Design viewer JSON file. 
+    """ The ViewerWriter class writes out a DNA Design viewer JSON file.
     """
 
     def __init__(self, dna_structure, dna_parameters):
@@ -59,7 +58,7 @@ class ViewerWriter(object):
 
         with open(file_name, 'w') as outfile:
             json.dump(vis_model, outfile, indent=4, separators=(',', ': '))
-            #json.dump(vis_model, outfile)
+            # json.dump(vis_model, outfile)
 
     def _get_domain_info(self, dna_structure):
         """ Get JSON serialized data for all the domains. """
@@ -68,12 +67,12 @@ class ViewerWriter(object):
             point1, point2 = domain.get_end_points()
             base_info = [base.id for base in domain.base_list]
             if (domain.strand):
-                strand_id = domain.strand.id
+                # strand_id = domain.strand.id
                 strand_base_ids = [base.id for base in domain.strand.tour]
                 start_base_index = strand_base_ids.index(base_info[0])
                 end_base_index = strand_base_ids.index(base_info[-1])
             else:
-                strand_id = -1
+                # strand_id = -1
                 start_base_index = -1
                 end_base_index = -1
             frame = domain.helix.end_frames[:, :, 0]
@@ -93,7 +92,7 @@ class ViewerWriter(object):
                     'melting_temperature': domain.melting_temperature()
                     }
             domains_info.append(info)
-        # __for domain in dna_structure.domain_list
+
         return domains_info
 
     def _get_helices_info(self, dna_structure):
@@ -138,7 +137,7 @@ class ViewerWriter(object):
         return helices_info
 
     def _get_strand_info(self, dna_structure):
-        """ Get JSON serialized data for strands objetcs. 
+        """ Get JSON serialized data for strands objetcs.
         """
         self._logger.debug(
             "==================== get strand information p ===================")
@@ -158,12 +157,11 @@ class ViewerWriter(object):
 
             self._logger.debug("Domains:")
             for domain in strand.domain_list:
-                point1, point2 = domain.get_end_points()
+                # point1, point2 = domain.get_end_points()
                 start_base = domain.base_list[0]
                 end_base = domain.base_list[-1]
                 self._logger.debug("id %d  vhelix %d  start %d  end %d" % (domain.id, start_base.h, start_base.p,
                                                                            end_base.p))
-            # __for domain in strand.domain_list
 
             domain_ids = [domain.id for domain in strand.domain_list]
 
@@ -198,10 +196,10 @@ class ViewerWriter(object):
         return strand_info_list
 
     def _modify_domain_ids(self, strand, domain_ids):
-        """ Modify the list of strand domains IDs so that the order of domain bases 
+        """ Modify the list of strand domains IDs so that the order of domain bases
             follows that of its parent strand.
             # TODO (Davep) Remove this when we are confidant that modifying
-            # circular strands solves all of the domain ordering issues. 
+            # circular strands solves all of the domain ordering issues.
         """
         strand_start_base = self.dna_structure.base_connectivity[strand.tour[0]-1]
         circular_domains = {}
@@ -217,7 +215,6 @@ class ViewerWriter(object):
                 start_end_ids.add(domain.id)
             else:
                 break
-        # __for domain in strand.domain_list
 
         # Create a list of domains at the end of the strand that are in the
         # strand's start virtual helix.
@@ -230,7 +227,6 @@ class ViewerWriter(object):
                 circular_domains[start_base.p] = domain
             else:
                 break
-        # __for domain in reversed(strand.domain_list)
 
         if (not start_domains) or (not end_domains):
             return domain_ids
@@ -249,7 +245,6 @@ class ViewerWriter(object):
         for domain in strand.domain_list:
             if domain.id not in start_end_ids:
                 domain_ids.append(domain.id)
-        # __for domain in strand.domain_list
 
         for p in sorted_domains:
             domain = circular_domains[p]
@@ -258,7 +253,7 @@ class ViewerWriter(object):
             self._logger.debug("id %d  vhelix %d  start %d  end %d" % (domain.id, start_base.h, start_base.p,
                                                                        end_base.p))
             domain_ids.append(domain.id)
-        # __for p in sorted_domains
+
         self._logger.debug("Domain IDs %s " % str(domain_ids))
         return domain_ids
 
@@ -300,8 +295,8 @@ class ViewerWriter(object):
                     num_scaffold += 1
                 else:
                     num_staple += 1
-            self._logger.debug("Connected helix: num: %d  row: %d  col:%d " % (to_helix.lattice_num, to_helix.lattice_row,
-                                                                               to_helix.lattice_col))
+            self._logger.debug(
+                f"Connected helix: num: {to_helix.lattice_num}  row: {to_helix.lattice_row} col:{to_helix.lattice_col}")
             self._logger.debug("    Nindex: %d " % nindex)
             self._logger.debug("    Direction: (%g %g %g) " %
                                (dir[0], dir[1], dir[2]))
@@ -318,16 +313,14 @@ class ViewerWriter(object):
 
             helix_conn_array[nindex] = conn_info
 
-        # __for connection in helix_connectivity
-
-        #self._logger.debug(" Helix conn array: %s" % str(helix_conn_array))
+        # self._logger.debug(" Helix conn array: %s" % str(helix_conn_array))
         return helix_conn_array
 
     def _get_crossover_info(self, connection):
-        """ Get the helix crossover information to be written to a file. 
+        """ Get the helix crossover information to be written to a file.
         """
         from_helix = connection.from_helix
-        to_helix = connection.to_helix
+        # to_helix = connection.to_helix
         crossovers = connection.crossovers
         start_pos = from_helix.get_start_pos()
         # Strands that are not base-paired don't have a start position.
@@ -344,8 +337,8 @@ class ViewerWriter(object):
                 scaffolds[base.p] = crossover
             else:
                 staples[base.p] = crossover
-        self._logger.debug("    Number of design crossovers: %d  staple: %d  scaffold: %d " % (len(crossovers),
-                                                                                               len(staples), len(scaffolds)))
+        self._logger.debug(
+            f"    Number of design crossovers: {len(crossovers)}  staple: {len(staples)}  scaffold: {len(scaffolds)}")
 
         # Add staple information. Double crossovers will occur in pairs separated by
         # a single position.
@@ -364,7 +357,6 @@ class ViewerWriter(object):
             start_pos, pos, scaffolds, crossover_info)
 
         return crossover_info
-    # __def _get_crossover_info
 
     def _get_crossover_strand_info(self, start_pos, pos, crossovers, crossover_info):
         num_pos = len(pos)
@@ -412,9 +404,5 @@ class ViewerWriter(object):
                     }
 
             crossover_info.append(info)
-        # __while n < num_pos
 
         return crossover_info
-    # __def _get_crossover_strand_info
-
-# __class ViewerWriter

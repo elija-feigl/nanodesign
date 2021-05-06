@@ -53,27 +53,12 @@
    perform operations when the visualizer starts. Commands can also be executed
    from the command line as a semicolon-separated string.
 """
-import os
-import re
 import sys
-import json
 import logging
 import argparse
 
-try:
-    import nanodesign
-except ImportError:
-    import sys
-    base_path = os.path.abspath(os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), '../'))
-    sys.path.append(base_path)
-    import nanodesign
-    # if it fails now, we let the exception go all the way up to halt execution.
-    # TODO (JMS 10/26/16): add better reporting of the import error.
-    sys.path = sys.path[:-1]
-
 from nanodesign.visualizer.model import VisModel
-from nanodesign.converters import Converter
+from nanodesign.converters.converter import Converter
 from nanodesign.converters.pdbcif.atomic_structure import AtomicStructure
 
 
@@ -104,7 +89,7 @@ def read_file(args, logger):
         sys.exit(1)
     else:
         logger.info("Input file name: %s" % args.infile)
-        infile = args.infile
+        # infile = args.infile
 
     converter.read_cadnano_file(args.infile, args.inseqfile, args.inseqname)
 

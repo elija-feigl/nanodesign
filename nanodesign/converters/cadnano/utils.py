@@ -16,7 +16,7 @@
 This module is contains various functions used to create a DNA structure from a caDNAno DNA origami design file.
 """
 import numpy as np
-from math import sqrt, cos, acos, sin, asin, pi
+from math import sqrt, cos, acos, sin, pi
 from .common import CadnanoLatticeType
 
 
@@ -45,30 +45,29 @@ def generate_coordinates(
     positions that contain a base. The coordinates and refereance frames are also set for
     scaffold and staple bases.
     """
-    r_strand = (
-        dna_parameters.helix_distance / 2.0
-    )  # half the distance between the axes of adjacent DNA helices.
+    # r_strand = dna_parameters.helix_distance / 2.0  # half the distance between the axes of adjacent DNA helices.
     r_helix = dna_parameters.helix_radius  # radius of DNA helices (nm)
-    dist_bp = (
-        dna_parameters.base_pair_rise
-    )  # rise between two neighboring base-pairs (nm)
-    ang_bp = (
-        dna_parameters.base_pair_twist_angle
-    )  # twisting angle between two neighboring base-pairs (degrees)
-    ang_minor = dna_parameters.minor_groove_angle  # angle of the minor groove (degrees)
+    # rise between two neighboring base-pairs (nm)
+    dist_bp = dna_parameters.base_pair_rise
+    # twisting angle between two neighboring base-pairs (degrees)
+    ang_bp = dna_parameters.base_pair_twist_angle
+    # angle of the minor groove (degrees)
+    ang_minor = dna_parameters.minor_groove_angle
 
     # Positions of the scaffold nucleotide and staple nucleotide
     # in the local reference frame.
     scaf_local = (
         r_helix
         * np.array(
-            [cos(deg2rad(180 - ang_minor / 2)), sin(deg2rad(180 - ang_minor / 2)), 0.0]
+            [cos(deg2rad(180 - ang_minor / 2)),
+             sin(deg2rad(180 - ang_minor / 2)), 0.0]
         ).transpose()
     )
     stap_local = (
         r_helix
         * np.array(
-            [cos(deg2rad(180 + ang_minor / 2)), sin(deg2rad(180 + ang_minor / 2)), 0.0]
+            [cos(deg2rad(180 + ang_minor / 2)),
+             sin(deg2rad(180 + ang_minor / 2)), 0.0]
         ).transpose()
     )
 
@@ -105,7 +104,6 @@ def generate_coordinates(
         e2 = np.array([cos(-deg2rad(angle)), 0, sin(-deg2rad(angle))])
         e1 = np.cross(e2, e3)
         axis_frames[:, :, i] = np.array([e1, e2, e3]).transpose()
-    # __for base in staple_bases
 
     # Compute scaffold nucleotide positions and set base coordinates and frame.
     num_scaffold_bases = len(scaffold_bases)
@@ -118,7 +116,6 @@ def generate_coordinates(
             axis_frames[:, :, j], scaf_local
         )
         base.nt_coords = scaffold_coords[i]
-    # __for base in scaffold_bases
 
     # Compute staple nucleotide positions and set base coordinates and frame.
     num_staple_bases = len(staple_bases)
@@ -131,12 +128,8 @@ def generate_coordinates(
             axis_frames[:, :, j], stap_local
         )
         base.nt_coords = staple_coords[i]
-    # __for base in stape_bases
 
     return axis_coords, axis_frames, scaffold_coords, staple_coords
-
-
-# __def generate_coordinates
 
 
 def get_start_coordinates_angle(dna_parameters, lattice_type, row, col, helix_num):
@@ -149,15 +142,12 @@ def get_start_coordinates_angle(dna_parameters, lattice_type, row, col, helix_nu
         col (int): The caDNAno column number.
         helix_num (int): The caDNAno virtual helix number.
     """
-    r_strand = (
-        dna_parameters.helix_distance / 2.0
-    )  # half the distance between the axes of adjacent DNA helices.
-    dist_bp = (
-        dna_parameters.base_pair_rise
-    )  # rise between two neighboring base-pairs (nm)
-    ang_bp = (
-        dna_parameters.base_pair_twist_angle
-    )  # twisting angle between two neighboring base-pairs (degrees)
+    # half the distance between the axes of adjacent DNA helices.
+    r_strand = dna_parameters.helix_distance / 2.0
+    # rise between two neighboring base-pairs (nm)
+    # dist_bp = dna_parameters.base_pair_rise
+    # twisting angle between two neighboring base-pairs (degrees)
+    ang_bp = dna_parameters.base_pair_twist_angle
 
     # Set the helix start coordinates, based on helix (row,col), and frame orientation,
     # based on helix number (polarity).
@@ -177,12 +167,8 @@ def get_start_coordinates_angle(dna_parameters, lattice_type, row, col, helix_nu
             init_ang = 180 + ang_bp / 2
         else:
             init_ang = 0 + ang_bp / 2
-    # __if lattice_type == CadnanoLatticeType.honeycomb
 
     return np.array([xpos, 0.0, zpos]), init_ang
-
-
-# __def get_start_coordinates_angle
 
 
 def deg2rad(deg):
@@ -191,17 +177,11 @@ def deg2rad(deg):
     return rad
 
 
-# __def deg2rad
-
-
 def find_row(neigh, curr_bases):
     tmp = curr_bases - neigh
     s = np.sum(np.abs(tmp), 1)
     ind = np.where(s == 0)[0]
     return ind
-
-
-# __def find_row
 
 
 def vrrotmat2vec(R):
@@ -216,13 +196,13 @@ def vrrotmat2vec(R):
     m21 = R[2, 1]
     m22 = R[2, 2]
     angle = acos((m00 + m11 + m22 - 1) / 2.0)
-    x = (m21 - m12) / sqrt(pow(m21 - m12, 2) + pow(m02 - m20, 2) + pow(m10 - m01, 2))
-    y = (m02 - m20) / sqrt(pow(m21 - m12, 2) + pow(m02 - m20, 2) + pow(m10 - m01, 2))
-    z = (m10 - m01) / sqrt(pow(m21 - m12, 2) + pow(m02 - m20, 2) + pow(m10 - m01, 2))
+    x = (m21 - m12) / sqrt(pow(m21 - m12, 2) +
+                           pow(m02 - m20, 2) + pow(m10 - m01, 2))
+    y = (m02 - m20) / sqrt(pow(m21 - m12, 2) +
+                           pow(m02 - m20, 2) + pow(m10 - m01, 2))
+    z = (m10 - m01) / sqrt(pow(m21 - m12, 2) +
+                           pow(m02 - m20, 2) + pow(m10 - m01, 2))
     return np.array([x, y, z], dtype=float), angle
-
-
-# __def vrrotmat2vec
 
 
 def vrrotvec2mat(axis, theta):
@@ -247,9 +227,6 @@ def vrrotvec2mat(axis, theta):
     )
 
 
-# __def vrrotvec2mat
-
-
 def bp_interp(dnode_1, triad_1, dnode_2, triad_2, n: int):
     """Interpolate the position (dnode) and orientation (triad) between two base pairs.
 
@@ -267,12 +244,10 @@ def bp_interp(dnode_1, triad_1, dnode_2, triad_2, n: int):
 
     # Calculate for dNode_interp and triad_interp.
     for i in range(0, n):
-        dnode_interp[i, :] = (dnode_1 * (n + 1 - (i + 1)) + dnode_2 * (i + 1)) / (n + 1)
+        dnode_interp[i, :] = (
+            dnode_1 * (n + 1 - (i + 1)) + dnode_2 * (i + 1)) / (n + 1)
         angle = theta * (i + 1) / (n + 1)
         rot_mat = vrrotvec2mat(a, angle)
         triad_interp[:, :, i] = np.dot(rot_mat, triad_1)
 
     return dnode_interp, triad_interp
-
-
-# __def bp_interp

@@ -20,19 +20,8 @@
    Each domain in the design is printed with its seqeunce. If the domain contains the search sequence then
    the location of the first occurence of the search sequence is highlighed by a line above it.
 """
-import logging
-import os
 import re
-import sys
-
-# The following imports are designed to try and get the nanodesign package
-# imported regardless of whether or not you have it installed in the
-# site-packages. If you have it in site packages, the first block should just work.
-# Otherwise, it will assume you can import it based on a relative path from this source
-# file's directory, and try to do so by adjusting the system paths temporarily.
-
-import nanodesign
-from nanodesign.converters import Converter
+from nanodesign.converters.converter import Converter
 
 
 def read_file(file_name, seq_name):
@@ -74,8 +63,6 @@ def main():
             lstr = "".join(loc)
             print('{:>{width}}'.format(lstr, width=len(dstr)))
         print('{0}'.format(dstr))
-        # __if match
-    # __for domain in dna_structure.domain_list
 
 
 if __name__ == '__main__':

@@ -95,9 +95,7 @@ class PdbReader(object):
         atom = Atom(
             atom_id, atom_name, res_name, chain_id, seq_id, x, y, z, element)
         self.current_molecule.add_atom(atom)
-    # __def process_atom
 
     def process_ter(self, line):
         """ Process a PDB TER record. """
         pass
-    # __def process_ter

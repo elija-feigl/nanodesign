@@ -13,49 +13,45 @@
 # limitations under the License.
 
 """
-This module defines the classes used to define the connectivity and geometry of a DNA structure. 
+    This module defines the classes used to define the connectivity and geometry of a DNA structure.
 
-A DNA structure consists of a number of scaffold and staple strands (DNA origami), or oligo strands alone, bound together 
-to form a designed geometric shape.
+    A DNA structure consists of a number of scaffold and staple strands (DNA origami),
+    or oligo strands alone, bound together to form a designed geometric shape.
 """
 from collections import OrderedDict
 import json
 import logging
-import numpy as np
-import sys
 
-# imports from other parts of the package
-from .parameters import DnaParameters
 from ..converters.cadnano.common import CadnanoLatticeType
 from ..converters.cadnano.utils import generate_coordinates
-from .dna_structure_helix import DnaStructureHelix, DnaHelixConnection
+from .dna_structure_helix import DnaHelixConnection
 from .lattice import Lattice
 from .strand import DnaStrand
 from .domain import Domain
 
 
 class DnaStructure(object):
-    """ This class stores the base connectivity and geometry for a DNA model. 
+    """ This class stores the base connectivity and geometry for a DNA model.
 
         Attributes:
             base_connectivity (List[DnaBase]): The list of DnaBase objects for the structure.
             domain_list (List[Domain]): The list of Domain objects for the structure.
             id_nt (NumPy Nx2 ndarray[int]): The base IDs for scaffold bases and their paired staple base.
-            lattice_type (CadnanoLatticeType): The lattice type the geometry of this structure is derived from. 
+            lattice_type (CadnanoLatticeType): The lattice type the geometry of this structure is derived from.
             lattice (Lattice): The Lattice object used for calculating lattice-dependent data (e.g. neighboring lattice
-                locations).  
+                locations).
             parameters (DnaParameters): Stores information for DNA parameters (e.g. helix radius).
-            strands (List[DnaStrand]): The list a DnaStrand objects. 
+            strands (List[DnaStrand]): The list a DnaStrand objects.
             strands_map (Dict[DnaStrand]): The dictionary that maps strand IDs to DnaStrand objects.
     """
 
     def __init__(self, name, base_connectivity, helices, dna_parameters):
-        """ Initialize a DnaStructure object. 
+        """ Initialize a DnaStructure object.
 
             Arguments:
                 name (string): The name of the structure.
-                base_connectivity (List[DnaBase]): The list of DNA bases for the structure. 
-                helices (List[DnaStructureHelix]): The list of helices for the structure. 
+                base_connectivity (List[DnaBase]): The list of DNA bases for the structure.
+                helices (List[DnaStructureHelix]): The list of helices for the structure.
                 dna_parameters (DnaParameters): The DNA parameters to use when creating the 3D geometry for the design.
         """
         self.name = name
@@ -74,10 +70,10 @@ class DnaStructure(object):
         self._aux_data_computed = False
 
     def _add_structure_helices(self, structure_helices):
-        """ Add a list of structural helices. 
+        """ Add a list of structural helices.
 
-            The structural helices are stored in two dictionaries, one used to look up a helix 
-            using a helix ID and the other used to look up a helix using a lattice (row,col) 
+            The structural helices are stored in two dictionaries, one used to look up a helix
+            using a helix ID and the other used to look up a helix using a lattice (row,col)
             coordinate.
             # TODO (DaveP) We need to remove references to lattice-based geometry.
 
@@ -90,13 +86,13 @@ class DnaStructure(object):
                 helix.lattice_row, helix.lattice_col)] = helix
 
     def set_lattice_type(self, lattice_type):
-        """ Set the lattice type the geometry of this structure is derived from. 
+        """ Set the lattice type the geometry of this structure is derived from.
 
             Arguments:
-                lattice_type(CadnanoLatticeType): The type of lattice (e.g. square, honeycomb). 
+                lattice_type(CadnanoLatticeType): The type of lattice (e.g. square, honeycomb).
 
-            A Lattice object is created from the given lattice type. It is used to calculate 
-            lattice-dependent data such as crossover locations and the neighboring lattice 
+            A Lattice object is created from the given lattice type. It is used to calculate
+            lattice-dependent data such as crossover locations and the neighboring lattice
             coordinates for a given coordinate.
         """
         self.lattice_type = lattice_type
@@ -106,7 +102,7 @@ class DnaStructure(object):
     def compute_aux_data(self):
         """ Compute auxiliary data.
 
-            Compute data derived from the base connectivty: domains, strand/helix and helix/helix connectivty 
+            Compute data derived from the base connectivty: domains, strand/helix and helix/helix connectivty
             relationships, and crossovers. This data is needed for visualization, calculating melting
             temperature and other applications.
         """
@@ -122,7 +118,7 @@ class DnaStructure(object):
         self._aux_data_computed = True
 
     def create_strands(self):
-        """ Create the list of strands connecting contiguous sequences of bases.  
+        """ Create the list of strands connecting contiguous sequences of bases.
 
             Returns the list of strands (List[DnaStrand]).
         """
@@ -136,17 +132,15 @@ class DnaStructure(object):
             try:
                 base_index = is_visited.index(False)
                 curr_base = base_connectivity[base_index]
-            except:
+            except ValueError:
                 break
 
             init_base = curr_base
-
             # Find the first base in the current strand.
             while curr_base.up and (curr_base.up.id != init_base.id):
                 curr_base = curr_base.up
                 if (is_visited[curr_base.id]):
                     return None
-            # _while
 
             if not curr_base.up:                     # currBase is at the 5'-end of the strand
                 is_circular = False
@@ -179,7 +173,6 @@ class DnaStructure(object):
                 curr_base.strand = n_strand
                 curr_base.residue = n_residue
                 is_visited[curr_base.id] = True
-            # __while((not is_circular
 
             # Modify the strand if it is circular and the first base crosses over to another helix.
             # The first base is moved to the end of the strand. This will prevent later issues, like
@@ -191,12 +184,10 @@ class DnaStructure(object):
                 if first_base.h != second_base.h:
                     del(tour[0])
                     tour.append(first_base)
-            # __if is_circular and len(tour) > 2
 
             strand = DnaStrand(n_strand, self, is_scaffold, is_circular, tour)
             strands.append(strand)
             n_strand += 1
-        # __while (True):
 
         self.strands = strands
         return self.strands
@@ -237,24 +228,20 @@ class DnaStructure(object):
             self._logger.debug(
                 "=================== remove staples ===================")
             for strand in removed_strands:
-                self._logger.debug("Remove staple strand ID %d  start helix %d  position %d" % (strand.id,
-                                                                                                strand.tour[0].h, strand.tour[0].p))
-            # __for strand in removed_strands
+                self._logger.debug(
+                    f"Remove staple strand ID {strand.id} start helix {strand.tour[0].h} p {strand.tour[0].p}")
 
             self._logger.debug(
                 "=================== retain staples ===================")
             for strand in remaining_strands:
                 if not strand.is_scaffold:
-                    self._logger.debug("Retain staple strand ID %d  start helix %d  position %d" % (strand.id,
-                                                                                                    strand.tour[0].h, strand.tour[0].p))
-            # __for strand in remaining_strands
-        # __if self._logger.getEffectiveLevel() == logging.DEBUG
-    # __def remove_staples
+                    self._logger.debug(
+                        f"Retain staple strand ID {strand.id} start helix {strand.tour[0].h} p {strand.tour[0].p}")
 
     def create_base_connectivity_table(self):
         """ Create the base connectivity table.
 
-            The base connectivity table stores all the bases (DnaBase) for the structure. 
+            The base connectivity table stores all the bases (DnaBase) for the structure.
             Bases are obtained from the base lists stored in the structure helices. The
             base ID is set to its location in the table.
         """
@@ -272,7 +259,6 @@ class DnaStructure(object):
                 base.id = id
                 base_connectivity.append(base)
                 id += 1
-        # __for helix in self.structure_helices_map.values()
 
         if self._logger.getEffectiveLevel() == logging.DEBUG:
             self._logger.debug("Base connectivity table size %d" %
@@ -284,11 +270,8 @@ class DnaStructure(object):
                 down_id = base.down.id if base.down else -1
                 self._logger.debug("%3d id %3d  h %3d  p %3d  up %3d  down %3d  %d" % (i, base.id, base.h, base.p,
                                                                                        up_id, down_id, base.is_scaf))
-            # __for i,base in enumerate(base_connectivity)
-        # __if self._logger.getEffectiveLevel() == logging.DEBUG
 
         self.base_connectivity = base_connectivity
-    # __def create_base_connectivity_table
 
     def generate_maximal_staple_set(self, retain_staples):
         """ Generate the maximal staple set retaining those in the given retained staples list.
@@ -297,10 +280,10 @@ class DnaStructure(object):
                 retain_staples(List[DnaStrand]): The list of staple objects to retain.
 
             Strands are first removed from the structure. New bases are then created and added to helices
-            at locations not occupied by the bases in the retained strands. Crossover information is then 
+            at locations not occupied by the bases in the retained strands. Crossover information is then
             added to the helices by setting down and up pointers for crossover bases.
 
-            The structure base connectivity table is generated and a new list of strands are created from it. 
+            The structure base connectivity table is generated and a new list of strands are created from it.
         """
         self._logger.info("Add maximal staple set")
 
@@ -326,7 +309,6 @@ class DnaStructure(object):
                                      helix.lattice_num, helix.scaffold_bases, helix.staple_bases)
             helix.set_coordinates(axis_coords, axis_frames,
                                   scaffold_coords, staple_coords)
-        # __for helix in self.structure_helices_map.values()
 
         # Create the base connectivity needed for strand generation.
         self.create_base_connectivity_table()
@@ -337,7 +319,6 @@ class DnaStructure(object):
         self._logger.info("Number of added staples %d" %
                           (len(self.strands)-len(remaining_strands)))
         self._logger.info("Total number of strands %d" % len(self.strands))
-    # __def generate_maximal_staple_set
 
     def create_removed_staple_lists(self, retain_staples):
         # Create lists of strands to remove and strands to keep.
@@ -348,9 +329,8 @@ class DnaStructure(object):
                 removed_strands.append(strand)
             else:
                 remaining_strands.append(strand)
-        # __for strand in self.strands
+
         return removed_strands, remaining_strands
-    # __def create_removed_staple_list
 
     def remove_helices_bases(self, removed_strands):
         """ Remove bases for the strands in the list of removed strands from the structure helices.
@@ -358,7 +338,7 @@ class DnaStructure(object):
             Arguments:
                 removed_strands (List[DnaStrand]): The list of strands to remove.
 
-           A list of bases for each helix is first created from removed strands bases. 
+           A list of bases for each helix is first created from removed strands bases.
            The bases for each helix are then removed using that list.
         """
         self._logger.debug(
@@ -374,21 +354,17 @@ class DnaStructure(object):
                 if base.h not in helix_base_map:
                     helix_base_map[base.h] = []
                 helix_base_map[base.h].append(base)
-            # __for base in strand.tour
-        # __for strand in removed_strands
 
         # Remove bases from helices.
         for helix_id, base_list in helix_base_map.items():
             helix = self.structure_helices_map[helix_id]
             helix.remove_bases(base_list)
-        # __for helix_id,base_list in helix_base_map.items
-    # __def remove_helices_bases
 
     def get_staples_by_color(self, staple_colors):
-        """ Get the list of staples by their color ID. 
+        """ Get the list of staples by their color ID.
 
             Arguments:
-                stape_colors (List[int]): The list of staple color IDs. 
+                stape_colors (List[int]): The list of staple color IDs.
 
             Returns the set of staple strands IDs matching the colors in the input list.
         """
@@ -397,10 +373,8 @@ class DnaStructure(object):
             for strand in self.strands:
                 if (not strand.is_scaffold) and (strand.icolor == color):
                     staple_strands.add(strand.id)
-            # __for strand in self.strands
-        # __for color in staple_colors
+
         return staple_strands
-    # __def get_staples_by_color
 
     def set_strand_helix_references(self):
         """ Set the helices referenced by each strand. """
@@ -408,17 +382,15 @@ class DnaStructure(object):
             for base in strand.tour:
                 helix = self.structure_helices_map[base.h]
                 strand.add_helix(helix)
-        # __for strand in self.strands__
-    # __def set_strand_helix_references
 
     def _compute_domains(self):
-        """ Compute DNA domains from strands. 
+        """ Compute DNA domains from strands.
 
-            Domains are computed by traversing the bases in the scaffold and staple strands of a structure. 
-            Domain are bounded by a single->double or double->single strand transitions, crossovers between 
-            helices or strand termination. 
+            Domains are computed by traversing the bases in the scaffold and staple strands of a structure.
+            Domain are bounded by a single->double or double->single strand transitions, crossovers between
+            helices or strand termination.
 
-            Domains are created using an integer ID starting from 0. 
+            Domains are created using an integer ID starting from 0.
             Domain objects are stored in self.domain_list[]. A list of domains is also created for each strand.
         """
         self._logger.debug(
@@ -459,7 +431,7 @@ class DnaStructure(object):
                 base = strand.tour[i]
                 across_sign = 0 if base.across else -1
                 add_curr_base = True
-                #self._logger.debug("Base h %3d  p %3d " % (base.h, base.p))
+                # self._logger.debug("Base h %3d  p %3d " % (base.h, base.p))
                 # if (base.up):
                 #    self._logger.debug("    Base up  h %3d  p %3d " % (base.up.h, base.up.p))
 
@@ -511,18 +483,15 @@ class DnaStructure(object):
                         domain_id = self._add_domain(
                             domain_id, strand, domain_bases, merge_domains, "abase start/end")
                         domain_bases = []
-                # __if curr_across_sign != across_sign
 
                 # Add the current base to the current list of domain bases.
                 if add_curr_base:
                     domain_bases.append(base)
-            # __for i in range(1,len(strand.tour))
 
             # Add a domain for any remaining bases.
             if len(domain_bases) != 0:
                 domain_id = self._add_domain(
                     domain_id, strand, domain_bases, merge_domains, "remaining")
-        # __for strand in self.strands__
 
         self._logger.info("Number of domains computed: %d " %
                           len(self.domain_list))
@@ -537,7 +506,6 @@ class DnaStructure(object):
                 if (base.across is not None):
                     across_base = base.across
                     break
-            # __for base in domain.base_list
             conn_dom = -1
             conn_strand = -1
             if (across_base is not None):
@@ -545,7 +513,6 @@ class DnaStructure(object):
                 conn_strand = across_base.strand
             domain.connected_strand = conn_strand
             domain.connected_domain = conn_dom
-        # __for domain in domain_list
 
     def _check_base_crossover(self, base):
         """ Check if there is a crossover to a different helix at the given base.
@@ -571,8 +538,8 @@ class DnaStructure(object):
         """ Check that the bases in the domains created for a structure are consistent with the bases in the strand
             they are part of.
 
-            The combination of the bases in a list of domains for a strand should equal the number of base and follow the 
-            order of bases in that strand. In addition each domain should only contain bases for a single helix. 
+            The combination of the bases in a list of domains for a strand should equal the number of base and follow
+            the order of bases in that strand. In addition each domain should only contain bases for a single helix.
         """
         self._logger.debug(
             "============================== check domains ============================== ")
@@ -605,7 +572,6 @@ class DnaStructure(object):
                 if len(helix_list) != 1:
                     self._logger.error("The domain %d references more than one helix: %s" % (
                         domain.id, str(helix_list)))
-            # _for domain in domain_list
 
             if len(strand.tour) != len(domain_base_ids):
                 self._logger.error("The number of domain bases %d does not equal the number of strand bases %d." %
@@ -622,11 +588,9 @@ class DnaStructure(object):
                     if sbase.id != dbid:
                         match_failed = True
                         self._logger.error(
-                            "The domain base %d does not match the strand base %d." % (dbid, sbid))
+                            "The domain base %d does not match the strand base %d." % (dbid, sbase))
                         num_failures += 1
                         break
-                # __for sbase,dbid in zip(strand.tour,domain_base_ids)
-            #__if (not strand.is_circular)
 
             # For a failed match check if domain bases are out of order.
             if match_failed:
@@ -643,8 +607,6 @@ class DnaStructure(object):
             else:
                 self._logger.debug(
                     "Check passed: domain bases match strand bases.")
-            # __if match_failed
-        # __for strand in self.strands
 
         if num_failures == 0:
             self._logger.info("Domain consistency check: all domains passed.")
@@ -653,19 +615,19 @@ class DnaStructure(object):
                 "Domain consistency check: %d domains failed." % num_failures)
 
     def _add_domain(self, id, strand, base_list, merge_domains, msg=""):
-        """ Create a DnaDomain object from a list of bases. 
+        """ Create a DnaDomain object from a list of bases.
 
-            The new domain object is added to self.domain_list and to the list of domains for the helix and 
+            The new domain object is added to self.domain_list and to the list of domains for the helix and
             strand it is contained in.
 
-            If a strand is circular then the first domain will be created from the bases at the start of the strand. 
-            The remaining bases at the end of the strand will be merged into the initial domain. 
+            If a strand is circular then the first domain will be created from the bases at the start of the strand.
+            The remaining bases at the end of the strand will be merged into the initial domain.
 
             The merging algorithm works as follows:
 
                 first_dom = the first domain created for the strand.
                 first_sbase = the first base in the first domains base list.
-                base_list = list of bases for a new domain 
+                base_list = list of bases for a new domain
                 ebase = the last base in base_list
 
                       helix 1     .------------se-------------------------.
@@ -675,7 +637,7 @@ class DnaStructure(object):
 
                                           first_sbase
                                                |
-                      1st domain [.------------s]                            
+                      1st domain [.------------s]
 
                       new domain                [e-------------------------.]
                                                  |
@@ -688,12 +650,12 @@ class DnaStructure(object):
 
 
             TODO (DaveP) We need to check for the edge case where a strand crosses over to another helix
-                         a single base away from the strand start. 
+                         a single base away from the strand start.
 
                                     .----------.
                                     |          |
                                     .---..-----.               s = strand start
-                                        ||                     . = crossover 
+                                        ||                     . = crossover
                                   .-----.s---------.
                                   |                |
                                   .----------------.
@@ -704,9 +666,9 @@ class DnaStructure(object):
                 id (int): The domain ID; starts from 0.
                 strand (DnaStrand): The strand the domain is in.
                 base_list (list[DnaBase]): The list of bases in the domain.
-                merge_domains (bool): If True then for circular strands merge the bases from the start of the strand with
-                    those from the end. 
-                msg (string): An optional string used for debugging. 
+                merge_domains (bool): If True then for circular strands merge the
+                    bases from the start of the strand with those from the end.
+                msg (string): An optional string used for debugging.
 
             Returns:
                 id (int): The next domain ID. If a domain is added then id is incremented by one and returned.
@@ -736,12 +698,11 @@ class DnaStructure(object):
                 for base in first_dom.base_list:
                     merged_base_list.append(base)
                 first_dom.base_list = merged_base_list
-        # __if strand.is_circular and len(strand.domain_list):
 
         # If we haven't merged the bases then create a new domain.
         if not domain_was_merged:
-            start_pos = base_list[0].p
-            end_pos = base_list[-1].p
+            # start_pos = base_list[0].p
+            # end_pos = base_list[-1].p
             self._logger.debug("++++ add domain %d   %s" % (id, msg))
             self._logger.debug("     vh:  %4d  -  %4d" %
                                (base_list[0].h, base_list[-1].h))
@@ -755,7 +716,7 @@ class DnaStructure(object):
                 base.domain = domain.id
             self.domain_list.append(domain)
             id = id + 1
-        # __if not domain_was_merged:
+
         return id
 
     def _compute_strand_helix_references(self):
@@ -764,7 +725,6 @@ class DnaStructure(object):
             for base in strand.tour:
                 helix = self.structure_helices_map[base.h]
                 strand.add_helix(helix)
-        # __for strand in self.strands__
 
     def _set_helix_connectivity(self):
         """ For each helix set the list of helices it is connected to. """
@@ -793,7 +753,7 @@ class DnaStructure(object):
             helix.compute_design_crossovers(self)
 
     def write(self, file_name, write_json_format):
-        """ Write the structure information to a file. 
+        """ Write the structure information to a file.
             Structure information is written to files in JSON and plain text formats.
         """
 
@@ -815,7 +775,6 @@ class DnaStructure(object):
                 base_info['sequence'] = base.seq
                 base_info['strand'] = base.strand
                 base_list.append(base_info)
-            # __for base in self.base_connectivity
 
             strand_list = []
             for strand in self.strands:
@@ -876,10 +835,9 @@ class DnaStructure(object):
             for domain in self.domain_list:
                 outfile.write("domain %4d   %d:%s\n" %
                               (domain.id, len(domain.base_list), [base.id for base in domain.base_list]))
-        # __with open(file_name, 'w') as outfile
 
     def write_topology(self, file_name, write_json_format):
-        """ Write the base information with base connectivity to a file. 
+        """ Write the base information with base connectivity to a file.
             Base information is written to files in JSON and plain text formats.
         """
         # Write base information in JSON format.
@@ -898,7 +856,6 @@ class DnaStructure(object):
                 base_info['sequence'] = base.seq
                 base_info['strand'] = base.strand
                 base_list.append(base_info)
-            # __for base in self.base_connectivity
 
             topology = {'bases': base_list}
             with open(file_name, 'w') as outfile:
@@ -918,6 +875,3 @@ class DnaStructure(object):
                 across = base.across.id if base.across else -1
                 outfile.write("%4d %5d %5d %5d %5d %5d  %5s  %5d  %5d\n" %
                               (base.id, base.h, base.p, up, down, across, base.seq, base.strand, base.is_scaf))
-        # __with open(file_name, 'w') as outfile
-
-# __class DnaStructure(object):

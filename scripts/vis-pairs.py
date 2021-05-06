@@ -23,11 +23,8 @@
 
     The script uses the PyOpenGL package for a Python binding to OpenGL.
 """
-import os
 import sys
 import random
-import numpy as np
-from numpy import linalg
 
 try:
     from OpenGL.GL import *
@@ -84,7 +81,6 @@ class DnaModel(object):
             base = Base(strand_id, base_id, coord,
                         paired_base_id, paired_strand_id)
             self.pairs.append(base)
-        # __for i in range(1,len(lines))
 
     def get_strands(self):
         """ Get a list of strands. """
@@ -98,10 +94,9 @@ class DnaModel(object):
                     self.strand_colors[strand_id] = color
                 self.strands[strand_id].append(base)
             print(">>> number of strands %d" % len(self.strands))
-        # __if not self.strands
+
         return self.strands
 
-# __class DnaModel
 
 #====================================================================================#
 #                               g r a p h i c s                                      #
@@ -467,12 +462,9 @@ class VisGraphics(object):
                             pair_coords2[color2] = []
                         pair_coords2[color2].append(
                             (paired_base.coord[0], paired_base.coord[1], paired_base.coord[2], x, y, z))
-                    #__if (paired_base_id != -1)
-                # __for base in base_list
-            # __for strand_id,base_list in strands.items()
+
 
             self.pairs_geometry = [pair_coords1, pair_coords2]
-        # __if not self.pairs_geometry:
 
         glLineWidth(2.0)
         glBegin(GL_LINES)

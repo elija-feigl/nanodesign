@@ -14,8 +14,10 @@
 
 """ This module is used to store coordinate extent information.  """
 
+
 class VisExtent(object):
     """ This class stores extent information. """
+
     def __init__(self):
         self.is_set = False
         self.xmin = 0.0
@@ -25,7 +27,7 @@ class VisExtent(object):
         self.ymax = 1.0
         self.zmax = 1.0
 
-    def set(self,xmin,xmax,ymin,ymax,zmin,zmax):
+    def set(self, xmin, xmax, ymin, ymax, zmin, zmax):
         """ Set the exetent with the given arguments. """
         self.xmin = xmin
         self.ymin = ymin
@@ -38,13 +40,13 @@ class VisExtent(object):
     def reset(self):
         """ Reset the exetent to a unit cube. """
         self.is_set = False
-        self.set(0.0,1.0,0.0,1.0,0.0,1.0)
+        self.set(0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
 
-    def update(self,x,y,z):
+    def update(self, x, y, z):
         """ Update the exetent with the given (x,y,z) coordinate. """
 
         if not self.is_set:
-            self.set(x,x,y,y,z,z)
+            self.set(x, x, y, y, z, z)
             return
 
         if (x < self.xmin):

@@ -30,7 +30,9 @@ from collections import OrderedDict
 import numpy as np
 
 from ...data.base import DnaBase
-from ...data.dna_structure import DnaStructure, DnaStructureHelix
+from ...data.dna_structure_helix import DnaStructureHelix
+from ...data.dna_structure import DnaStructure
+
 from ...data.parameters import DnaPolarity
 from .utils import (
     bp_interp,
@@ -110,8 +112,6 @@ class CadnanoConvertDesign(object):
             base = self.base_map[base_index]
         return base
 
-    # __def _get_base
-
     def create_structure(self, design, modify=False):
         """Create a DNA structure from a caDNAno DNA origami design.
 
@@ -131,7 +131,8 @@ class CadnanoConvertDesign(object):
         self._logger.info(
             "Distance between adjacent helices %g " % self.dna_parameters.helix_distance
         )
-        self._logger.info("Helix radius %g " % self.dna_parameters.helix_radius)
+        self._logger.info("Helix radius %g " %
+                          self.dna_parameters.helix_radius)
         # Reset these in case this function is called multiple times.
         self.base_id = 0
         self.base_map = OrderedDict()
@@ -177,7 +178,6 @@ class CadnanoConvertDesign(object):
                     )
                 )
             n += 1
-        # __for bindex, base in dna_model.base_map.items():
 
         # Create an array of all of the DnaBase objects created for the design.
         base_connectivity = [None] * num_bases
@@ -202,7 +202,6 @@ class CadnanoConvertDesign(object):
                     "%4d  id %4d  h %4d  p %4d  up %4d  down %4d  across %4d  scaf %d"
                     % (i, base.id, base.h, base.p, up, down, across, base.is_scaf)
                 )
-        # __if self._logger.getEffectiveLevel() == logging.DEBUG
 
         # Remove deleted bases.
         if modify:
@@ -210,7 +209,8 @@ class CadnanoConvertDesign(object):
             print_base_connectivity = False
             if print_base_connectivity:
                 self._logger.info(
-                    "Size of topology after deletes %d" % len(base_connectivity)
+                    "Size of topology after deletes %d" % len(
+                        base_connectivity)
                 )
                 self._logger.info(
                     "---------- base_connectivity after deletes ---------- "
@@ -226,8 +226,6 @@ class CadnanoConvertDesign(object):
                         "%4d: base id %4d  up %4s  down %4s  across %4s  h %4d  p %4d  scaf %d"
                         % (i, base.id, up, down, across, base.h, base.p, base.is_scaf)
                     )
-            # __if print_base_connectivity_p
-        # __if (modify)
 
         # Add inserted bases.
         if modify:
@@ -235,7 +233,8 @@ class CadnanoConvertDesign(object):
             print_base_connectivity = False
             if print_base_connectivity:
                 self._logger.info(
-                    "Size of topology after inserts %d" % len(base_connectivity)
+                    "Size of topology after inserts %d" % len(
+                        base_connectivity)
                 )
                 self._logger.info(
                     "---------- base_connectivity after inserts ---------- "
@@ -248,8 +247,6 @@ class CadnanoConvertDesign(object):
                         "%4d: base id %4d  up %4s  down %4s  across %4s  h %4d  p %4d  scaf %d"
                         % (i, base.id, up, down, across, base.h, base.p, base.is_scaf)
                     )
-            # __if print_base_connectivity_p
-        # __if (modify)
 
         # Create a DnaStructure object to store the base connectivty and helices.
         name = "dna structure"
@@ -278,7 +275,6 @@ class CadnanoConvertDesign(object):
                         strand.tour[0].p,
                     )
                 )
-        # __if self._logger.getEffectiveLevel() == logging.DEBUG
 
         # Calculate staple ends.
         self.dna_structure.staple_ends = self._calculate_staple_ends(strands)
@@ -288,11 +284,10 @@ class CadnanoConvertDesign(object):
 
         return self.dna_structure
 
-    # __def create_structure
-
     def _delete_bases(self, helices, base_connectivity):
         """Remove bases from helices and base_connectivity."""
-        self._logger.debug("==================== delete bases ====================")
+        self._logger.debug(
+            "==================== delete bases ====================")
 
         # Delete bases from each helix.
         num_deleted_bases = 0
@@ -303,8 +298,6 @@ class CadnanoConvertDesign(object):
             for base in deleted_bases:
                 self._logger.debug("Delete base %d" % base.id)
                 base_connectivity.remove(base)
-            # __for base in deleted_bases
-        # __for helix in helices
 
         # Renumber base IDs.
         if num_deleted_bases != 0:
@@ -321,7 +314,8 @@ class CadnanoConvertDesign(object):
         The DnaBase.num_inserts attribute determines the number of bases inserted at that base.
         Bases are inserted in the 3' direction.
         """
-        self._logger.debug("==================== insert bases ====================")
+        self._logger.debug(
+            "==================== insert bases ====================")
         num_bases = len(base_connectivity)
         base_id = num_bases
         y_up_vec = np.array([0, 1.0, 0], dtype=float)
@@ -342,10 +336,10 @@ class CadnanoConvertDesign(object):
                 if base.num_insertions != 0:
                     base_inserts[base.id] = base
                     self._logger.debug(
-                        "Insert base id %d  h %d  pos %d" % (base.id, base.h, base.p)
+                        "Insert base id %d  h %d  pos %d" % (
+                            base.id, base.h, base.p)
                     )
-            # __for base in helix.scaffold_bases
-        # __for helix in helices
+
         self._logger.debug("Number of base inserts %d" % len(base_inserts))
         if len(base_inserts) == 0:
             return
@@ -402,7 +396,8 @@ class CadnanoConvertDesign(object):
             curr_across = curr_base.across
 
             if curr_across is not None:
-                self._logger.debug("Current across base ID %d" % curr_across.id)
+                self._logger.debug(
+                    "Current across base ID %d" % curr_across.id)
                 # neighbor_across_up = curr_across.up
                 processed_bases.add(curr_across.id)
                 # Make sure that the 3'-neighbor of the current base is to the right.
@@ -493,10 +488,12 @@ class CadnanoConvertDesign(object):
         )
         last_base = None
         self._logger.debug(
-            "Current coords %g %g %g" % (curr_coords[0], curr_coords[1], curr_coords[2])
+            "Current coords %g %g %g" % (
+                curr_coords[0], curr_coords[1], curr_coords[2])
         )
         self._logger.debug(
-            "Next coords %g %g %g" % (next_coords[0], next_coords[1], next_coords[2])
+            "Next coords %g %g %g" % (
+                next_coords[0], next_coords[1], next_coords[2])
         )
         self._logger.debug("Insert ssDNA")
         self._logger.debug("num_inserts %d " % num_inserts)
@@ -605,7 +602,8 @@ class CadnanoConvertDesign(object):
             new_bases[curr_base.h].append(base2)
             base_id += 1
             self._logger.debug(
-                "Add two bases  Base1 id %d   Base 2 id %d " % (base1.id, base2.id)
+                "Add two bases  Base1 id %d   Base 2 id %d " % (
+                    base1.id, base2.id)
             )
             base_connectivity.append(base1)
             base_connectivity.append(base2)
@@ -700,8 +698,10 @@ class CadnanoConvertDesign(object):
             scaffold_bases, staple_bases = self._create_single_helix(
                 vhelix, lattice_type
             )
-            self._logger.debug("Number of scaffold bases %d " % len(scaffold_bases))
-            self._logger.debug("Number of staple bases %d " % len(staple_bases))
+            self._logger.debug("Number of scaffold bases %d " %
+                               len(scaffold_bases))
+            self._logger.debug("Number of staple bases %d " %
+                               len(staple_bases))
             if self._logger.getEffectiveLevel() == logging.DEBUG:
                 s = ""
                 for base in scaffold_bases:
@@ -831,13 +831,15 @@ class CadnanoConvertDesign(object):
         new_base.up = five_base
 
         # Add the 3'-neighbor
-        base_index = self._get_base_index(base.final_strand, base.final_base, base_type)
+        base_index = self._get_base_index(
+            base.final_strand, base.final_base, base_type)
         three_base = self._get_base(base_index)
         new_base.down = three_base
 
         # Watson-Crick neighbor.
         if (paired_base.initial_strand >= 0) or (paired_base.final_strand >= 0):
-            base_index = self._get_base_index(helix_num, helix_pos, not base_type)
+            base_index = self._get_base_index(
+                helix_num, helix_pos, not base_type)
             wc_base = self._get_base(base_index)
             new_base.across = wc_base
         else:
@@ -883,27 +885,34 @@ class CadnanoConvertDesign(object):
             staple_crossovers = vhelix.possible_staple_crossovers
             scaffold_crossovers = vhelix.possible_scaffold_crossovers
             self._logger.debug(
-                "            num staple cross-overs: %d " % len(staple_crossovers)
+                "            num staple cross-overs: %d " % len(
+                    staple_crossovers)
             )
             shelix = structure_helices_coord_map[(row, col)]
             for cross_vh, index in staple_crossovers:
                 self._logger.debug(
-                    "            staple cross-over: %d,%d " % (cross_vh.num, index)
+                    "            staple cross-over: %d,%d " % (
+                        cross_vh.num, index)
                 )
-                cross_sh = structure_helices_coord_map[(cross_vh.row, cross_vh.col)]
+                cross_sh = structure_helices_coord_map[(
+                    cross_vh.row, cross_vh.col)]
                 coord = init_coord + np.array([0, dist_bp * index, 0])
-                shelix.possible_staple_crossovers.append((cross_sh, index, coord))
+                shelix.possible_staple_crossovers.append(
+                    (cross_sh, index, coord))
             self._logger.debug(
-                "            num scaffold cross-overs: %d " % len(scaffold_crossovers)
+                "            num scaffold cross-overs: %d " % len(
+                    scaffold_crossovers)
             )
             for cross_vh, index in scaffold_crossovers:
                 self._logger.debug(
-                    "            scaffold cross-over: %d,%d " % (cross_vh.num, index)
+                    "            scaffold cross-over: %d,%d " % (
+                        cross_vh.num, index)
                 )
-                cross_sh = structure_helices_coord_map[(cross_vh.row, cross_vh.col)]
+                cross_sh = structure_helices_coord_map[(
+                    cross_vh.row, cross_vh.col)]
                 coord = init_coord + np.array([0, dist_bp * index, 0])
-                shelix.possible_scaffold_crossovers.append((cross_sh, index, coord))
-        # __for vhelix in design.helices
+                shelix.possible_scaffold_crossovers.append(
+                    (cross_sh, index, coord))
 
     def _set_strands_colors(self, strands):
         """Set the color for staple strands.
@@ -925,8 +934,6 @@ class CadnanoConvertDesign(object):
                 ):
                     strand.color = staple_color.rgb
                     strand.icolor = staple_color.color
-            # __for color in self.staple_colors
-        # __for strand in strands
 
     def set_sequence_from_scaffold(self, dna_structure, modified_structure, sequence):
         """Set the sequence information for the staple and scaffold strands using a known
@@ -947,7 +954,8 @@ class CadnanoConvertDesign(object):
         sequence_length = len(sequence)
         self._logger.debug("sequence length: %d" % len(sequence))
         base_connectivity = dna_structure.base_connectivity
-        self._logger.debug("Size of base_connectivity %d" % len(base_connectivity))
+        self._logger.debug("Size of base_connectivity %d" %
+                           len(base_connectivity))
         strands = dna_structure.strands
         ordered_traverse = True
         ordered_traverse = False
@@ -992,11 +1000,14 @@ class CadnanoConvertDesign(object):
                     if not modified_structure:
                         if across_base is not None:
                             if base.num_deletions != 0:
-                                self._logger.debug("deleted base: id %d " % base.id)
+                                self._logger.debug(
+                                    "deleted base: id %d " % base.id)
                                 letter = "N"
                             elif base.num_insertions != 0:
-                                self._logger.debug("inserted base: id %d " % base.id)
-                                strand.insert_seq.append(sequence[seq_index + 1])
+                                self._logger.debug(
+                                    "inserted base: id %d " % base.id)
+                                strand.insert_seq.append(
+                                    sequence[seq_index + 1])
                                 seq_index += 2
                             else:
                                 seq_index += 1
@@ -1030,8 +1041,6 @@ class CadnanoConvertDesign(object):
                         elif across_base is not None:
                             base = across_base
                             even_vh = base.h % 2
-
-                # __for j in range(0,len(tour)):
 
             else:
                 self._logger.debug(
@@ -1079,8 +1088,6 @@ class CadnanoConvertDesign(object):
 
                     if base.across is not None:
                         base.across.seq = self._wspair(letter)
-                # __for i in range(0,len(strand.tour))
-        # __for strand in strands
 
         print_strands = True
         print_strands = False
@@ -1099,9 +1106,6 @@ class CadnanoConvertDesign(object):
                         "    vhelix: %d  pos: %d  seq: %s"
                         % (int(base.h), int(base.p), base.seq)
                     )
-            # __for i in range(0,len(strands))
-
-    # __def set_sequence_from_name
 
     def set_sequence(self, dna_structure, modified_structure, sequence):
         """Set the sequence information for the staple and scaffold strands.
@@ -1134,7 +1138,6 @@ class CadnanoConvertDesign(object):
                     base.seq = seq.letters[j]
                     if base.across is not None:
                         base.across.seq = self._wspair(seq.letters[j])
-                # __for j
 
             else:
                 seq_index = 0
@@ -1151,11 +1154,6 @@ class CadnanoConvertDesign(object):
                     base.seq = letter
                     if base.across is not None:
                         base.across.seq = self._wspair(letter)
-                # __for j
-
-        # __for i
-
-    # __def set_sequence
 
     def _wspair(self, x):
         """Match a base with its complementary base."""
@@ -1193,6 +1191,3 @@ class CadnanoConvertDesign(object):
                 return list(self.rgb)
             else:
                 return []
-
-
-# __class CadnanoTopology(object)

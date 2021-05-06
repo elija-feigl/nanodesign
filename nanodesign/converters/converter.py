@@ -105,7 +105,8 @@ class Converter(object):
             _, file_extension = os.path.splitext(seq_file_name)
             if file_extension == ".csv":
                 sequences: list = cadnano_reader.read_csv(seq_file_name)
-                self.logger.debug(f"set all sequences from file: {seq_file_name}")
+                self.logger.debug(
+                    f"set all sequences from file: {seq_file_name}")
                 self.cadnano_convert_design.set_sequence(
                     self.dna_structure, self.modify, sequences
                 )
@@ -114,7 +115,8 @@ class Converter(object):
                     sequence: str = f.read().strip().lower()
                 if not all(c in "atgc" for c in sequence):
                     self.logger.error(f"Faulty sequence file {seq_file_name}.")
-                self.logger.debug(f"set scaffold sequence from file: {seq_file_name}")
+                self.logger.debug(
+                    f"set scaffold sequence from file: {seq_file_name}")
                 self.cadnano_convert_design.set_sequence_from_scaffold(
                     self.dna_structure, self.modify, sequence
                 )
@@ -125,7 +127,8 @@ class Converter(object):
         elif seq_name is not None:
             sequence = dna_sequence_data.get(seq_name, None)
             if sequence is None:
-                self.logger.error(f"The sequence name {seq_name} is not recognized.")
+                self.logger.error(
+                    f"The sequence name {seq_name} is not recognized.")
             self.logger.debug(f"set sequence from  name: {seq_name}.")
             self.cadnano_convert_design.set_sequence_from_scaffold(
                 self.dna_structure, self.modify, sequence
@@ -217,9 +220,9 @@ class Converter(object):
                 retain_colors = [
                     int(color) for color in retain_tokens[1:] if color != ""
                 ]
-            # __if retain_tokens[0] == "retain"
-            retain_staples = self.dna_structure.get_staples_by_color(retain_colors)
-        # __if len(tokens) == 2
+
+            retain_staples = self.dna_structure.get_staples_by_color(
+                retain_colors)
 
         # Remove all staple strands except those given in retain_staples[].
         if operation == "delete":
@@ -228,8 +231,6 @@ class Converter(object):
         # Generaqte the maximal staple strand set except those given in retain_staples[].
         elif operation == "maximal_set":
             self.dna_structure.generate_maximal_staple_set(retain_staples)
-
-    # __def perform_staple_operations
 
     def transform_structure(self, transform):
         """Apply 3D geometric transformations to a selected set of helices.
@@ -260,21 +261,21 @@ class Converter(object):
                         helix_ids.append(id)
                 elif s:
                     helix_ids.append(int(s))
-            # __for s in helix_tokens
 
             # Check helix IDs.
             helices = []
             for hid in helix_ids:
                 helix = helices_map.get(hid, None)
                 if not helix:
-                    self.logger.error("Helix ID %d not found in dna structure." % hid)
                     self.logger.error(
-                        "DNA Structure has helix IDs %s " % str(helices_map.keys())
+                        "Helix ID %d not found in dna structure." % hid)
+                    self.logger.error(
+                        "DNA Structure has helix IDs %s " % str(
+                            helices_map.keys())
                     )
                     return
                 helices.append(helix)
-                # __if not helix:
-            # __for hid in helix_ids
+
             self.logger.info("Helix group %s" % str(helix_ids))
 
             # Parse transformations.
@@ -305,35 +306,29 @@ class Converter(object):
                     use_connectors = True
                     strand_name = xform_tokens[n + 1]
                     n += 1
-                # __if s == "rotate"
+
                 n += 1
-            # __while (n != len(xform_tokens))
 
             # Automatically generate the transformation the moves one group of helices to another
             # using the connections of distance crossovers.
             if use_connectors:
-                self.logger.info("Use connectors with strand '%s'" % strand_name)
+                self.logger.info(
+                    "Use connectors with strand '%s'" % strand_name)
                 connector_strands = []
                 for strand in self.dna_structure.strands:
                     if strand.is_scaffold:
                         connector_strands.append(strand)
                 helix_dist = self.dna_structure.dna_parameters.helix_distance
-                xform_from_connectors(connector_strands, helix_ids, helix_dist, xform)
-            # __if use_connectors
+                xform_from_connectors(
+                    connector_strands, helix_ids, helix_dist, xform)
 
             helix_group_xforms.append(HelixGroupXform(helices, xform))
-        # __for helix_group in helix_groups
 
         # Apply the transformation to the dna structure helices.
         apply_helix_xforms(helix_group_xforms)
-
-    # __def transform_structure
 
     def set_module_loggers(self, names):
         module_names = names.split(",")
         for module in module_names:
             logger = logging.getLogger(module)
             logger.setLevel(logging.DEBUG)
-        # __for module in modules
-
-    # __def set_debugging_loggers

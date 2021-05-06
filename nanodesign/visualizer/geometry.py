@@ -40,10 +40,8 @@
     will be slow.
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
-import os
-import sys
-import random
+from abc import ABCMeta, abstractmethod
+
 import numpy as np
 from .extent import VisExtent
 from math import sqrt, cos, sin, pi, acos
@@ -62,16 +60,16 @@ class VisGeometry(object):
     """ This is the VisGeometry base class.
 
         Attributes:
-            data (List): The geometry generic data. 
+            data (List): The geometry generic data.
             color (List[float]): The default geometry RGBA color. This is a list of four floats.
-            entity_indexes (List[int]): The list of entiy indexes for the geometry. 
+            entity_indexes (List[int]): The list of entiy indexes for the geometry.
             extent (VisExtent): The geometry 3D extent.
-            id (int): The geometry ID; just the count of the current number of geometries. 
+            id (int): The geometry ID; just the count of the current number of geometries.
             intersect_index (int): The last intersection index into the geometry.
             intersect_point (List[Float]): The last intersection point for the geometry.
             line_width (Float): The geometry default rendering line width.
             name (String): The geometry name.
-            num_vertices (int): The number of verices in the geometry. 
+            num_vertices (int): The number of verices in the geometry.
             selected (bool): If true then the geometry has been selected.
             selected_callback (Method): The function to call when the geometry is selected.
             selected_entity (int): The last entity selected.
@@ -108,7 +106,7 @@ class VisGeometry(object):
         VisGeometry.num_geometries += 1
 
     @abstractmethod
-    def render():
+    def render(self):
         """ Render geometry. """
         raise NotImplementedError
 
@@ -118,10 +116,11 @@ class VisGeometry(object):
         raise NotImplementedError
 
     def select_entity(self):
-        """ Select an entity using an index into a geometry's data (e.g. vertices) calculated by intersecting a 
-            geometry with a pick line. 
+        """ Select an entity using an index into a geometry's data (e.g. vertices)
+            calculated by intersecting a geometry with a pick line.
 
-            The self.entity_indexes list stores the index range for each entity in the geometry. Searching this list will
+            The self.entity_indexes list stores the index range for each entity
+            in the geometry. Searching this list will
             will determine the entity referenced by the index.
         """
         if self.entity_indexes is None:
@@ -132,25 +131,23 @@ class VisGeometry(object):
                 if self.intersect_index < index:
                     self.selected_entity = entity
                     break
-            # __for entity,index in enumerate(self.entity_indexes)
-        # __if self.intersect_point
 
     def update_stats(self, size_conn, size_verts):
         VisGeometry.vertices_size += size_verts
         VisGeometry.connectivity_size = size_conn
-        #print("Number of geometries %d" % VisGeometry.num_geometries)
-        #print("Size of connectivity %d" % VisGeometry.connectivity_size)
-        #print("Size of vertices %d" % VisGeometry.vertices_size)
+        # print("Number of geometries %d" % VisGeometry.num_geometries)
+        # print("Size of connectivity %d" % VisGeometry.connectivity_size)
+        # print("Size of vertices %d" % VisGeometry.vertices_size)
 
 
 class VisGeometryBox(VisGeometry):
     """ This class is used to display the outline of a 3D box. """
 
     def __init__(self, name, extent):
-        """ Initialize a VisGeometryBox object. 
+        """ Initialize a VisGeometryBox object.
             Arguments:
                 name (String): The geometry name.
-                extent (VisExtent): The box extent. 
+                extent (VisExtent): The box extent.
         """
         VisGeometry.__init__(self, name)
         xmin, xmax, ymin, ymax, zmin, zmax = extent.get_bounds()
@@ -259,7 +256,7 @@ class VisGeometryBox(VisGeometry):
             if ipt:
                 intersect_indexes.append(i)
                 intersect_points.append(ipt)
-        # __for i in range(0,self.num_vertices)
+
         if len(intersect_points) != 0:
             i, pt = get_closest_point(intersect_points, point1)
             self.intersect_point = pt
@@ -268,18 +265,18 @@ class VisGeometryBox(VisGeometry):
 
 
 class VisGeometryLines(VisGeometry):
-    """ This class is used to display pairs of lines. 
+    """ This class is used to display pairs of lines.
 
         Each pair of the geometry's vertices is used to display a line. Arrowheads may be drawn at the
-        end of each line. 
+        end of each line.
     """
 
     def __init__(self, name, points, arrows=False):
-        """ Initialize a VisGeometryLines object. 
+        """ Initialize a VisGeometryLines object.
             Arguments:
                 name (String): The geometry name.
-                points (List(List[Float]): The list of 3D points defining the lines endpoints. 
-                arrows (bool): If true then create arrowheads at the end of each line. 
+                points (List(List[Float]): The list of 3D points defining the lines endpoints.
+                arrows (bool): If true then create arrowheads at the end of each line.
         """
         VisGeometry.__init__(self, name)
         self.num_arrow_vertices = 0
@@ -307,9 +304,9 @@ class VisGeometryLines(VisGeometry):
                 for vert in arrow_verts:
                     self.arrow_vertices[n, :] = vert
                     n += 1
-            # __for i in range(0,len(points)-1)
+
             self.update_stats(0, len(self.arrow_vertices))
-        # __if arrows
+
         self.update_stats(0, len(self.vertices))
 
     def intersect_line(self, point1, point2):
@@ -328,7 +325,6 @@ class VisGeometryLines(VisGeometry):
             if ipt:
                 intersect_indexes.append(i)
                 intersect_points.append(ipt)
-        # __for i in range(0,self.num_vertices)
 
         # Set the selected entity.
         if len(intersect_points) != 0:
@@ -377,29 +373,29 @@ class VisGeometryLines(VisGeometry):
 
 
 class VisGeometryPath(VisGeometry):
-    """ This class is used to display a contiguous set of points as a solid path. 
+    """ This class is used to display a contiguous set of points as a solid path.
 
         Attributes:
-            select_vertex (bool): If true then select path vertices rather than path lines. 
+            select_vertex (bool): If true then select path vertices rather than path lines.
             sphere_radius (Float): The radius of path vertex spheres.
             start_marker (bool): If true then display the start of the path with a sphere.
             start_marker_radius (Float): The radius of the sphere at the path start.
             start_sphere (VisGeometrySphere): The geometry object for the start sphere.
-            vertex_spheres (List[VisGeometrySphere]): The list of geometry objects for vertex spheres. 
+            vertex_spheres (List[VisGeometrySphere]): The list of geometry objects for vertex spheres.
             sphere_selected (bool): If true then a sphere has been selected.
             bend_points (List[List[Float]]): The list of points where the path bends to cross over to an adjacent helix.
-            bend_index (List[Int]): The list of indexes into the points path where the path bends to cross over to an 
+            bend_index (List[Int]): The list of indexes into the points path where the path bends to cross over to an
                 adjacent helix. This is used to assign colors to arrows marking the path direction.
     """
 
     def __init__(self, name, points, show_vertices=False, show_arrows=False, **kwargs):
-        """ Initialize a VisGeometryLines object. 
+        """ Initialize a VisGeometryLines object.
 
             Arguments:
                 name (String): The geometry name.
-                points (List(List[Float]): The list of 3D points defining the path. 
-                show_vertices(bool): If true then display spheres at the path verticess. 
-                show_arrows (bool): If true then display arrows at the mid-sections of bends in the path. 
+                points (List(List[Float]): The list of 3D points defining the path.
+                show_vertices(bool): If true then display spheres at the path verticess.
+                show_arrows (bool): If true then display arrows at the mid-sections of bends in the path.
         """
         VisGeometry.__init__(self, name)
         self.start_marker = False
@@ -415,16 +411,16 @@ class VisGeometryPath(VisGeometry):
         for key, value in kwargs.items():
             if key == "colors":
                 colors = value
-        # __for key, value in kwargs.items()
+
         self._create_geometry(points, colors, show_vertices, show_arrows)
 
     def _create_geometry(self, points, colors, show_vertices, show_arrows):
-        """ Create the geometry for the path. 
+        """ Create the geometry for the path.
 
             Arguments:
-                points (List(List[Float]): The list of 3D points defining the path. 
-                show_vertices(bool): If true then display spheres at the path verticess. 
-                show_arrows (bool): If true then display arrows at the mid-sections of bends in the path. 
+                points (List(List[Float]): The list of 3D points defining the path.
+                show_vertices(bool): If true then display spheres at the path verticess.
+                show_arrows (bool): If true then display arrows at the mid-sections of bends in the path.
         """
         self.num_vertices = len(points)
         self.vertices = np.zeros((self.num_vertices, 3), dtype=float)
@@ -438,7 +434,6 @@ class VisGeometryPath(VisGeometry):
                     name, self.vertices[i], self.sphere_radius)
                 sphere.color = self.color
                 self.vertex_spheres.append(sphere)
-        # __for i,point in enumerate(points)
 
         # If showing arrows then calculate the bend points and
         # the vertices for arrow heads.
@@ -464,8 +459,7 @@ class VisGeometryPath(VisGeometry):
                     if self.colors:
                         self.bend_index.append(i)
                         self.bend_index.append(i)
-                # __if dist > 0.4
-            # __for i in range(0,len(points)-1)
+
             last_point = points[-1]
             self.bend_points.append(last_point[:])
             self.bend_index.append(len(points)-1)
@@ -493,7 +487,7 @@ class VisGeometryPath(VisGeometry):
                     u = vector_norm(dir)
                     v, w = compute_basis(u)
                     cpt = [point1[j] + 0.5*dist*u[j] for j in range(3)]
-                # __if i == len(self.bend_points)-1
+
                 scale = 0.2
                 hs = 0.05*scale
                 asc = 0.04
@@ -507,15 +501,13 @@ class VisGeometryPath(VisGeometry):
                     self.arrow_vertices[n+5, j] = cpt[j] + hs*u[j] + asc*w[j]
                     self.arrow_vertices[n+6, j] = cpt[j] + scale*u[j]
                     self.arrow_vertices[n+7, j] = cpt[j] + hs*u[j] - asc*w[j]
-                # __for j in range(0,3)
+
                 if self.colors:
                     k = (self.bend_index[i] + self.bend_index[i+1]) / 2
                     for j in range(0, 8):
                         self.arrow_colors[n+j, :] = self.colors[k]
-                # __if self.bend_colors
+
                 n += 8
-            # __for i in range(0,len(self.bend_points)/2)
-    # __def _create_geometry
 
     def intersect_line(self, point1, point2):
         """ Intersect the geometry with a line. """
@@ -536,7 +528,6 @@ class VisGeometryPath(VisGeometry):
             if ipt:
                 intersect_indexes.append(i)
                 intersect_points.append(ipt)
-        # __for i in range(0,self.num_vertices)
 
         # Intersect vertex spheres.
         num_ipt = len(intersect_points)
@@ -546,8 +537,6 @@ class VisGeometryPath(VisGeometry):
                 if sphere.intersect_line(point1, point2):
                     intersect_indexes.append(i)
                     intersect_points.append(sphere.center)
-            # __for i,sphere in enumerate(self.vertex_spheres)
-        # __if self.vertex_spheres
 
         # Set the selected entity.
         if len(intersect_points) != 0:
@@ -557,7 +546,6 @@ class VisGeometryPath(VisGeometry):
             self.selected_entity = self.intersect_index
             if i > num_ipt-1:
                 self.sphere_selected = True
-        # __if len(intersect_points) != 0
 
         # Determine the closest vertex to the selected point. We will use this
         # to select the nearest vertex to the pick point if needed.
@@ -577,7 +565,7 @@ class VisGeometryPath(VisGeometry):
                     self.selected_vertex = i2
                 else:
                     self.selected_vertex = i1
-        # __if len(intersect_points) != 0
+
         return (self.intersect_point is not None)
 
     def render(self):
@@ -626,13 +614,11 @@ class VisGeometryPath(VisGeometry):
                     continue
                 sphere.color = self.color
                 sphere.render()
-            # __for i,sphere in enumerate(self.vertex_spheres)
 
             if highlight:
                 sphere = self.vertex_spheres[self.selected_entity]
                 sphere.color = self.highlight_color
                 sphere.render()
-        # __if self.vertex_spheres
 
         # Render the start sphere.
         if self.start_marker:
@@ -653,7 +639,11 @@ class VisGeometryPath(VisGeometry):
 
         # Highlight selected entity. This will either be a line between two
         # vertices or a region around the selected vertix.
-        if self.selected and (self.entity_indexes is not None) and (self.selected_entity is not None) and (not self.sphere_selected):
+        cond = (self.selected and
+                (self.entity_indexes is not None) and
+                (self.selected_entity is not None) and
+                (not self.sphere_selected))
+        if cond:
             glColor4fv(self.highlight_color)
             glLineWidth(8.0)
             glBegin(GL_LINES)
@@ -685,15 +675,11 @@ class VisGeometryPath(VisGeometry):
                     glVertex3dv(pt2)
                     glVertex3dv(pt2)
                     glVertex3dv(mpt2)
-                # __if self.selected_vertex == 0
-
             # Highlight a line between vertices.
             else:
                 for i in range(i1, i2+1):
                     glVertex3dv(self.vertices[i])
-            # __if self.select_vertex
             glEnd()
-        # __if self.selected and (self.entity_indexes is not  None) and (self.selected_entity is not  None) and (not self.sphere_selected)
 
         # Display arrows at the mid points between bends and markers at bend points.
         if self.bend_points:
@@ -714,19 +700,17 @@ class VisGeometryPath(VisGeometry):
             glEnd()
             glEnable(GL_LIGHTING)
 
-    # __def render(self)
-
 
 class VisGeometrySphere(VisGeometry):
     """ This class is used to display a solid sphere. """
 
     def __init__(self, name, center, radius, num_sides=20):
-        """ Initialize a VisGeometryLines object. 
+        """ Initialize a VisGeometryLines object.
 
             Arguments:
                 name (String): The geometry name.
-                center (List[Float]): The center of the sphere.                
-                radius (Float): The sphere radius. 
+                center (List[Float]): The center of the sphere.
+                radius (Float): The sphere radius.
                 num_sides (int): The number of sides (polygons) used to represent the sphere.
         """
         VisGeometry.__init__(self, name)
@@ -736,9 +720,9 @@ class VisGeometrySphere(VisGeometry):
 
     def intersect_line(self, point1, point2):
         """ Intersect the sphere with a line. """
-        x0 = point1[0]
-        y0 = point1[1]
-        z0 = point1[2]
+        # x0 = point1[0]
+        # y0 = point1[1]
+        # z0 = point1[2]
         v1 = [point1[i] - point2[i] for i in range(3)]
         v2 = [point1[i] - self.center[i] for i in range(3)]
         xd = v1[0]
@@ -768,35 +752,34 @@ class VisGeometrySphere(VisGeometry):
             glutSolidSphere(self.radius, self.num_sides, self.num_sides)
         finally:
             glPopMatrix()
-    # __def render(self)
 
 
 class VisGeometryCylinder(VisGeometry):
-    """ This class is used to display a cylinder. 
+    """ This class is used to display a cylinder.
 
         Attributes:
-            axis (List[Float]): The cylinder axis; defined by point2-point1. 
+            axis (List[Float]): The cylinder axis; defined by point2-point1.
             capped (Tuple(bool,bool)): Flags for capping the ends of the cylinder.
             length (Float): The length of the cylinder; defined by |point1-point2|.
-            normals ((NumPy Nx3 ndarray[float]): The cylinder polygons vertex normals. 
-            num_tri (int): The number of triangles used to represent the cylinder. 
-            point1 (List[Float]): The first endpoint defining the cylinder axis. 
-            point2 (List[Float]): The second endpoint defining the cylinder axis. 
+            normals ((NumPy Nx3 ndarray[float]): The cylinder polygons vertex normals.
+            num_tri (int): The number of triangles used to represent the cylinder.
+            point1 (List[Float]): The first endpoint defining the cylinder axis.
+            point2 (List[Float]): The second endpoint defining the cylinder axis.
             radius (Float): The cylinder radius.
-            tri_conn ((NumPy 3*num_tri ndarray[int]): The cylinder polygons connectivity. 
+            tri_conn ((NumPy 3*num_tri ndarray[int]): The cylinder polygons connectivity.
             unit_axis (List[Float]): The normalized cylinder axis.
 
         The cylinder orientation (axis) and length is defined by two points.
     """
 
     def __init__(self, name, radius, point1, point2, num_sides=20, capped=(True, True)):
-        """ Initialize a VisGeometryCylinder object. 
+        """ Initialize a VisGeometryCylinder object.
 
             Arguments:
                 name (String): The geometry name.
                 radius (Float): The cylinder radius.
-                point1 (List[Float]): The first endpoint defining the cylinder axis. 
-                point2 (List[Float]): The second endpoint defining the cylinder axis. 
+                point1 (List[Float]): The first endpoint defining the cylinder axis.
+                point2 (List[Float]): The second endpoint defining the cylinder axis.
                 num_sides (int): The number of sides (polygons) used to represent the cylinder.
                 capped (Tuple(bool,bool)): Flags for capping the ends of the cylinder.
         """
@@ -829,16 +812,15 @@ class VisGeometryCylinder(VisGeometry):
             # Set the selected entity. A cylinder has only one entity.
             self.selected_entity = 0
         return (ipt is not None)
-    # __def intersect_line(self, point1, point2)
 
     def intersect_cyl_line(self, point1, point2):
-        """ Calculate the intersection point between a line and the cylinder. 
+        """ Calculate the intersection point between a line and the cylinder.
 
             Arguments:
-                point1 (List[Float]): The first endpoint defining the line . 
-                point2 (List[Float]): The second endpoint defining the line. 
+                point1 (List[Float]): The first endpoint defining the line .
+                point2 (List[Float]): The second endpoint defining the line.
 
-            Returns the intersection point. 
+            Returns the intersection point.
         """
         ipt = None
         c = self.point1
@@ -884,7 +866,6 @@ class VisGeometryCylinder(VisGeometry):
                     cpt_in = True
                     tc = tc2
                     cpt = cpt2
-        # __if vdh != 0.0
 
         if cpt_in:
             ipt = cpt
@@ -935,7 +916,6 @@ class VisGeometryCylinder(VisGeometry):
                 ipt = [o[i] + t*v[i] for i in range(3)]
 
         return ipt
-    # __def intersect_cyl_line(self, point1, point2)
 
     def render(self):
         """ Render the cylinder. """
@@ -968,7 +948,6 @@ class VisGeometryCylinder(VisGeometry):
                 glVertex3f(x, y, z)
                 conn_count += 1
             glEnd()
-        # __for i in range(0,num)__
 
         # Render the cap polygons.
         for i in range(0, (cap1+cap2)*num_sides):
@@ -989,7 +968,7 @@ class VisGeometryCylinder(VisGeometry):
                 glVertex3f(x, y, z)
                 conn_count += 1
             glEnd()
-        # __for i in range(0,num)__
+
         glDisable(GL_LIGHTING)
 
         # If the cylinder is selected then hightlight its boundng circles at its ends and
@@ -1049,10 +1028,8 @@ class VisGeometryCylinder(VisGeometry):
                     z = verts[n][2]
                     glVertex3f(x, y, z)
                     n += 1
-                # __for j in range(0,num_sides)
+
                 glEnd()
-            # __for i in range(0,2)
-    # __render()
 
     def _generate_cyl(self):
         """ Generate the cylinder polygons. """
@@ -1081,9 +1058,8 @@ class VisGeometryCylinder(VisGeometry):
                 verts[i+n][j] = origin[j] + ct*v[j] + st*w[j] + self.axis[j]
                 vnorms[i][j] = ct*v[j] + st*w[j]
                 vnorms[i+n][j] = ct*v[j] + st*w[j]
-            # __for j in range(0, 3)__
+
             t += dt
-        # __for i in range(0,n)__
 
         # Cylinder end caps.
         if cap1 and cap2:
@@ -1097,7 +1073,6 @@ class VisGeometryCylinder(VisGeometry):
             if cap2:
                 vnorms[2*n+offset][j] = u[j]
                 verts[2*n+offset][j] = origin[j] + self.axis[j]
-        # __for j in range(0, 3)
 
         # Create the side polygons connectivity.
         num_tri = 2*n + n*ncaps
@@ -1120,7 +1095,6 @@ class VisGeometryCylinder(VisGeometry):
             conn[3*num_tri+1] = j2
             conn[3*num_tri+2] = j3
             num_tri += 1
-        # __for i in range(0, n)__
 
         # Create the end caps polygons connectivity.
         for i in range(0, n):
@@ -1144,7 +1118,6 @@ class VisGeometryCylinder(VisGeometry):
                 conn[3*num_tri+1] = j2
                 conn[3*num_tri+2] = j3
                 num_tri += 1
-        # __for i in range(0,n)
 
         self.vertices = verts
         self.normals = vnorms
@@ -1156,18 +1129,18 @@ class VisGeometryCylinder(VisGeometry):
 class VisGeometryAxes(VisGeometry):
     """ This class is used to display axes as three pairs of lines.
 
-        An axes is draw as a set of three lines originating from a common origin. This is used to display 
-        coordinate frames. An arrowhead is drawn for the third axis to better show directionality 
-        (e.g. helix polarity). 
+        An axes is draw as a set of three lines originating from a common origin. This is used to display
+        coordinate frames. An arrowhead is drawn for the third axis to better show directionality
+        (e.g. helix polarity).
     """
 
     def __init__(self, name, origins, directions, scale=1.0):
-        """ Initialize a VisGeometryAxes object. 
+        """ Initialize a VisGeometryAxes object.
 
             Arguments:
                 name (String): The geometry name.
-                origins (List[List[Float]]): The list of N axis origins. 
-                directions ((NumPy 3x3xN ndarray[float]): The axis three directions.  ith axis1 = directions[:,0,i], 
+                origins (List[List[Float]]): The list of N axis origins.
+                directions ((NumPy 3x3xN ndarray[float]): The axis three directions.  ith axis1 = directions[:,0,i],
                     ith axis2 = directions[:,1,i], ith axis3 = directions[:,2,i]
                 scale (Float): The axis length scale.
         """
@@ -1213,9 +1186,8 @@ class VisGeometryAxes(VisGeometry):
                     scale*directions[j, 2, i]
                 self.vertices[n+13, j] = origins[i, j] + hs * \
                     directions[j, 2, i] - asc*directions[j, 0, i]
-            # __for j in range(0,num_axes)
+
             n += self.num_vp
-        # __for i in range(0,num_axes)
 
     def intersect_line(self, point1, point2):
         """ Intersect the geometry with a line. """
@@ -1233,7 +1205,7 @@ class VisGeometryAxes(VisGeometry):
                 self.intersect_index = i
                 self.intersect_point = ipt
                 return True
-        # __for i in range(0,self.num_vertices)
+
         return False
 
     def render(self):
@@ -1259,24 +1231,23 @@ class VisGeometryAxes(VisGeometry):
             for i in range(i1, i2):
                 glVertex3dv(self.vertices[i])
             glEnd()
-    # __def render(self)
 
 
 class VisGeometryPolygon(VisGeometry):
-    """ This class is used to display polygons. 
+    """ This class is used to display polygons.
 
         Attributes:
-            centers ((NumPy Nx3 ndarray[float]): The polygons face centers. 
-            counts (List[int]): The list of the number of points for each polygon. 
-            normals ((NumPy Nx3 ndarray[float]): The polygons face normals. 
+            centers ((NumPy Nx3 ndarray[float]): The polygons face centers.
+            counts (List[int]): The list of the number of points for each polygon.
+            normals ((NumPy Nx3 ndarray[float]): The polygons face normals.
     """
 
     def __init__(self, name, counts, points, reverse_normals=False):
-        """ Initialize a VisGeometryPolygon object. 
+        """ Initialize a VisGeometryPolygon object.
 
             Arguments:
                 name (String): The geometry name.
-                points (List(List[Float]): The list of 3D points defining the lines endpoints. 
+                points (List(List[Float]): The list of 3D points defining the lines endpoints.
         """
         VisGeometry.__init__(self, name)
         self.num_polygons = len(counts)
@@ -1298,9 +1269,8 @@ class VisGeometryPolygon(VisGeometry):
                 cy += points[pindex][1]
                 cz += points[pindex][2]
                 pindex += 1
-            # __for point in points
+
             self.centers[i] = [cx/n, cy/n, cz/n]
-        # __for i,n in enumerate(counts)
 
         # Compute normals.
         pindex = 0
@@ -1324,11 +1294,10 @@ class VisGeometryPolygon(VisGeometry):
                     (verts[j+pindex][0] + verts[k+pindex][0])
                 nz += (verts[j+pindex][0] - verts[k+pindex][0]) * \
                     (verts[j+pindex][1] + verts[k+pindex][1])
-            # __for j in range(0,n)
+
             mag = sqrt(nx*nx + ny*ny + nz*nz)
             self.normals[i] = [s*nx/mag, s*ny/mag, s*nz/mag]
             pindex += n
-        # __for i,n in enumerate(counts)
 
     def intersect_line(self, point1, point2):
         """ Intersect polygons with a line. """
@@ -1351,9 +1320,8 @@ class VisGeometryPolygon(VisGeometry):
                 if ipt:
                     intersect_indexes.append(i)
                     intersect_points.append(ipt)
-            # __for j in range(0,n)
+
             pindex += n
-        # __for i,n in enumerate(counts)
 
         # Set the selected entity.
         if len(intersect_points) != 0:
@@ -1385,7 +1353,6 @@ class VisGeometryPolygon(VisGeometry):
             highlight = True
         else:
             highlight = False
-        # __if self.selected_entity is not  None
 
         # Render polygons storing selected vertices for later highlighting.
         highlight_vindex = []
@@ -1403,9 +1370,8 @@ class VisGeometryPolygon(VisGeometry):
                     glVertex3dv(self.vertices[j+pindex])
                     glVertex3dv(self.vertices[k+pindex])
                     glVertex3dv(self.centers[i])
-            # __for j in range(0,n)
+
             pindex += n
-        # __for i,n in enumerate(counts)
 
         # Highlight the selected polygon.
         if highlight:
@@ -1414,7 +1380,7 @@ class VisGeometryPolygon(VisGeometry):
                 glVertex3dv(self.vertices[ivert[0]])
                 glVertex3dv(self.vertices[ivert[1]])
                 glVertex3dv(self.centers[ivert[2]])
-        # __if highlight
+
         glEnd()
         glEnable(GL_CULL_FACE)
         glDisable(GL_LIGHTING)
@@ -1422,8 +1388,6 @@ class VisGeometryPolygon(VisGeometry):
         # Draw intersection points.
         if self.selected and self.intersect_point:
             draw_cross(self.intersect_point)
-
-# __class VisGeometryPolygon
 
 
 class VisGeometrySymbols(VisGeometry):
@@ -1434,12 +1398,12 @@ class VisGeometrySymbols(VisGeometry):
     BASE_DELETE = "base_delete"
 
     def __init__(self, name, symbol, origins, directions, scale=1.0):
-        """ Initialize a VisGeometryLines object. 
+        """ Initialize a VisGeometryLines object.
 
             Arguments:
                 name (String): The geometry name.
-                origins (List[List[Float]]): The list of N axis origins. 
-                directions ((NumPy 3x3xN ndarray[float]): The symbol three directions.  ith axis1 = directions[:,0,i], 
+                origins (List[List[Float]]): The list of N axis origins.
+                directions ((NumPy 3x3xN ndarray[float]): The symbol three directions.  ith axis1 = directions[:,0,i],
                     ith axis2 = directions[:,1,i], ith axis3 = directions[:,2,i]
                 scale (Float): The symbol scale.
         """
@@ -1476,9 +1440,8 @@ class VisGeometrySymbols(VisGeometry):
                     scale*directions[j, 2, i]
                 self.vertices[n+5, j] = origins[i, j] + \
                     scale*directions[j, 2, i]
-            # __for j in range(0,3)
+
             n += self.num_vp
-        # __for i in range(0,num_symbols)
 
     def _create_insert_geometry(self, origins, directions, scale):
         """ Create the insert geometry, a 3D triangle. """
@@ -1501,9 +1464,8 @@ class VisGeometrySymbols(VisGeometry):
                     scale*v1[j] + scale*v2[j]
                 self.vertices[n+5, j] = origins[i, j] + \
                     scale*v1[j] + scale*v2[j]
-            # __for j in range(0,3)
+
             n += self.num_vp
-        # __for i in range(0,num_symbols)
 
     def intersect_line(self, point1, point2):
         """ Intersect the geometry with a line. """
@@ -1521,7 +1483,7 @@ class VisGeometrySymbols(VisGeometry):
                 self.intersect_index = i
                 self.intersect_point = ipt
                 return True
-        # __for i in range(0,self.num_vertices)
+
         return False
 
     def render(self):
@@ -1547,26 +1509,25 @@ class VisGeometrySymbols(VisGeometry):
             for i in range(i1, i2):
                 glVertex3dv(self.vertices[i])
             glEnd()
-    # __def render(self)
 
 
 class VisGeometryCircle(VisGeometry):
-    """ This class is used to display a circle in 3D. 
+    """ This class is used to display a circle in 3D.
 
         Attributes:
-            center (List[Float]): The circle center.                
-            normal (List[Float]): The normal to the plane the circle lies in.                
-            radius (Float): The circle radius. 
+            center (List[Float]): The circle center.
+            normal (List[Float]): The normal to the plane the circle lies in.
+            radius (Float): The circle radius.
     """
 
     def __init__(self, name, radius, center, normal, num_sides=20):
-        """ Initialize a VisGeometryLines object. 
+        """ Initialize a VisGeometryLines object.
 
             Arguments:
                 name (String): The geometry name.
-                radius (Float): The circle radius. 
-                center (List[Float]): The circle center.                
-                normal (List[Float]): The normal to the plane the circle lies in.                
+                radius (Float): The circle radius.
+                center (List[Float]): The circle center.
+                normal (List[Float]): The normal to the plane the circle lies in.
                 num_sides (int): The number of points used to represent the circle.
         """
         VisGeometry.__init__(self, name)
@@ -1595,7 +1556,6 @@ class VisGeometryCircle(VisGeometry):
             vec_length = vector_mag(vec)
             if vec_length <= self.radius:
                 ipt = cpt
-        # __if vdh != 0.0
 
         # Check for intersection when line and circle plane are perpendicular.
         # Find the intersection by intersecting a line passing through the circle
@@ -1615,7 +1575,6 @@ class VisGeometryCircle(VisGeometry):
                 angle = acos(a/self.radius)
                 b = self.radius*sin(angle)
                 ipt = [c[i] - s*a*u[i] + b*vn[i] for i in range(3)]
-        # __if vdh != 0.0
 
         if ipt is not None:
             self.intersect_index = 0
@@ -1656,17 +1615,15 @@ class VisGeometryCircle(VisGeometry):
             st = radius*sin(t)
             for j in range(0, 3):
                 verts[i][j] = origin[j] + ct*v[j] + st*w[j]
-            # __for j in range(0, 3)__
+
             t += dt
-        # __for i in range(0,n)__
+
         self.num_vertices = num_verts
         self.vertices = verts
-    # __generate_circle(self):
-# __class VisGeometryCircle(VisGeometry):
 
 
 class VisGeometryNumber(VisGeometry):
-    """ This class is used to display a number in 3D.  
+    """ This class is used to display a number in 3D.
 
         Attributes:
             center (List[Float]): The point in 3D to center the number.
@@ -1676,7 +1633,7 @@ class VisGeometryNumber(VisGeometry):
             v (List[Float]): The y-axis in the normal plane to display the number in.
             width (Float): The width of the number to display.
 
-        This class implements a simple number drawing function to replace the glutStrokeCharacter function 
+        This class implements a simple number drawing function to replace the glutStrokeCharacter function
         which is not supported on all platforms.
     """
     # Data describing the line segment coordinates on a 3x3 raster for digits 0-9.
@@ -1694,7 +1651,7 @@ class VisGeometryNumber(VisGeometry):
     }
 
     def __init__(self, name, number, width, center, normal, u=[1, 0, 0], v=[0, 0, 1]):
-        """ Initialize a VisGeometryLines object. 
+        """ Initialize a VisGeometryLines object.
 
             Arguments:
                 name (String): The geometry name.
@@ -1723,7 +1680,7 @@ class VisGeometryNumber(VisGeometry):
             if ipt:
                 self.intersect_index = i
                 self.intersect_point = ipt
-        # __for i in range(0,self.num_vertices)
+
         return (self.intersect_point is not None)
 
     def render(self):
@@ -1766,23 +1723,21 @@ class VisGeometryNumber(VisGeometry):
                 points.append(point2)
             n += 1
             offset = [offset[j] + 2.2*n*width*u[j] for j in range(0, 3)]
-        # __for digit in self.number
+
         self.num_vertices = len(points)
         self.vertices = np.array(points, dtype=float)
-    # __def _generate_number(self)
-# __class VisGeometryNumber(VisGeometry)
 
 
 def generate_arrow_geometry(point1, point2, num_arrow_pts=4):
-    """ Generate a set of points representing an arrowhead at the end of a line. 
+    """ Generate a set of points representing an arrowhead at the end of a line.
 
         Arguments:
-            point1 (List[Float]): The start point defining of the line . 
-            point2 (List[Float]): The end point of the line. 
+            point1 (List[Float]): The start point defining of the line .
+            point2 (List[Float]): The end point of the line.
             num_arrow_pts (int): The number of points used for the arrowhead.
 
         Returns:
-            verts (List[Float]): The points representing an arrowhead. 
+            verts (List[Float]): The points representing an arrowhead.
 
         The arrowdhead is defined by pairs of points connecting to point2.
     """
@@ -1801,7 +1756,7 @@ def generate_arrow_geometry(point1, point2, num_arrow_pts=4):
         verts.append(point2)
         verts.append([center[j] + ct*v[j] + st*w[j] for j in range(3)])
         t += dt
-    # __for i in range(0,n)__
+
     return verts
 
 
@@ -1840,8 +1795,7 @@ def get_closest_point(points, point):
             min_dist = dist
             min_pt = pt
             min_i = i
-        #__if (min_dist is None) or (dist < min_dist)
-    # __for i,pt in enumerate(points)
+
     return min_i, min_pt
 
 #----------------------------------------------------#
@@ -1900,16 +1854,16 @@ def vector_norm(u):
 
 
 def comp_line_line_intersect(line1_p1, line1_p2, line2_p1, line2_p2):
-    """ Compute the intersection of two lines. 
+    """ Compute the intersection of two lines.
 
         Arguments:
-            line1_p1 (List[Float]): The start point of the first line . 
-            line1_p2 (List[Float]): The end point of the first line . 
-            line2_p1 (List[Float]): The start point of the second line . 
-            line2_p2 (List[Float]): The end point of the second line . 
+            line1_p1 (List[Float]): The start point of the first line .
+            line1_p2 (List[Float]): The end point of the first line .
+            line2_p1 (List[Float]): The start point of the second line .
+            line2_p2 (List[Float]): The end point of the second line .
 
         Returns:
-            ipt (List[Float]): The intersection point. 
+            ipt (List[Float]): The intersection point.
     """
     tol = 0.1
     v1 = [line1_p2[i] - line1_p1[i] for i in range(3)]
@@ -1947,8 +1901,6 @@ def comp_line_line_intersect(line1_p1, line1_p2, line2_p1, line2_p2):
         ipt = None
 
     return ipt
-
-# __def comp_line_line_intersect
 
 
 def comp_poly_line_intersect(normal, poly_pts, line_p1, line_p2):
@@ -1989,13 +1941,13 @@ def comp_poly_line_intersect(normal, poly_pts, line_p1, line_p2):
 
 
 def vector_max_proj(normal):
-    """ Determine a vector's maximum projection (i.e. the indices of a vector's maximum components) . 
+    """ Determine a vector's maximum projection (i.e. the indices of a vector's maximum components) .
 
         Arguments:
-            normal (List[Float]): The normal to find the maximum projection. 
+            normal (List[Float]): The normal to find the maximum projection.
 
         Returns:
-            i1, i2, i3 (int): The maximum projections. 
+            i1, i2, i3 (int): The maximum projections.
     """
     nx = normal[0]
     ny = normal[1]
@@ -2019,15 +1971,15 @@ def vector_max_proj(normal):
 
 
 def point_in_triangle(tri, point, i0, i1, i2):
-    """ Determine if a point is in a triangle. 
+    """ Determine if a point is in a triangle.
 
         Arguments:
-            tri (List[Float]): The list of triangle points. 
-            point (List[Float]): The point to test. 
+            tri (List[Float]): The list of triangle points.
+            point (List[Float]): The point to test.
             i1, i2, i3 (int): The maximum projections of the polygon's normal.
 
         Returns:
-            in_tri (bool): If true then the point is in the triangle. 
+            in_tri (bool): If true then the point is in the triangle.
     """
     u0 = point[i1] - tri[0][i1]
     v0 = point[i2] - tri[0][i2]
@@ -2042,14 +1994,11 @@ def point_in_triangle(tri, point, i0, i1, i2):
         if (b >= 0.0) and (b <= 1.0) and (v1 != 0.0):
             a = (v0 - b*v2) / v1
             in_tri = (a >= 0.0) and ((a + b) <= 1.00001)
-        #__if (b >= 0.0) and (b <= 1.0) and (v1 != 0.0)
 
     else:
         b = (v0*u1 - u0*v1) / (v2*u1 - u2*v1)
         if (b >= 0.0) and (b <= 1.00001):
             a = (u0 - b*u2) / u1
             in_tri = (a >= 0.0) and ((a + b) <= 1.00001)
-        #__if (b >= 0.0) and (b <= 1.00001)
-    # __if u1 == 0.0
 
     return in_tri

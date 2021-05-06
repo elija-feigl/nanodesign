@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# 2021.02.25.: moved matix math to seperate file @Elija, Feigl
+# 2021.02.25.: moved matrix math to seperate file @Elija, Feigl
 
 """
 This module is contains various functions.
@@ -142,8 +142,6 @@ def _vrrotmat2vec(R):
                         "[_vrrotmat2vec] **** WARNING: R-M not zero: %g " % (
                             R[i, j] - M[i, j])
                     )
-        # __for i in range(0,3)
-    # __if check_result
 
     return np.array([x, y, z], dtype=float), angle
 

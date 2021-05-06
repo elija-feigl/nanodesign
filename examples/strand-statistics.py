@@ -17,28 +17,14 @@
 """This module demonstrates using the Nanodesign interface to calculate some statistics
    for the strands in a design.
 
-    Using the length of each strand the number of instances of each strand length 
+    Using the length of each strand the number of instances of each strand length
     are counted. The counts for each length are then sorted and printed.
 
     The number of helices each strand visits is then calculated using its list of bases.
     The counts for each helix are then sorted and printed.
 """
 from collections import OrderedDict
-import logging
-import os
-import re
-import sys
-
-
-# The following imports are designed to try and get the nanodesign package
-# imported regardless of whether or not you have it installed in the
-# site-packages. If you have it in site packages, the first block should just work.
-# Otherwise, it will assume you can import it based on a relative path from this source
-# file's directory, and try to do so by adjusting the system paths temporarily.
-
-import nanodesign
-
-from nanodesign.converters import Converter
+from nanodesign.converters.converter import Converter
 
 
 def read_file(file_name, seq_name):
@@ -67,16 +53,14 @@ def main():
         if num_bases not in strand_lengths:
             strand_lengths[num_bases] = 0
         strand_lengths[num_bases] += 1
-    # __for strand in self.strands
+
     print("\nStrand length counts:")
-    for length, count in sorted(strand_lengths.items(), key=lambda (k, v): (v, k)):
-        print('Length {:>4}  Count {:>4}'.format(length, count))
-    # __for length in strand_lengths
+    for length, count in strand_lengths.items():
+        print(f'Length {length}  Count {count}')
 
     # Calculate the number of helices each strand visits.
     strand_helix = OrderedDict()
     for strand in dna_structure.strands:
-        id = strand.id
         helix_ids = set()
         for base in strand.tour:
             helix_ids.add(base.h)
@@ -84,12 +68,10 @@ def main():
         if num_helices not in strand_helix:
             strand_helix[num_helices] = 0
         strand_helix[num_helices] += 1
-    # __for strand in dna_structure.strands
+
     print("\nStrand helix counts:")
-    for num_helices, count in sorted(strand_helix.items(), key=lambda (k, v): (v, k)):
-        print('Number of helices {:>4}  Count {:>4}'.format(
-            num_helices, count))
-    # __for num_helices in strand_helix
+    for num_helices, count in strand_helix.items():
+        print(f'Number of helices {num_helices}  Count {count}')
 
 
 if __name__ == '__main__':
