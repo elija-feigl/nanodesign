@@ -76,7 +76,7 @@ class DnaStructureHelix(object):
 
     def __init__(self, load_order, id, scaffold_polarity, helix_axis_coords,
                  helix_axis_frames, scaffold_coords, staple_coords,
-                 scaffold_bases, staple_bases):
+                 scaffold_bases, staple_bases, end_coordinates=None, end_frames=None):
         """ Initialize a DnaStructureHelix object.
 
             Arguments:
@@ -109,11 +109,15 @@ class DnaStructureHelix(object):
         self._logger = logging.getLogger(__name__ + ":" + str(self.id))
 
         # Set helix ends coordinates.
-        self.end_coordinates = np.zeros((2, 3), dtype=float)
-        self.end_frames = np.zeros((3, 3, 2), dtype=float)
+        if end_coordinates is None or end_frames is None:
+            self.end_coordinates = np.zeros((2, 3), dtype=float)
+            self.end_frames = np.zeros((3, 3, 2), dtype=float)
+            self.set_end_coords()
+        else:
+            self.end_coordinates = end_coordinates
+            self.end_frames = end_frames
         self.staple_pos = {}
         self.scaffold_pos = {}
-        self.set_end_coords()
         self.build_base_pos_maps()
 
     def set_end_coords(self):
