@@ -17,15 +17,15 @@
 # appropriate metadata, etc.
 
 # 2021.02.25.: switched to setuptools @Elija, Feigl
-import setuptools
+from setuptools import setup, find_packages
 
-setuptools.setup(
+setup(
     name="nanodesign",
     version="1.0",
-    packages=setuptools.find_packages(),
+    packages=find_packages(),
     include_package_data=True,
     install_requires=(
-        'numpy>=1.14',
+        'numpy',
     ),
     classifiers=[
         "Programming Language :: Python :: 3",
