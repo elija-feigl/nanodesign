@@ -102,7 +102,7 @@ class DnaStructure(object):
     def compute_aux_data(self):
         """ Compute auxiliary data.
 
-            Compute data derived from the base connectivty: domains, strand/helix and helix/helix connectivty
+            Compute data derived from the base connectivity: domains, strand/helix and helix/helix connectivity
             relationships, and crossovers. This data is needed for visualization, calculating melting
             temperature and other applications.
         """
@@ -364,7 +364,7 @@ class DnaStructure(object):
         """ Get the list of staples by their color ID.
 
             Arguments:
-                stape_colors (List[int]): The list of staple color IDs.
+                staple_colors (List[int]): The list of staple color IDs.
 
             Returns the set of staple strands IDs matching the colors in the input list.
         """
@@ -643,7 +643,7 @@ class DnaStructure(object):
                                                  |
                                                  ebase
 
-                if first_base and ebase are in the same helix and they are a sigle base apart then add the new domains
+                if first_base and ebase are in the same helix and they are a single base apart then add the new domains
                 base list to the first domains:
 
                       1st domain  [.------------se-------------------------.]
@@ -762,7 +762,7 @@ class DnaStructure(object):
 
         # Write structure information in JSON format.
         if write_json_format:
-            self._logger.info("Writing DNA strcuture to file %s." % file_name)
+            self._logger.info("Writing DNA structure to file %s." % file_name)
             base_list = []
             for base in self.base_connectivity:
                 base_info = OrderedDict()

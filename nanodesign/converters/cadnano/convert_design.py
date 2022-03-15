@@ -248,7 +248,7 @@ class CadnanoConvertDesign(object):
                         % (i, base.id, up, down, across, base.h, base.p, base.is_scaf)
                     )
 
-        # Create a DnaStructure object to store the base connectivty and helices.
+        # Create a DnaStructure object to store the base connectivity and helices.
         name = "dna structure"
         self.dna_structure = DnaStructure(
             name, base_connectivity, helices, self.dna_parameters

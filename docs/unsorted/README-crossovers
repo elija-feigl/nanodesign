@@ -36,7 +36,7 @@ using the CadnanoConvertDesign._set_possible_crossovers() function.
 
 dna_structure.py
 ----------------
-The helix connectivty is first calculated using DnaStructure._set_helix_connectivity() (called from DnaStructure.compute_aux_data()).
+The helix connectivity is first calculated using DnaStructure._set_helix_connectivity() (called from DnaStructure.compute_aux_data()).
 
 The scaffold and staple design crossovers are calculated for all helices using DnaStructure._compute_helix_design_crossovers();  
 crossovers for each helix is calculated in DnaStructureHelix.compute_design_crossovers().

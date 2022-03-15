@@ -48,13 +48,13 @@ class Stapler(object):
     template              = template staple design, list of domain lengths 5' to 3'
     temperature           = monte carlo temperature ( in kT ? )
     energy                = list of paths: energies of paths of current state
-    path_probabilities    = probablity to chose path i for step
+    path_probabilities    = probability to chose path i for step
     uncovered_domain_penalty = energy penalty for domains that are not covered by any template
     template_overhang_penalty_factor = energy penalty for template domains not associated to any path
         domain = length of template domain * template_overhang_penalty_factor
     temperature             = system temperature for monte carlo probability calculation
-    step_probabilities    = probabily of each step type during monte carlo
-    standard_domain_length = preffered length of domains during breaking that are not covered by any template
+    step_probabilities    = probabilily of each step type during monte carlo
+    standard_domain_length = preferred length of domains during breaking that are not covered by any template
 
     template_types        = list of paths of template types placed
     template_positions    = list of paths of template positions
@@ -276,7 +276,7 @@ class Stapler(object):
             if self.dna_structure.strands[self.strand_index[path_nr]].is_circular:
                 break_pos_temp = np.random.randint(0, 2 * len(path))
 
-                # If crossver break, check if double crossover, if not, reroll position.
+                # If crossover break, check if double crossover, if not, reroll position.
                 while ((break_pos_temp % 2) == 1) and (
                     self.crossovers_joint[
                         self.path_crossover_list[path_nr][break_pos_temp // 2][0]
@@ -619,7 +619,7 @@ class Stapler(object):
                             ]
                             break_pos_right = break_larger_smallest[1]
 
-                    # current unbroken path wraps around, map values to continous range
+                    # current unbroken path wraps around, map values to continuous range
                     if break_pos_left >= break_pos_right:
                         break_pos_right += 2 * \
                             len(self.path_list[current_path])
@@ -748,10 +748,10 @@ class Stapler(object):
                         )  # insert new template_pos left
                         template_offsets_temp[current_path].insert(
                             insertion_index, template_off_new
-                        )  # insert new template_off lefft
+                        )  # insert new template_off left
                         template_types_temp[current_path].insert(
                             insertion_index, template_type_new
-                        )  # insert new template_off lefft
+                        )  # insert new template_off left
 
                         template_positions_temp[current_path][
                             (insertion_index + 1)

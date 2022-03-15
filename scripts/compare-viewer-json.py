@@ -329,7 +329,7 @@ class HelixConnectivity(object):
             self.bad_data = True
 
     def compare(self, helix_conn):
-        """Compare this helix connectivity object with the given helix connectivty object."""
+        """Compare this helix connectivity object with the given helix connectivity object."""
         if self.bad_data or helix_conn.bad_data:
             return
         # Compare attributes that are not a list or a dict.

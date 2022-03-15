@@ -9,8 +9,13 @@ from pathlib import Path
 
 from nanodesign.converters.converter import Converter
 from nanodesign.converters.dna_sequence_data import dna_sequence_data
+from nanodesign.converters.cadnano.reader import CadnanoReader
+from nanodesign.converters.cadnano.writer import CadnanoWriter
+from nanodesign.converters.cadnano.convert_design import CadnanoConvertDesign
+from nanodesign.data.parameters import DnaParameters
 
 from .insert_uv_welding import welding
+from .stapler import Stapler
 
 
 logger = logging.getLogger(__name__)
@@ -81,39 +86,71 @@ def uv_welding(design, sequence, fill_char):
 
 @cli.command()
 @click.argument("design", type=click.Path(exists=True, resolve_path=True, path_type=Path))
-@click.argument("sequence", type=str)
-@click.argument("fill_char", type=str)
-def uv_welding(design, sequence, fill_char):
+def stapler(design):
     """\b
-    add additional fill characters to staple sequences.
+    create new cadnano design with automated staple breaking.
     \b
     DESIGN is the name of the design file [.json]
-    SEQUENCE is the scaffold strand sequence file 
-    FILL_CHAR chararcter(s) to be used to signify inserted bases
     """
 
     # parse command line arguments
-    logger.info("Starting UV Welding modifications")
-    if Path(sequence).exists():
-        seq_file_name = str(Path(sequence).absolute())
-        seq_name = None
-    elif sequence in dna_sequence_data:
-        seq_file_name = None
-        seq_name = sequence
-    else:
-        raise FileNotFoundError
+    logger.info("Starting stapler script")
 
-    # Read cadnano file and create dna structure.
+
     converter = Converter()
-    converter.read_cadnano_file(
-        file_name=str(design),
-        seq_file_name=seq_file_name,
-        seq_name=seq_name,
+    cadnano_reader = CadnanoReader()
+    converter.cadnano_design = cadnano_reader.read_json(design)
+
+    dna_parameters = DnaParameters()
+    converter.cadnano_convert_design = CadnanoConvertDesign(dna_parameters)
+    converter.dna_structure = converter.cadnano_convert_design.create_structure(
+        converter.cadnano_design
     )
-    dna_structure = converter.dna_structure
-    dna_structure.get_domains()
+    _ = converter.dna_structure.get_domains()
 
-    output_lines = welding(dna_structure, fill_char=fill_char)
 
-    with open("UVw_sequence.csv", mode="w") as seq_file:
-        seq_file.writelines(output_lines)
+    stapler = Stapler(converter.dna_structure, converter.cadnano_design)
+    stapler.template = [
+        [7, 7, 14, 7, 7, 7],
+        [7, 14, 7, 7, 7],
+        [14, 7, 7, 7],
+        [7, 7, 7, 14, 7, 7],
+        [7, 7, 7, 14, 7],
+        [7, 7, 7, 14],
+        [7, 7, 14, 7, 7],
+        [7, 14, 7, 7],
+        [14, 7, 7],
+        [7, 7, 14, 7],
+        [7, 7, 14],
+        [7, 14, 7],
+    ]
+
+    stapler.uncovered_domain_penalty = 10.0
+    stapler.template_overhang_penalty_factor = 0.5
+    stapler.step_probabilities = (0.1, 0.1, 0.35, 0.35, 0.1)
+    stapler.standard_domain_length = 5
+
+    stapler.initialize_system()
+
+    # NOTE: For an overnight run, the paramaters (1e8, 1e4, 0.9999998047) should get to an error free structure.
+    stapler.temperature = 10.0
+    nr_steps = 10000000
+    nr_steps_timescale = 10000
+    stapler.generate(nr_steps, nr_steps_timescale, 0.999975)
+
+    converter.dna_structure = converter.cadnano_convert_design.create_structure(
+        converter.cadnano_design
+    )
+    converter.dna_structure.get_domains()
+    logger.debug("Staple domains:")
+    for strands in converter.dna_structure.strands[1:]:
+        lengths = []
+        for domain in strands.domain_list:
+            lengths.append(len(domain.base_list))
+        logger.debug(lengths)
+
+    # Write a caDNAno JSON file.
+    design_out = design.with_stem(f"{design.stem}_recode")
+    logger.info("Write modified structure to file %s", design_out)
+    cadnano_writer = CadnanoWriter(converter.dna_structure)
+    cadnano_writer.write(design_out)
