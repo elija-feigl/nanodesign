@@ -17,6 +17,7 @@
 # appropriate metadata, etc.
 
 # 2021.02.25.: switched to setuptools @Elija, Feigl
+from importlib.metadata import entry_points
 from setuptools import setup, find_packages
 
 setup(
@@ -32,4 +33,8 @@ setup(
         "License :: Apache, Version 2.0",
         "Operating System :: OS Independent",
     ],
+    entry_points='''
+        [console_scripts]
+        nanodesign=scripts.main:cli
+    ''',
 )
