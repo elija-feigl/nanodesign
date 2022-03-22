@@ -16,16 +16,27 @@ from nanodesign.data.parameters import DnaParameters
 
 from .insert_uv_welding import welding
 from .stapler import Stapler
+from .alpha_value import compute_alpha_value, permutate_optimal_scaffold_start
 
 
-logger = logging.getLogger(__name__)
+def init_logging():
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    console_handler = logging.StreamHandler()
+    formatter = logging.Formatter('[%(name)s] %(levelname)s - %(message)s')
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    return logger
+
+
+logger = init_logging()
 
 
 def print_version(ctx, _, value):
     """click print version."""
     if not value or ctx.resilient_parsing:
         return
-    click.echo("1.0")  #TODO: add get_version
+    click.echo("1.0.1")  #TODO: add get_version
     ctx.exit()
 
 
@@ -42,6 +53,54 @@ def print_version(ctx, _, value):
 def cli():
     """nanodesign script interface.
     """
+   
+
+@cli.command()
+@click.argument("design", type=click.Path(exists=True, resolve_path=True, path_type=Path))
+@click.argument("sequence", type=str)
+@click.option("-t", "--temperature",type=float, default=40.0, show_default=True, help="Alpha value threshold temperature in C.")
+@click.option("-m", "--c-mg", "c_mg", type=float, default=20.0, show_default=True, help="Magnesium ion concentration in mM.")
+@click.option("-n", "--c-ma", "c_na", type=float, default=5.0, show_default=True, help="Sodium ion concentration in mM.")
+@click.option("-p", "--permutate", "search_start", is_flag=True, help="Find optimal scaffold start based on maximizing the alpha by sequence permutation.")
+def alpha_value(design, sequence, temperature, c_mg, c_na, search_start):
+    """\b
+    Computes the alpha value at a given temperature 
+    The alpha value is the percentage of staples that contain at least one domain with a melting temperature higher
+        than the specified temperature
+
+    Can find scaffold start postion with maximum alpha value.
+    Note: only works for single scaffold designs
+    \b
+    DESIGN is the name of the design file [.json]
+    SEQUENCE is the scaffold strand sequence file 
+    """
+    # parse command line arguments
+    logger.info("Starting alpha value script")
+    if Path(sequence).exists():
+        seq_file_name = str(Path(sequence).absolute())
+        seq_name = None
+    elif sequence in dna_sequence_data:
+        seq_file_name = None
+        seq_name = sequence
+    else:
+        raise FileNotFoundError
+
+    # Read cadnano file and create dna structure.
+    converter = Converter()
+    converter.modify = True  # NOTE: removes deletions and insertions.
+    converter.read_cadnano_file(
+        file_name=str(design),
+        seq_file_name=seq_file_name,
+        seq_name=seq_name,
+    )
+    dna_structure = converter.dna_structure
+
+    alpha_value = compute_alpha_value(dna_structure, threshold=temperature, c_mg=c_mg, c_na=c_na)
+    logger.info("Base alpha-%s value: %s", temperature, alpha_value)
+
+    if search_start:
+        optimal_start, optimal_alpha_value= permutate_optimal_scaffold_start(dna_structure, threshold=temperature, c_mg=c_mg, c_na=c_na)
+        logger.info("Optimal scaffold starting position: %s,  alpha-%s value: %s", optimal_start, temperature, optimal_alpha_value)
 
 
 @cli.command()
@@ -70,6 +129,7 @@ def uv_welding(design, sequence, fill_char):
 
     # Read cadnano file and create dna structure.
     converter = Converter()
+    converter.modify = True # NOTE: removes deletions and insertions.
     converter.read_cadnano_file(
         file_name=str(design),
         seq_file_name=seq_file_name,
