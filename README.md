@@ -1,6 +1,6 @@
 NOTE
 ==========
-This fork is a python3 port of the discontinued original. we are also trying to finish & cleanup code to extends nanodesigns functionality. Contributions are welcome!
+This fork is a python3 port of the discontinued original. we are trying to finish & cleanup code to extends nanodesigns functionality. Contributions are welcome!
 
 Nanodesign
 ==========
