@@ -146,28 +146,26 @@ def uv_welding(design, sequence, fill_char):
 
 @cli.command()
 @click.argument("design", type=click.Path(exists=True, resolve_path=True, path_type=Path))
-def stapler(design):
+@click.option("-t", "--temperature", "temperature", type=float, default=10.0, show_default=True, help="Temperature in C.")
+@click.option("-r", "--temperature-rate", "temperature_rate", type=float, default=0.999975, show_default=True, help="Temperature adjustment rate.")
+@click.option("-n", "--steps", "steps", type=int, default=int(1e7), show_default=True, help="Number of steps.")
+@click.option("-m", "--steps-timescale", "steps_timescale", type=int, default=int(1e4), show_default=True, help="Number of timescale steps.")
+
+def stapler(design, steps, temperature, steps_timescale, temperature_rate):
     """\b
     create new cadnano design with automated staple breaking.
     \b
     DESIGN is the name of the design file [.json]
     """
 
-    # parse command line arguments
     logger.info("Starting stapler script")
-
-
     converter = Converter()
-    cadnano_reader = CadnanoReader()
-    converter.cadnano_design = cadnano_reader.read_json(design)
-
-    dna_parameters = DnaParameters()
-    converter.cadnano_convert_design = CadnanoConvertDesign(dna_parameters)
-    converter.dna_structure = converter.cadnano_convert_design.create_structure(
-        converter.cadnano_design
-    )
-    _ = converter.dna_structure.get_domains()
-
+    converter.read_cadnano_file(
+                file_name=design,
+                seq_file_name=None,  # TODO
+                seq_name=None,
+            )
+    converter.dna_structure.compute_aux_data()
 
     stapler = Stapler(converter.dna_structure, converter.cadnano_design)
     stapler.template = [
@@ -185,32 +183,39 @@ def stapler(design):
         [7, 14, 7],
     ]
 
+    # NOTE: general parameter set
     stapler.uncovered_domain_penalty = 10.0
     stapler.template_overhang_penalty_factor = 0.5
     stapler.step_probabilities = (0.1, 0.1, 0.35, 0.35, 0.1)
     stapler.standard_domain_length = 5
 
     stapler.initialize_system()
+    # NOTE: For an overnight run, the parameters (1e8, 1e4, 0.9999998047) should get to an error free structure.
+    stapler.temperature = temperature
+    design = stapler.generate(nr_steps=steps, nr_steps_timescale=steps_timescale, temperature_adjust_rate=temperature_rate)
+    # TODO: Check following edge condition. Reported by JP. Get sample file? (JMS 11/21/16)
+    #    structure with only two staples with two segments each, one double crossover, crashes:
+    #    **** ERROR: Reached a visited base.Traceback (most recent call last):
+    #    File "testScript3.py", line 357, in <module>
+    #    main()
+    #    File "testScript3.py", line 346, in main
+    #    converter.dna_structure = converter.cadnano_convert_design.create_structure(converter.cadnano_design)
+    #    File "/converters/cadnano/convert_design.py", line 170, in create_structure
+    #    self._set_strands_colors(strands)
+    #    File "/converters/cadnano/convert_design.py", line 1124, in _set_strands_colors
+    #    for strand in strands:
+    #    TypeError: 'NoneType' object is not iterable
+    
+    # regenerate structure from modified design
+    dna_structure = converter.cadnano_convert_design.create_structure(design)
+    dna_structure.compute_aux_data()
 
-    # NOTE: For an overnight run, the paramaters (1e8, 1e4, 0.9999998047) should get to an error free structure.
-    stapler.temperature = 10.0
-    nr_steps = 10000000
-    nr_steps_timescale = 10000
-    stapler.generate(nr_steps, nr_steps_timescale, 0.999975)
-
-    converter.dna_structure = converter.cadnano_convert_design.create_structure(
-        converter.cadnano_design
-    )
-    converter.dna_structure.get_domains()
     logger.debug("Staple domains:")
-    for strands in converter.dna_structure.strands[1:]:
-        lengths = []
-        for domain in strands.domain_list:
-            lengths.append(len(domain.base_list))
-        logger.debug(lengths)
+    for strand in dna_structure.strands[1:]:
+        logger.debug("Strand %s", strand.id, [len(domain.base_list) for domain in strand.domain_list])
 
     # Write a caDNAno JSON file.
     design_out = design.with_stem(f"{design.stem}_recode")
     logger.info("Write modified structure to file %s", design_out)
-    cadnano_writer = CadnanoWriter(converter.dna_structure)
+    cadnano_writer = CadnanoWriter(dna_structure)
     cadnano_writer.write(design_out)

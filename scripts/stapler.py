@@ -1,33 +1,11 @@
 #!/usr/bin/env python
-
-# Copyright 2016 Autodesk Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-#
+# Copyright (C) 2021-Present  Elija Feigl
+# Full Apache License, Version 2.0 can be found in `LICENSE` at the project root.
 # This file was originally contributed by Jean-Philippe Sobczak of Tilibit Nanosystems
-#
 
-import os
-import sys
+from copy import deepcopy
 import logging
 import numpy as np
-
-from nanodesign.converters.converter import Converter
-from nanodesign.converters.cadnano.reader import CadnanoReader
-from nanodesign.converters.cadnano.writer import CadnanoWriter
-from nanodesign.converters.cadnano.convert_design import CadnanoConvertDesign
-from nanodesign.data.parameters import DnaParameters
 
 
 class Stapler(object):
@@ -53,7 +31,7 @@ class Stapler(object):
     template_overhang_penalty_factor = energy penalty for template domains not associated to any path
         domain = length of template domain * template_overhang_penalty_factor
     temperature             = system temperature for monte carlo probability calculation
-    step_probabilities    = probabilily of each step type during monte carlo
+    step_probabilities    = probability of each step type during monte carlo
     standard_domain_length = preferred length of domains during breaking that are not covered by any template
 
     template_types        = list of paths of template types placed
@@ -115,11 +93,8 @@ class Stapler(object):
             if not strand.is_scaffold:
                 path = []  # list of domain lengths
                 path_crossovers = []  # list of crossover placeholders
-                self._logger.debug("")
-                self._logger.debug(
-                    "---------- strand %d ---------" % strand.id)
-                self._logger.debug("Number of domains %d " %
-                                   len(strand.domain_list))
+                self._logger.debug( "\n---------- strand %d ---------" % strand.id)
+                self._logger.debug("Number of domains %d " % len(strand.domain_list))
 
                 for domain_nr, domain in enumerate(strand.domain_list):
                     path.append(len(domain.base_list))  # add domain length
@@ -179,7 +154,7 @@ class Stapler(object):
         )  # sort crossovers according to smaller scaffold base number
 
     def _join_crossovers(self):
-        """ create entries in path_crossover_list[path][domain][0] referincing unique crossover position
+        """ create entries in path_crossover_list[path][domain][0] referencing unique crossover position
             in crossovers_joint, add +1 to crossovers_joint for each closed crossover in unique crossover position
         """
         counter = 0
@@ -258,7 +233,7 @@ class Stapler(object):
 
         TODO:   states are entropically weighted with their number of domains within the target unbroken path part,
                 because of multiple representations for the same system state.
-                Therefore overhanging states are aditionally penalized
+                Therefore overhanging states are additionally penalized
         """
 
         for path_nr, path in enumerate(self.path_list):
@@ -320,14 +295,12 @@ class Stapler(object):
                 )
             )
 
-        domain_number = 0  # calculate total number of path domains
-        for path in self.path_list:
-            domain_number += len(path)
+        domain_number = sum(len(path) for path in self.path_list)
 
         # set probabilities for each path to be chosen during monte-carlo steps. paths weighted with number of domains
         for path in self.path_list:
             self.path_probabilities.append(float(len(path)) / domain_number)
-        print("Starting state energy", sum(self.energy), self.energy)
+        self._logger.debug("Starting state energy %s %s", sum(self.energy), self.energy)
 
     def _calculate_energy(
         self,
@@ -343,17 +316,14 @@ class Stapler(object):
         mismatches in lengths between domain and template domain add ( 1.0 * length ) to energy
         """
 
+        # initialize
         energy = 0
-
         path = self.path_list[path_nr]
-
-        path_copy = path[:]  # make a copy of the path domain lengths
+        path_copy = path[:]  
 
         # project template domains onto current unbroken strand section domains
         for template_nr, template_pos in enumerate(template_positions[path_nr]):
-
             template_off = template_offsets[path_nr][template_nr]
-
             template_type = template_types[path_nr][template_nr]
 
             """ start_pos is first domain of current unbroken strand section
@@ -373,7 +343,7 @@ class Stapler(object):
             # make a copy of the template domain lengths
             template_copy = self.template[template_type][:]
 
-            """ current_pos is postion in the coordinate system of the template strand, some examples:
+            """ current_pos is position in the coordinate system of the template strand, some examples:
                 linear strand, template_pos = 0, template_offset = 2 , no added breaks
 
                 template position:      -0-
@@ -450,22 +420,15 @@ class Stapler(object):
             for current_pos in range(start_pos, end_pos + 1):
                 # current_pos in template coordinate system
                 current_template_pos = current_pos - template_pos + template_off
-
                 # shift positions back to real coordinates
                 current_pos_shift = current_pos % len(self.path_list[path_nr])
 
-                # template reaches current domain
-                if (current_template_pos >= 0) and (
+                is_template_reaches_domain = (current_template_pos >= 0) and (
                     current_template_pos < len(self.template[template_type])
-                ):
-
-                    path_copy[current_pos_shift] -= self.template[template_type][
-                        current_template_pos
-                    ]
-                    template_copy[current_template_pos] -= self.template[template_type][
-                        current_template_pos
-                    ]
-                # domain not covered, penalize
+                )
+                if is_template_reaches_domain:
+                    path_copy[current_pos_shift] -= self.template[template_type][current_template_pos]
+                    template_copy[current_template_pos] -= self.template[template_type][current_template_pos]
                 else:
                     energy += self.uncovered_domain_penalty
 
@@ -486,43 +449,7 @@ class Stapler(object):
             3 = move existing template
             4 = change template type
         """
-
-        # Determine path to change.
-        current_path = np.random.choice(
-            range(len(self.path_list)), None, p=self.path_probabilities
-        )
-        current_strand = self.strand_index[current_path]
-
-        # Determine type of change.
-        change_type = np.random.choice(
-            (0, 1, 2, 3, 4), None, p=self.step_probabilities)
-
-        # Copy system state.
-        crossovers_joint_temp = self.crossovers_joint[:]
-
-        template_positions_temp = []
-        for element in self.template_positions:
-            template_positions_temp.append(element[:])
-
-        template_offsets_temp = []
-        for element in self.template_offsets:
-            template_offsets_temp.append(element[:])
-
-        template_types_temp = []
-        for element in self.template_types:
-            template_types_temp.append(element[:])
-
-        break_positions_temp = []
-        for element in self.break_positions:
-            break_positions_temp.append(element[:])
-
-        single_strand_side_exception_temp = self.single_strand_side_exception[:]
-
-        # keep track if step was forbidden because not physical
-        forbidden = False
-
-        if change_type == 0:  # add new break to path
-
+        def add_break() -> bool:
             # List of non-broken locations in path.
             break_positions_available = [
                 pos
@@ -530,13 +457,11 @@ class Stapler(object):
                 if pos not in break_positions_temp[current_path]
             ]
 
-            if not break_positions_available:  # no positions available
-                print("current path is broken at every position")  # TODO
+            if not break_positions_available:
+                self._logger.debug("current path is broken at every position")  # TODO
                 forbidden = True
             else:
-                break_pos_new = np.random.choice(
-                    break_positions_available
-                )  # roll new break position
+                break_pos_new = np.random.choice(break_positions_available)
 
                 # Check if single crossover in unique crossover location.
                 if ((break_pos_new % 2) == 1) and (
@@ -766,8 +691,9 @@ class Stapler(object):
                             % len(template_positions_temp[current_path])
                         ] = template_type_current  # insert current template_off right
 
-        if change_type == 1:  # remove break from path
+            return forbidden
 
+        def remove_break() -> bool:
             if len(break_positions_temp[current_path]) < 2:
                 # print("current path has no free breaks left to remove" #TODO)
                 forbidden = True
@@ -820,9 +746,10 @@ class Stapler(object):
                 del template_positions_temp[current_path][template_index_to_delete]
                 del template_offsets_temp[current_path][template_index_to_delete]
                 del template_types_temp[current_path][template_index_to_delete]
+                return forbidden
 
-        if change_type == 2:  # move break
-
+        def move_break() -> bool:
+            
             if (
                 len(break_positions_temp[current_path])
                 - (not self.dna_structure.strands[current_strand].is_circular)
@@ -952,13 +879,10 @@ class Stapler(object):
                             ) and ((break_positions_temp[current_path][0] % 2) == 0):
                                 if step < 0:
                                     single_strand_side_exception_temp[current_path] = 1
+            return forbidden
 
-        if change_type == 3:  # move template
-
-            # roll template to move
-            template_index = np.random.randint(
-                0, len(template_positions_temp[current_path])
-            )
+        def move_template() -> bool:
+            template_index = np.random.randint(0, len(template_positions_temp[current_path]))
             template_pos = template_positions_temp[current_path][template_index]
 
             # break_pos left and right of current template_pos
@@ -1041,24 +965,41 @@ class Stapler(object):
                     ) and ((break_positions_temp[current_path][0] % 2) == 0):
                         if step_pos > 0:
                             single_strand_side_exception_temp[current_path] = 1
+            return forbidden
 
-        if change_type == 4:  # change template type
-
-            template_type_new = np.random.randint(
-                0, len(self.template)
-            )  # roll new template type
-            template_index = np.random.randint(
-                0, len(template_positions_temp[current_path])
-            )  # roll template index
-
+        def change_template() -> bool:
+            template_type_new = np.random.randint(0, len(self.template))  # roll new template type
+            template_index = np.random.randint( 0, len(template_positions_temp[current_path]))  # roll template index
             # check if current template offset is compatible with new template type = (offset < length)
-            if template_offsets_temp[current_path][template_index] < len(
-                self.template[template_type_new]
-            ):
-                template_types_temp[current_path][template_index] = template_type_new
-            else:
-                forbidden = True
+            if template_offsets_temp[current_path][template_index] < len(self.template[template_type_new]):
+                template_offsets_temp[current_path][template_index] = template_type_new
+                return False
+            return True    
+        
+        # Determine path to change.
+        current_path = np.random.choice(
+            range(len(self.path_list)), None, p=self.path_probabilities
+        )
+        current_strand = self.strand_index[current_path]
 
+        # Copy system state.
+        crossovers_joint_temp = self.crossovers_joint[:]
+        template_positions_temp = deepcopy(self.template_positions)
+        template_offsets_temp = deepcopy(self.template_offsets)
+        template_types_temp = deepcopy(self.template_types)
+        break_positions_temp = deepcopy(self.break_positions)
+        single_strand_side_exception_temp = self.single_strand_side_exception[:]
+
+        # keep track if step was forbidden because not physical
+        forbidden = False
+        # determine type of change.
+        step_choice =[add_break, remove_break, move_break, move_template, change_template]
+        step = np.random.choice(step_choice, None, p=self.step_probabilities)
+        # save type and execute step
+        change_type = step_choice.index(step)
+        forbidden = step()
+
+        # metropolis rule
         energy_new = self._calculate_energy(
             template_positions_temp,
             template_offsets_temp,
@@ -1068,9 +1009,7 @@ class Stapler(object):
             current_path,
         )
         energy_diff = energy_new - self.energy[current_path]
-
         p = np.exp(-energy_diff / self.temperature)
-
         random_draw = np.random.random()
 
         if p > random_draw:
@@ -1087,54 +1026,52 @@ class Stapler(object):
 
         return acceptance, change_type
 
-    def generate(self, nr_steps, nr_steps_timescale, temperature_adjust_rate):
+    def generate(self, nr_steps, nr_steps_timescale, temperature_adjust_rate, step_nr_output = 1000):
         # approximate average acceptance rate for each step type over last 10000 steps
         acceptance_rate = [0.0, 0.0, 0.0, 0.0, 0.0]
+        # count number of steps since system state energy didn't change and
         # approximate average change in system state energy per step over last 10000 steps
-        energy_rate = 0.0
-        # count number of steps since system state energy didn't change
-        counter = 0
-
+        counter, energy_rate = 0, 0.0
+        
         for step_nr in range(nr_steps):
             energy_previous = sum(self.energy)
             acceptance_current, type = self._take_step()
             energy_new = sum(self.energy)
-            if energy_new == energy_previous:
-                counter += 1
-            else:
-                counter = 0
-
+            counter = (counter + 1) if energy_new == energy_previous else 0
+    
             if counter == nr_steps_timescale:
                 break
 
-            energy_rate = (1.0 - 1.0 / nr_steps_timescale) * energy_rate + (
-                1.0 / nr_steps_timescale
-            ) * (energy_new - energy_previous)
-            acceptance_rate[type] = (1.0 - 1.0 / nr_steps_timescale) * acceptance_rate[
-                type
-            ] + (1.0 / nr_steps_timescale) * acceptance_current
+            # update rates
+            rate = (1.0 / nr_steps_timescale)
+            n_rate = (1.0 - rate)
+            energy_rate = (
+                n_rate * energy_rate 
+                + rate  * (energy_new - energy_previous)
+            )
+            acceptance_rate[type] = (
+                n_rate * acceptance_rate[type] 
+                + rate * acceptance_current
+            )
             if energy_rate > 0.0:
                 self.temperature *= temperature_adjust_rate
-            if step_nr % 1000 == 0:
-                # TODO
-                print(
-                    "step",
+
+            # output
+            if step_nr % step_nr_output == 0:
+                self._logger.info(
+                    "step: %s | acceptance_rate: %s | step type: %s | energy: %s | temp: %s | e rate",
                     step_nr,
-                    "acceptance_rate",
                     acceptance_rate,
-                    "step type",
                     type,
-                    "energy",
                     sum(self.energy),
-                    "temp",
                     self.temperature,
-                    "e rate",
                     energy_rate,
                 )
 
+        # update cadnano design of system
         self._break_json()
 
-        return
+        return self.cadnano_design
 
     def _break_json(self):
         """write all breaks into cadnano_design"""
@@ -1307,109 +1244,3 @@ class Stapler(object):
                     self.cadnano_design.helices[helix_index_0].staple_strands[
                         crossover[1]
                     ].final_base = -1
-
-
-def main():
-
-    converter = Converter()
-
-    # TODO: I removed some abspath stuff here so that it just tries to expand the first argument, that way
-    # this can be called from different relative paths. Remove this comment or edit to match a consistent
-    # style for argument handling.
-    if len(sys.argv) != 2:
-        sys.stderr.write("**** ERROR: Wrong number of arguments.\n")
-        sys.stderr.write("Usage: stapler.py <filename>\n")
-        sys.stderr.write(
-            "Output: If <filename> is path/name.json, output will be placed in path/name_recode.json\n"
-        )
-        sys.exit(1)
-
-    file_full_path_and_name = os.path.abspath(os.path.expanduser(sys.argv[1]))
-    file_name = os.path.basename(file_full_path_and_name)
-    file_path = os.path.dirname(file_full_path_and_name)
-
-    output_file_name = file_name[:-5] + "_recode.json"
-    output_file_full_path_and_name = os.path.join(file_path, output_file_name)
-
-    cadnano_reader = CadnanoReader()
-    converter.cadnano_design = cadnano_reader.read_json(
-        file_full_path_and_name)
-
-    dna_parameters = DnaParameters()
-    converter.cadnano_convert_design = CadnanoConvertDesign(dna_parameters)
-    converter.dna_structure = converter.cadnano_convert_design.create_structure(
-        converter.cadnano_design
-    )
-    converter.dna_structure.get_domains()
-
-    # TODO testing variables:
-
-    stapler = Stapler(converter.dna_structure, converter.cadnano_design)
-    stapler.template = [
-        [7, 7, 14, 7, 7, 7],
-        [7, 14, 7, 7, 7],
-        [14, 7, 7, 7],
-        [7, 7, 7, 14, 7, 7],
-        [7, 7, 7, 14, 7],
-        [7, 7, 7, 14],
-        [7, 7, 14, 7, 7],
-        [7, 14, 7, 7],
-        [14, 7, 7],
-        [7, 7, 14, 7],
-        [7, 7, 14],
-        [7, 14, 7],
-    ]
-
-    # A slightly expanded template might be: [[7,7,14,7,7,7],[7,14,7,7,7],[14,7,7,7],
-    # [7,7,7,14,7,7],[7,7,7,14,7],[7,7,7,14],[7,7,14,7,7],[7,14,7,7],[14,7,7],[7,7,14,7],
-    # [7,7,14],[7,14,7],[14,7,7,7,7],[7,7,7,7,14]]
-    # stapler.template = [[7,7,7,14,7,7,7]]
-    # stapler.template = [[7,7,7,14,7],[7,7,14,7,7],[7,14,7,7,7]]
-    # stapler.template = [[16,16,16],[8,16],[16,8]]
-    # stapler.template = [[8,16,8]]
-
-    stapler.uncovered_domain_penalty = 10.0
-    stapler.template_overhang_penalty_factor = 0.5
-    stapler.step_probabilities = (0.1, 0.1, 0.35, 0.35, 0.1)
-    stapler.standard_domain_length = 5
-
-    stapler.initialize_system()
-
-    stapler.temperature = 10.0
-    nr_steps = 10000000
-    nr_steps_timescale = 10000
-    stapler.generate(nr_steps, nr_steps_timescale, 0.999975)
-
-    # For an overnight run, the paramaters (1e8, 1e4, 0.9999998047) should get to an error free structure.
-
-    # TODO: Check following edge condition. Reported by JP. Get sample file? (JMS 11/21/16)
-    #    structure with only two staples with two segments each, one double crossover, crashes:
-    #    **** ERROR: Reached a visited base.Traceback (most recent call last):
-    #    File "testScript3.py", line 357, in <module>
-    #    main()
-    #    File "testScript3.py", line 346, in main
-    #    converter.dna_structure = converter.cadnano_convert_design.create_structure(converter.cadnano_design)
-    #    File "/converters/cadnano/convert_design.py", line 170, in create_structure
-    #    self._set_strands_colors(strands)
-    #    File "/converters/cadnano/convert_design.py", line 1124, in _set_strands_colors
-    #    for strand in strands:
-    #    TypeError: 'NoneType' object is not iterable
-
-    converter.dna_structure = converter.cadnano_convert_design.create_structure(
-        converter.cadnano_design
-    )
-    converter.dna_structure.get_domains()
-    print("staple domains:")
-    for strands in converter.dna_structure.strands[1:]:
-        lengths = []
-        for domain in strands.domain_list:
-            lengths.append(len(domain.base_list))
-        print(lengths)
-
-    # Write a caDNAno JSON file.
-    cadnano_writer = CadnanoWriter(converter.dna_structure)
-    cadnano_writer.write(output_file_full_path_and_name)
-
-
-if __name__ == "__main__":
-    main()
