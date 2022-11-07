@@ -13,6 +13,9 @@ Listing (alphabetical):
   Joseph is the primary maintainer for this project, and helped lay out how it should be built. Blame them for the organization and lack of documentation. 
 * Jean-Philippe Sobczak, [Tilibit Nanosystems](https://www.tilibit.com/)
   Jean-Philippe developed the [`stapler`](scripts/stapler.py) script, using expertise from Tilibit Nanosystems in designing good stapler sets.
+* Elija Feigl, [Technical University Munich](https://www.dietzlab.org/)
+  Elija Feigl develops and maintains the python3 branch and added the command line script interface.
+
 
 
 

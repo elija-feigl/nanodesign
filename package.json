@@ -1,11 +1,11 @@
 {
   "name": "nanodesign",
-  "version": "1.0.0",
-  "description": "nanodesign computeworkder",
+  "version": "1.14.0",
+  "description": "nanodesign DNA origami compute framework ",
   "repository": {
     "type": "git",
-    "url": "https://git.autodesk.com/bionano/nanodesign.git"
+    "url": "https://github.com/elija-feigl/nanodesign"
   },
-  "author": "Autodesk, Inc.",
+  "author": "Autodesk, Inc.; Elija Feigl TUM ",
   "license": "Autodesk, Inc."
 }

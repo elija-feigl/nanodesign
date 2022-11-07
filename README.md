@@ -1,6 +1,6 @@
 NOTE
 ==========
-This fork is a python3 port of the discontinued original. we are trying to finish & cleanup code to extends nanodesigns functionality. Contributions are welcome!
+This fork is a python3 port of the discontinued original. We are trying to finish & cleanup code to extends nanodesigns functionality. Contributions are welcome!
 
 Nanodesign
 ==========
@@ -10,46 +10,77 @@ Create, interact and modify nucleic acid based structures. The Nanodesign Python
 
 You should have [`git`](https://git-scm.com/downloads) installed as well as [Python 3.6](https://python.org). Note that this part of the guide is aimed towards Mac OS X or Linux installs. For a Windows install, a similar pattern should work using one of the command line shells.
 
-On the command line, change to the directory you want Nanodesign installed under, and run:
+On the command line run:
 ```shell
-git clone https://github.com/Autodesk/nanodesign
+pip install git+https://github.com/elija-feigl/nanodesign
 ```
 
-You will now have the repository cloned and checked out to the `master` branch in the subdirectory `nanodesign/`. See [CONTRIBUTING.md](CONTRIBUTING.md#branching-model) for details on other branches.
+or clone and install via:
+
+```shell
+git clone https://github.com/elija-feigl/nanodesign
+```
+
+You will now have the repository cloned and checked out to the `python3` branch in the subdirectory `nanodesign/`. See [CONTRIBUTING.md](CONTRIBUTING.md#branching-model) for details on other branches.
 
 ### Installation
 
 We are currently working on getting the package set up for installation in your Python's site packages. Once this is fully tested, we'll also be adding the package to the PyPI package repository and it should no longer be necessary to acquire the git repository for regular usage. 
 
 To try out the site package install, you can run the following from the repository directory:
+
+```shell
+pip install -e .
+```
+
+or the legacy version:
+
 ```shell
 python setup.py install
 ```
 
 Currently, the install should be functional for almost all of the package, except for the [PDB/mmCIF](http://mmcif.wwpdb.org/) export routines. The example scripts will not be installed, but you can still access them from the `scripts/` subdirectory as mentioned in the examples, below.
 
+
+###  Usage: Command Line Interface
+
+Some workflows are available via a command line interface. To view available options run:
+
+```shell
+nanodesign -h
+```
+
+follow the instructions provided by the help text to execute one of the available commands. 
+
 ### Example Usage: Package
 
 To do some simple operations with the package, we have a few short scripts in the [`examples/`](examples/) subdirectory that show off the interface:
 
-#### Strand Statistics
+#### NOTE: Cadnano Converter:
+
+for working with modern cadnano > 2.4 we highly recommend the following paradigm to ensure proper treatment of insertions and deletions:
+
+```python
+converter = Converter()
+converter.modify = True  # NOTE: converts deletions and insertions into proper bases
+converter.read_cadnano_file(
+    file_name=file_name,
+    seq_file_name=seq_file_name,
+    seq_name=seq_name,
+)
+dna_structure = converter.dna_structure
+```
+
+#### Example: Strand Statistics
 
 Source: [`examples/strand-statistics.py`](examples/strand-statistics.py)  
 This script loads a Cadnano file and produces some statistics on the number of strands by length, and the number of distinct virtual helices visited by each strand.
 
-#### Find A Specific Sequence
+#### Example: Find A Specific Sequence
 
 Source: [`examples/seq-search.py`](examples/seq-search.py)  
 This script loads a Cadnano file and searches through all of the domains to find a specific DNA sequence. It will print out all domain ids that contain that sequence.
 
-### Example Usage: Scripts
-
-There are currently three main scripts available: 
-* `converter`: Converts between different formats.
-* `stapler`: Adds staples to a design following certain templates.
-* `vis`: Visualize a design. Requires PyOpenGL installed (`pip install pyopengl`).
-
-For all of these, it's assumed that you are running from the `scripts/` subdirectory.
 
 ### Running Tests: via Docker 
 
