@@ -22,7 +22,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="nanodesign",
-    version="1.0",
+    version="1.14",
     packages=find_packages(),
     include_package_data=True,
     install_requires=(

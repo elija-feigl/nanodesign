@@ -135,6 +135,7 @@ def main():
 
     # Read cadnano file and create dna structure.
     converter = Converter()
+    converter.modify = True
     if not file_path.exists():
         raise FileNotFoundError
     converter.read_cadnano_file(

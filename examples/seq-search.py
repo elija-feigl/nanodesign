@@ -27,6 +27,7 @@ from nanodesign.converters.converter import Converter
 def read_file(file_name, seq_name):
     """ Read in a cadnano file. """
     converter = Converter()
+    converter.modify = True
     seq_file = None
     converter.read_cadnano_file(file_name, seq_file, seq_name)
     return converter
