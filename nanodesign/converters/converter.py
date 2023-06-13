@@ -86,27 +86,19 @@ class Converter(object):
         self.dna_parameters = DnaParameters()
         self.logger = logging.getLogger(__name__)
 
-    def read_cadnano_file(self, file_name, seq_file_name, seq_name):
-        """Read in a caDNAno file.
-
-        Arguments:
-            file_name (String): The name of the caDNAno file to convert.
-            seq_file_name (String): The name of the CSV file used to assign a DNA base sequence to the DNA structure.
-            seq_name (String): The name of a sequence used to assign a DNA base sequence to the DNA structure.
-        """
-        cadnano_reader = CadnanoReader()
-        self.cadnano_design = cadnano_reader.read_json(file_name)
-        self.cadnano_convert_design = CadnanoConvertDesign(self.dna_parameters)
-        self.dna_structure = self.cadnano_convert_design.create_structure(
-            self.cadnano_design, self.modify
-        )
-
-        if seq_file_name is not None:
+    def _set_sequence(self, seq_file_name, seq_name, cadnano_reader):
+        """Sets the sequence of all bases after structure and topology have been defined"""
+        if self.cadnano_design.has_sequence:
+            self.logger.info("Setting sequences from cadnano json-file.")
+            self.cadnano_convert_design.set_sequence_from_extended_design(
+                self.dna_structure, self.cadnano_design
+            )
+        elif seq_file_name is not None:
             _, file_extension = os.path.splitext(seq_file_name)
             if file_extension == ".csv":
                 sequences: list = cadnano_reader.read_csv(seq_file_name)
-                self.logger.debug(
-                    f"set all sequences from file: {seq_file_name}")
+                self.logger.info(
+                    f"Set all sequences from file: {seq_file_name}")
                 self.cadnano_convert_design.set_sequence(
                     self.dna_structure, self.modify, sequences
                 )
@@ -115,8 +107,8 @@ class Converter(object):
                     sequence: str = f.read().strip().lower()
                 if not all(c in "atgc" for c in sequence):
                     self.logger.error(f"Faulty sequence file {seq_file_name}.")
-                self.logger.debug(
-                    f"set scaffold sequence from file: {seq_file_name}")
+                self.logger.info(
+                    f"Set scaffold sequence from file: {seq_file_name}")
                 self.cadnano_convert_design.set_sequence_from_scaffold(
                     self.dna_structure, self.modify, sequence
                 )
@@ -129,10 +121,30 @@ class Converter(object):
             if sequence is None:
                 self.logger.error(
                     f"The sequence name {seq_name} is not recognized.")
-            self.logger.debug(f"set sequence from  name: {seq_name}.")
+            self.logger.info(f"Set sequence from  name: {seq_name}.")
             self.cadnano_convert_design.set_sequence_from_scaffold(
                 self.dna_structure, self.modify, sequence
             )
+        else:
+            self.logger.info("No sequence assigned.")
+
+    def read_cadnano_file(self, file_name, seq_file_name, seq_name):
+        """Read in a caDNAno file.
+
+        Arguments:
+            file_name (String): The name of the caDNAno file to convert.
+            seq_file_name (String): The name of the CSV file used to assign a DNA base sequence to the DNA structure.
+            seq_name (String): The name of a sequence used to assign a DNA base sequence to the DNA structure.
+        """
+        cadnano_reader = CadnanoReader()
+        self.cadnano_design = cadnano_reader.read_json(file_name)
+
+        self.cadnano_convert_design = CadnanoConvertDesign(self.dna_parameters)
+        self.dna_structure = self.cadnano_convert_design.create_structure(
+            self.cadnano_design, self.modify
+        )
+
+        self._set_sequence(seq_file_name, seq_name, cadnano_reader)
 
     def write_viewer_file(self, file_name):
         """Write a Nanodesign Viewer file.

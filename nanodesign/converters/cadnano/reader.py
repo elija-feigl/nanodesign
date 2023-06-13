@@ -133,8 +133,13 @@ class CadnanoReader(object):
             col = int(json_helix[CadnanoJsonFields.COL])
             deletions = json_helix[CadnanoJsonFields.SKIP]
             insertions = json_helix[CadnanoJsonFields.LOOP]
-            helix = CadnanoVirtualHelix(
-                num_helix, num, row, col, insertions, deletions)
+            scaffold_sequence = json_helix.get(
+                CadnanoJsonFields.SCAFFOLD_SEQUENCE, None)
+            staple_sequence = json_helix.get(
+                CadnanoJsonFields.STAPLE_SEQUENCE, None)
+            design.has_sequence = (scaffold_sequence is not None) or (
+                staple_sequence is not None)
+            helix = CadnanoVirtualHelix(num_helix, num, row, col, insertions, deletions, scaffold_sequence, staple_sequence)
             self._logger.debug(
                 "==================== virtual helix %d ==================== " % num_helix)
             self._logger.debug("num %d " % num)

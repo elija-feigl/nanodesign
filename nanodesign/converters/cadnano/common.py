@@ -45,6 +45,8 @@ class CadnanoJsonFields:
     COL = "col"
     DELETION = "deletion"
     INSERTION = "insertion"
+    SCAFFOLD_SEQUENCE = "scafSeq"
+    STAPLE_SEQUENCE = "stapSeq"
     LOOP = "loop"
     NUM = "num"
     ROW = "row"

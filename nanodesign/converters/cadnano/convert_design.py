@@ -1155,6 +1155,31 @@ class CadnanoConvertDesign(object):
                     if base.across is not None:
                         base.across.seq = self._wspair(letter)
 
+    def set_sequence_from_extended_design(self, dna_structure, cadnano_design):
+        """Set the sequence information for the staple and scaffold strands.
+
+        for Cadnano>2.??? sequence information is contained in the json itself.
+
+        Arguments:
+            modified_structure (bool): If True then the structure has been modified with deletions and insertions.
+            cadnano_design (CadnanoDesign): The design file with sequence information in virtual helices
+        """
+        for row_col, cadnano_vhelix in cadnano_design.helices_coord_map.items():
+            helix = dna_structure.structure_helices_coord_map[row_col]
+            for sc_base in helix.scaffold_bases:
+                seq = cadnano_vhelix.scaffold_sequence[sc_base.p]
+                if cadnano_vhelix.insertions[sc_base.p]:
+                    cadnano_vhelix.scaffold_sequence[sc_base.p] = seq[:-1]
+                    seq = seq[-1]
+                sc_base.seq = seq
+
+            for st_base in helix.staple_bases:
+                seq = cadnano_vhelix.staple_sequence[st_base.p]
+                if cadnano_vhelix.insertions[st_base.p]:
+                    cadnano_vhelix.staple_sequence[st_base.p] = seq[:-1]
+                    seq = seq[-1]
+                st_base.seq = seq
+
     def _wspair(self, x):
         """Match a base with its complementary base."""
         x = x.upper()

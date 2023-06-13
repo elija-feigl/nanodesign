@@ -33,6 +33,7 @@ class CadnanoDesign(object):
         self.helices_coord_map = {}
         self.max_row = 0
         self.max_col = 0
+        self.has_sequence = False
         self._logger = logging.getLogger(__name__)
 
     def calculate_possible_crossovers(self):
@@ -139,13 +140,15 @@ class CadnanoVirtualHelix(object):
                 neighboring helices.
     """
 
-    def __init__(self, id, num, row, col, insertions, deletions):
+    def __init__(self, id, num, row, col, insertions, deletions, scaffold_sequence, staple_sequence,):
         self.id = id
         self.num = num
         self.row = row
         self.col = col
         self.insertions = insertions
         self.deletions = deletions
+        self.scaffold_sequence = scaffold_sequence
+        self.staple_sequence = staple_sequence
         self.scaffold_strands = []
         self.staple_strands = []
         self.staple_colors = []
