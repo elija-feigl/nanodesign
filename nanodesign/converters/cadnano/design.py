@@ -140,13 +140,14 @@ class CadnanoVirtualHelix(object):
                 neighboring helices.
     """
 
-    def __init__(self, id, num, row, col, insertions, deletions, scaffold_sequence, staple_sequence,):
+    def __init__(self, id, num, row, col, insertions, deletions, scaffold_sequence, staple_sequence, modifications):
         self.id = id
         self.num = num
         self.row = row
         self.col = col
         self.insertions = insertions
         self.deletions = deletions
+        self.modifications = modifications
         self.scaffold_sequence = scaffold_sequence
         self.staple_sequence = staple_sequence
         self.scaffold_strands = []

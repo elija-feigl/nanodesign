@@ -1169,8 +1169,9 @@ class CadnanoConvertDesign(object):
             for sc_base in helix.scaffold_bases:
                 seq = cadnano_vhelix.scaffold_sequence[sc_base.p]
                 if cadnano_vhelix.insertions[sc_base.p]:
-                    cadnano_vhelix.scaffold_sequence[sc_base.p] = seq[:-1]
-                    seq = seq[-1]
+                    # cadnano_vhelix.scaffold_sequence[sc_base.p] = seq[:-1]
+                    # seq = seq[-1]
+                    seq = cadnano_vhelix.scaffold_sequence[sc_base.p].pop(-1)
                 sc_base.seq = seq
 
             for st_base in helix.staple_bases:

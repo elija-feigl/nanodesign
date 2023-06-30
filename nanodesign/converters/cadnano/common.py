@@ -58,3 +58,4 @@ class CadnanoJsonFields:
     STAP_COLORS = "stap_colors"
     VHELIX = "vhelix"
     VSTRANDS = "vstrands"
+    MOD = "chemMod"
