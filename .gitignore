@@ -21,3 +21,7 @@ test/**
 
 # exclude legacy code
 dnaFit/legacy/**
+
+#
+.python-version
+.DS_Store
