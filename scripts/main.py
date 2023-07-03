@@ -36,7 +36,7 @@ def print_version(ctx, _, value):
     """click print version."""
     if not value or ctx.resilient_parsing:
         return
-    click.echo("1.15.1")  #TODO: add get_version
+    click.echo("1.15.2")  #TODO: add get_version
     ctx.exit()
 
 

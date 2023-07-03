@@ -133,7 +133,8 @@ class CadnanoReader(object):
             col = int(json_helix[CadnanoJsonFields.COL])
             deletions = json_helix[CadnanoJsonFields.SKIP]
             insertions = json_helix[CadnanoJsonFields.LOOP]
-            modifications = json_helix[CadnanoJsonFields.MOD]
+            modifications = json_helix.get(
+                json_helix[CadnanoJsonFields.MOD], None)
             scaffold_sequence = json_helix.get(
                 CadnanoJsonFields.SCAFFOLD_SEQUENCE, None)
             staple_sequence = json_helix.get(
