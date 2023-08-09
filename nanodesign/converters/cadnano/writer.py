@@ -119,7 +119,8 @@ class CadnanoWriter(object):
                        "scafSeq": scaf_seq,
                        "stapSeq": stap_seq,
                        }
-            vstrand = vstrand.update(vstrand_unsupported_data)
+            if vstrand_unsupported_data is not None:
+                vstrand.update(vstrand_unsupported_data)
             vstrands_info.append(vstrand)
 
         return vstrands_info
