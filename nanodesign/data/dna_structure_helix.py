@@ -76,7 +76,7 @@ class DnaStructureHelix(object):
 
     def __init__(self, load_order, id, scaffold_polarity, helix_axis_coords,
                  helix_axis_frames, scaffold_coords, staple_coords,
-                 scaffold_bases, staple_bases, end_coordinates=None, end_frames=None):
+                 scaffold_bases, staple_bases, end_coordinates=None, end_frames=None, unsupported_data=None):
         """ Initialize a DnaStructureHelix object.
 
             Arguments:
@@ -89,6 +89,8 @@ class DnaStructureHelix(object):
                 scaffold_coords (NumPy Nx3 ndarray[float]): The scaffold DNA helix nucleotide coordinates.
                 staple_bases (List[DnaBase]): The list of staple bases defined for the helix.
                 staple_coords (NumPy Nx3 ndarray[float]): The staple DNA helix nucleotide coordinates.
+                unsupported_data (Dict[str, Any]): soft format information for each helix.
+                    read and written the cadnano-format without effect
         """
         self.id = id
         self.load_order = load_order
@@ -99,6 +101,7 @@ class DnaStructureHelix(object):
         self.helix_axis_frames = helix_axis_frames
         self.helix_axis_coords = helix_axis_coords
         self.scaffold_polarity = scaffold_polarity
+        self.unsupported_data = unsupported_data
         self.lattice_row = -1
         self.lattice_col = -1
         self.lattice_num = -1

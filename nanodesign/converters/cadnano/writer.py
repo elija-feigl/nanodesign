@@ -96,10 +96,13 @@ class CadnanoWriter(object):
                 load_order, num, row, col))
 
             # Set the arrays for the virtual helix base information.
+            vstrand_unsupported_data = helix.unsupported_data
             scaf_info = self._get_base_info(helix_size, scaffold_bases)
             stap_info = self._get_base_info(helix_size, staple_bases)
             loop_info = self._get_loop_info(helix_size, staple_bases)
             skip_info = self._get_skip_info(helix_size, staple_bases)
+            scaf_seq = self._get_seq_info(helix_size, scaffold_bases)
+            stap_seq = self._get_seq_info(helix_size, staple_bases)
             if num in helix_strands_map:
                 staple_colors = self._get_staple_colors(helix_strands_map[num])
             else:
@@ -112,9 +115,11 @@ class CadnanoWriter(object):
                        "stap": stap_info,
                        "loop": loop_info,
                        "skip": skip_info,
-                       "stap_colors": staple_colors
+                       "stap_colors": staple_colors,
+                       "scafSeq": scaf_seq,
+                       "stapSeq": stap_seq,
                        }
-
+            vstrand = vstrand.update(vstrand_unsupported_data)
             vstrands_info.append(vstrand)
 
         return vstrands_info
@@ -165,6 +170,21 @@ class CadnanoWriter(object):
                 down_vh = base.down.h
             base_info[base.p] = [up_vh, up_pos, down_vh, down_pos]
 
+        return base_info
+
+    def _get_seq_info(self, helix_size, base_list):
+        """ Get the array defining sequence information from the list of bases.
+
+            Arguments:
+                helix_size (int): The size of caDNAno virtual helix.
+                base_list (DnaBase): The list of bases for a helix.
+
+            Create an array of empty sequences "" for the caDNAno virtual helix
+            and fill it in at the positions given by the bases in the base list (DnaBase.seq).
+        """
+        base_info = [""] * helix_size
+        for base in base_list:
+            base_info[base.p] += base.seq
         return base_info
 
     def _get_loop_info(self, helix_size, base_list):

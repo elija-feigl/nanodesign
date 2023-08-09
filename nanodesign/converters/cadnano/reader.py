@@ -141,7 +141,14 @@ class CadnanoReader(object):
                 CadnanoJsonFields.STAPLE_SEQUENCE, None)
             design.has_sequence = (scaffold_sequence is not None) or (
                 staple_sequence is not None)
-            helix = CadnanoVirtualHelix(num_helix, num, row, col, insertions, deletions, scaffold_sequence, staple_sequence, modifications)
+
+            supported_keys = [getattr(CadnanoJsonFields, attr) for attr in vars(CadnanoJsonFields)]
+            unsupported_data = {key: value for key, value in json_helix.items() if key not in supported_keys}
+
+            helix = CadnanoVirtualHelix(
+                num_helix, num, row, col, insertions, deletions,
+                scaffold_sequence, staple_sequence, modifications, unsupported_data
+            )
             self._logger.debug(
                 "==================== virtual helix %d ==================== " % num_helix)
             self._logger.debug("num %d " % num)
@@ -150,6 +157,8 @@ class CadnanoReader(object):
             self._logger.debug("Number of insertions %d " %
                                insertions.count(-1))
             self._logger.debug("Number of deletions %d " % deletions.count(-1))
+            if unsupported_data:
+                self._logger.debug(f"Tolerating unsupported fields {list(unsupported_data.keys())}")
 
             # Check for a vhelix with no bases.
             scaffold = json_helix[CadnanoJsonFields.SCAF]
