@@ -28,7 +28,7 @@ class CadnanoWriter(object):
         self.dna_structure = dna_structure
         self._logger = logging.getLogger(__name__)
 
-    def write(self, file_name):
+    def write(self, file_name, keep_sequence_data=True, keep_unsupported_data=True):
         """ Write a caDNAno design JSON file.
 
         Args:
@@ -36,7 +36,7 @@ class CadnanoWriter(object):
         """
         self._logger.info("Writing caDNAno design JSON file %s " % file_name)
         dna_structure = self.dna_structure
-        vstrand_info = self._get_vstrand_info(dna_structure)
+        vstrand_info = self._get_vstrand_info(dna_structure, keep_sequence_data, keep_unsupported_data)
 
         design = {'name': os.path.basename(file_name),
                   'vstrands': vstrand_info
@@ -45,7 +45,7 @@ class CadnanoWriter(object):
         with open(file_name, 'w') as outfile:
             json.dump(design, outfile, indent=4, separators=(',', ': '))
 
-    def _get_vstrand_info(self, dna_structure):
+    def _get_vstrand_info(self, dna_structure, keep_sequence_data=True, keep_unsupported_data=True):
         """ Get virtual helix information for the design.
 
             In caDNAno all the virtual helices are the same size (i.e. the same number of base positions).
@@ -96,7 +96,6 @@ class CadnanoWriter(object):
                 load_order, num, row, col))
 
             # Set the arrays for the virtual helix base information.
-            vstrand_unsupported_data = helix.unsupported_data
             scaf_info = self._get_base_info(helix_size, scaffold_bases)
             stap_info = self._get_base_info(helix_size, staple_bases)
             loop_info = self._get_loop_info(helix_size, staple_bases)
@@ -116,11 +115,18 @@ class CadnanoWriter(object):
                        "loop": loop_info,
                        "skip": skip_info,
                        "stap_colors": staple_colors,
-                       "scafSeq": scaf_seq,
-                       "stapSeq": stap_seq,
                        }
-            if vstrand_unsupported_data is not None:
-                vstrand.update(vstrand_unsupported_data)
+            if keep_sequence_data:
+                vstrand_sequence = {
+                    "scafSeq": scaf_seq,
+                    "stapSeq": stap_seq,
+                }
+                vstrand.update(vstrand_sequence)
+
+            if keep_unsupported_data:
+                vstrand_unsupported_data = helix.unsupported_data
+                if vstrand_unsupported_data is not None:
+                    vstrand.update(vstrand_unsupported_data)
             vstrands_info.append(vstrand)
 
         return vstrands_info
