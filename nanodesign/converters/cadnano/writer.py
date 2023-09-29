@@ -36,7 +36,12 @@ class CadnanoWriter(object):
         """
         self._logger.info("Writing caDNAno design JSON file %s " % file_name)
         dna_structure = self.dna_structure
-        vstrand_info = self._get_vstrand_info(dna_structure, keep_sequence_data, keep_unsupported_data)
+        try:
+            vstrand_info = self._get_vstrand_info(dna_structure, keep_sequence_data, keep_unsupported_data)
+        except Exception as e:
+            self._logger.warning("Virtual helix information could not be generated. Aborting write.")
+            self._logger.error(e)
+            return
 
         design = {'name': os.path.basename(file_name),
                   'vstrands': vstrand_info
@@ -106,6 +111,9 @@ class CadnanoWriter(object):
                 staple_colors = self._get_staple_colors(helix_strands_map[num])
             else:
                 staple_colors = []
+
+            if sum(loop_info) > 0:
+                self._logger.warning("Design contains insertions. If you used the CadnanoConverter with modify==True the .json file may not be compatible with caDNAno.")
 
             vstrand = {"row": row,
                        "col": col,

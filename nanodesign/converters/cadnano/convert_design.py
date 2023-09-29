@@ -1160,7 +1160,7 @@ class CadnanoConvertDesign(object):
                     if base.across is not None:
                         base.across.seq = self._wspair(letter)
 
-    def set_sequence_from_extended_design(self, dna_structure, cadnano_design):
+    def set_sequence_from_extended_design(self, dna_structure, cadnano_design, modify=False):
         """Set the sequence information for the staple and scaffold strands.
 
         for Cadnano>2.??? sequence information is contained in the json itself.
@@ -1181,7 +1181,7 @@ class CadnanoConvertDesign(object):
                     seq = vhelix_sequence[base.p]
                     if cadnano_vhelix.insertions[base.p]:
                         sequence_tag = vhelix_sequence[base.p]
-                        if len(sequence_tag) > 1:
+                        if len(sequence_tag) > 1 and modify:
                             seq_list = list(sequence_tag)
                             seq_list = seq_list[::-1] if not base.is_scaf else seq_list
                             seq_list = seq_list[::-1] if p5_polar else seq_list

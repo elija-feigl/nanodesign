@@ -91,7 +91,7 @@ class Converter(object):
         if self.cadnano_design.has_sequence:
             self.logger.info("Setting sequences from cadnano json-file.")
             self.cadnano_convert_design.set_sequence_from_extended_design(
-                self.dna_structure, self.cadnano_design
+                self.dna_structure, self.cadnano_design, self.modify
             )
         elif seq_file_name is not None:
             _, file_extension = os.path.splitext(seq_file_name)
