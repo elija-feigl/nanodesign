@@ -499,8 +499,9 @@ class CadnanoConvertDesign(object):
         self._logger.debug("num_inserts %d " % num_inserts)
 
         # Create bases to insert.
-        for i in range(0, num_inserts):
+        for i in range(num_inserts):
             base = DnaBase(base_id)
+            base.num_insertions = num_inserts - i - 1
             if curr_base.h not in new_bases:
                 new_bases[curr_base.h] = []
             new_bases[curr_base.h].append(base)
@@ -594,11 +595,13 @@ class CadnanoConvertDesign(object):
         last_base2 = None
         for i in range(num_inserts):
             base1 = DnaBase(base_id)
+            base1.num_insertions = num_inserts - i - 1
             if curr_base.h not in new_bases:
                 new_bases[curr_base.h] = []
             new_bases[curr_base.h].append(base1)
             base_id += 1
             base2 = DnaBase(base_id)
+            base2.num_insertions = num_inserts - i - 1
             new_bases[curr_base.h].append(base2)
             base_id += 1
             self._logger.debug(
@@ -637,7 +640,7 @@ class CadnanoConvertDesign(object):
             base1.is_scaf = curr_base.is_scaf
             base1.nt_coords = curr_base.nt_coords + dy * (i + 1.0)
             base1.coordinates = insert_coords[i]
-            base1.ref_frame = insert_frames[i]
+            base1.ref_frame = insert_frames[:, :, i]
 
             base2.across = base1
             base2.h = curr_across.h
@@ -645,7 +648,7 @@ class CadnanoConvertDesign(object):
             base2.is_scaf = curr_across.is_scaf
             base2.nt_coords = curr_across.nt_coords + dy * (i + 0.5)
             base2.coordinates = insert_coords[i]
-            base2.ref_frame = insert_frames[i]
+            base2.ref_frame = insert_frames[:, :, i]
 
             last_base1 = base1
             last_base2 = base2
@@ -1168,20 +1171,24 @@ class CadnanoConvertDesign(object):
         """
         for row_col, cadnano_vhelix in cadnano_design.helices_coord_map.items():
             helix = dna_structure.structure_helices_coord_map[row_col]
-            for sc_base in helix.scaffold_bases:
-                seq = cadnano_vhelix.scaffold_sequence[sc_base.p]
-                if cadnano_vhelix.insertions[sc_base.p]:
-                    # cadnano_vhelix.scaffold_sequence[sc_base.p] = seq[:-1]
-                    # seq = seq[-1]
-                    seq = cadnano_vhelix.scaffold_sequence[sc_base.p].pop(-1)
-                sc_base.seq = seq
-
-            for st_base in helix.staple_bases:
-                seq = cadnano_vhelix.staple_sequence[st_base.p]
-                if cadnano_vhelix.insertions[st_base.p]:
-                    cadnano_vhelix.staple_sequence[st_base.p] = seq[:-1]
-                    seq = seq[-1]
-                st_base.seq = seq
+            p5_polar = helix.scaffold_polarity == DnaPolarity.FIVE_PRIME
+            for bases, vhelix_sequence, in [
+                (helix.scaffold_bases, cadnano_vhelix.scaffold_sequence),
+                (helix.staple_bases, cadnano_vhelix.staple_sequence),
+            ]:
+                bases = sorted(bases, key=lambda x: (x.p, -x.num_insertions))
+                for base in bases:
+                    seq = vhelix_sequence[base.p]
+                    if cadnano_vhelix.insertions[base.p]:
+                        sequence_tag = vhelix_sequence[base.p]
+                        if len(sequence_tag) > 1:
+                            seq_list = list(sequence_tag)
+                            seq_list = seq_list[::-1] if not base.is_scaf else seq_list
+                            seq_list = seq_list[::-1] if p5_polar else seq_list
+                            seq = seq_list[base.num_insertions]
+                        else:
+                            seq = sequence_tag
+                    base.seq = seq
 
     def _wspair(self, x):
         """Match a base with its complementary base."""

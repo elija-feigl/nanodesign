@@ -22,20 +22,20 @@ from setuptools import setup, find_packages
 
 setup(
     name="nanodesign",
-    version="1.15",
+    version="1.17",
     packages=find_packages(),
     include_package_data=True,
     install_requires=(
-        'numpy',
-        'biopython',
+        "numpy",
+        "biopython",
     ),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: Apache, Version 2.0",
         "Operating System :: OS Independent",
     ],
-    entry_points='''
+    entry_points="""
         [console_scripts]
         nanodesign=scripts.main:cli
-    ''',
+    """,
 )
