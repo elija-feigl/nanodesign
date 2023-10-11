@@ -743,7 +743,7 @@ class CadnanoConvertDesign(object):
                 staple_coords,
                 scaffold_bases,
                 staple_bases,
-                unsupported_data,
+                unsupported_data=unsupported_data,
             )
             structure_helix.lattice_num = num
             structure_helix.lattice_row = row
