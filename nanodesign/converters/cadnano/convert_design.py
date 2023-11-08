@@ -929,16 +929,28 @@ class CadnanoConvertDesign(object):
         an RGB and integer representation. The integer representation can be used
         as an ID to group staple strands by functionality.
         """
+        MAX_SKIP_CORR = 3
         for strand in strands:
             if strand.is_scaffold:
                 continue
             base = strand.tour[0]
-            for staple_color in self.staple_colors:
-                if (staple_color.vhelix_num == base.h) and (
-                    staple_color.vhelix_pos == base.p
-                ):
-                    strand.color = staple_color.rgb
-                    strand.icolor = staple_color.color
+            rgb, color = None, None
+            vhelix_pos = base.p
+            step_3p5p = base.p - strand.tour[1].p
+
+            while rgb is None or color is None:
+                for staple_color in self.staple_colors:
+                    if staple_color.vhelix_num != base.h:
+                        continue
+                    if staple_color.vhelix_pos == vhelix_pos:
+                        rgb = staple_color.rgb
+                        color = staple_color.color
+                        break
+                vhelix_pos += step_3p5p
+                if abs(vhelix_pos-base.p) > MAX_SKIP_CORR:
+                    raise ValueError(f"Failed strand color assignment at {base.h}-{base.p}")
+            strand.color = rgb
+            strand.icolor = color
 
     def set_sequence_from_scaffold(self, dna_structure, modified_structure, sequence):
         """Set the sequence information for the staple and scaffold strands using a known
