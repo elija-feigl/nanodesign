@@ -947,8 +947,12 @@ class CadnanoConvertDesign(object):
                         color = staple_color.color
                         break
                 vhelix_pos += step_3p5p
-                if abs(vhelix_pos-base.p) > MAX_SKIP_CORR:
-                    raise ValueError(f"Failed strand color assignment at {base.h}-{base.p}")
+                if abs(vhelix_pos - base.p) > MAX_SKIP_CORR:
+                    self._logger.debug(f"Failed strand color assignment at {base.h}-{base.p}. Use random color.")
+                    rgb = strand.color  # randomly chosen in strand constructor
+                    color = strand.icolor
+                    break
+                
             strand.color = rgb
             strand.icolor = color
 
