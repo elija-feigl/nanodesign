@@ -17,6 +17,8 @@ __all__ = ["EnergyModel", "energy_model",
 
 import math
 
+from itertools import tee
+
 DEFAULT_TEMPERATURE_IN_KELVIN = 37.0 + 273.15
 # 37 degrees C, in Kelvin.
 
@@ -28,19 +30,12 @@ def convert_temperature_K_to_C(temperature_in_K):
     return temperature_in_K - 273.15
 
 
-def str_by_twos(iterable):
-    """Iterate over a string by consecutive pairs. Used for stack energy
-calculations and maybe should be local there, but there may be other areas of
-use. Looked for an equivalent function in itertools and didn't find anything
-obvious."""
-    iterable = iter(iterable)
-    cur_item = iterable.next()
-    next_item = iterable.next()
-    yield cur_item + next_item
-    for item in iterable:
-        cur_item = next_item
-        next_item = item
-        yield cur_item + next_item
+def str_by_twos(iterable: str):
+    """Yield consecutive pairs from a string (e.g., 'ABCD' -> 'AB', 'BC', 'CD')."""
+    a, b = tee(iterable)
+    next(b, None)
+    for x, y in zip(a, b):
+        yield x + y
 
 
 class EnergyModel(object):
@@ -113,7 +108,6 @@ class EnergyModel(object):
         }
 
         self.temperature_in_K = DEFAULT_TEMPERATURE_IN_KELVIN
-    # end: def __init__()
 
     def pair_type(self, base_1, base_2):
         pair = base_1 + base_2
